@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>ALMA Maps | خرائط ألما</title>
+
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  >
+
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      font-family: Arial, sans-serif;
+    }
+
+    #map {
+      width: 100%;
+      height: 100vh;
+    }
+
+    .alma-header {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      z-index: 1000;
+      width: min(360px, calc(100% - 40px));
+      background: rgba(255, 255, 255, 0.96);
+      border-radius: 18px;
+      padding: 16px;
+      box-shadow: 0 6px 25px rgba(0, 0, 0, 0.18);
+    }
+
+    .alma-title {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .alma-logo {
+      width: 45px;
+      height: 45px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #146c43;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .alma-title h1 {
+      margin: 0;
+      font-size: 23px;
+      color: #1f2937;
+    }
+
+    .alma-title p {
+      margin: 2px 0 0;
+      font-size: 13px;
+      color: #6b7280;
+    }
+
+    .search-box {
+      display: flex;
+      gap: 8px;
+    }
+
+    .search-box input {
+      flex: 1;
+      min-width: 0;
+      padding: 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      outline: none;
+      font-size: 15px;
+    }
+
+    .search-box button {
+      border: 0;
+      border-radius: 10px;
+      padding: 0 15px;
+      background: #146c43;
+      color: white;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .location-button {
+      width: 100%;
+      margin-top: 9px;
+      padding: 11px;
+      border: 0;
+      border-radius: 10px;
+      background: #f3f4f6;
+      color: #1f2937;
+      cursor: pointer;
+      font-size: 14px;
+    }
+
+    @media (max-width: 600px) {
+      .alma-header {
+        top: 10px;
+        right: 10px;
+        width: calc(100% - 20px);
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <div class="alma-header">
+
+    <div class="alma-title">
+      <div class="alma-logo">A</div>
+
+      <div>
+        <h1>ALMA Maps</h1>
+        <p>دليلك الذكي في العراق</p>
+      </div>
+    </div>
+
+    <div class="search-box">
+      <input
+        id="searchInput"
+        type="text"
+        placeholder="ابحث عن مدينة أو مكان في العراق"
+      >
+      <button onclick="searchPlace()">بحث</button>
+    </div>
+
+    <button class="location-button" onclick="findMyLocation()">
+      تحديد موقعي
+    </button>
+
+  </div>
+
+  <div id="map"></div>
+
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
+  </script>
+
+  <script>
+    const map = L.map("map").setView([33.2232, 43.6793], 6);
+
+    L.tileLayer(
+      "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+      {
+        maxZoom: 19,
+        attribution:
+          '&copy; OpenStreetMap contributors'
+      }
+    ).addTo(map);
+
+    L.marker([33.3152, 44.3661])
+      .addTo(map)
+      .bindPopup("<strong>بغداد</strong><br>العراق");
+
+    async function searchPlace() {
+      const input = document.getElementById("searchInput");
+      const query = input.value.trim();
+
+      if (!query) {
+        alert("اكتب اسم المكان أولاً");
+        return;
+      }
+
+      try {
+        const url =
+          "https://nominatim.openstreetmap.org/search" +
+          "?format=json" +
+          "&limit=1" +
+          "&countrycodes=iq" +
+          "&q=" + encodeURIComponent(query);
+
+        const response = await fetch(url);
+        const results = await response.json();
+
+        if (!results.length) {
+          alert("لم يتم العثور على المكان");
+          return;
+        }
+
+        const place = results[0];
+
+        const lat = Number(place.lat);
+        const lon = Number(place.lon);
+
+        map.setView([lat, lon], 15);
+
+        L.marker([lat, lon])
+          .addTo(map)
+          .bindPopup(place.display_name)
+          .openPopup();
+
+      } catch (error) {
+        alert("تعذر تنفيذ البحث حالياً");
+      }
+    }
+
+    function findMyLocation() {
+      if (!navigator.geolocation) {
+        alert("المتصفح لا يدعم تحديد الموقع");
+        return;
+      }
+
+      navigator.geolocation.getCurrentPosition(
+        function(position) {
+          const lat = position.coords.latitude;
+          const lon = position.coords.longitude;
+
+          map.setView([lat, lon], 16);
+
+          L.marker([lat, lon])
+            .addTo(map)
+            .bindPopup("موقعك الحالي")
+            .openPopup();
+        },
+
+        function() {
+          alert("تعذر تحديد موقعك. تأكد من السماح للموقع بالوصول إلى موقعك.");
+        },
+
+        {
+          enableHighAccuracy: true
+        }
+      );
+    }
+
+    document
+      .getElementById("searchInput")
+      .addEventListener("keydown", function(event) {
+        if (event.key === "Enter") {
+          searchPlace();
+        }
+      });
+  </script>
+
+</body>
+</html>
