@@ -30,28 +30,41 @@
       height: 100vh;
     }
 
-    .alma-header {
+    .alma-panel {
       position: absolute;
       top: 20px;
       right: 20px;
       z-index: 1000;
-      width: min(360px, calc(100% - 40px));
+      width: min(390px, calc(100% - 40px));
       background: rgba(255, 255, 255, 0.96);
       border-radius: 18px;
       padding: 16px;
       box-shadow: 0 6px 25px rgba(0, 0, 0, 0.18);
     }
 
+    html[dir="ltr"] .alma-panel {
+      right: auto;
+      left: 20px;
+    }
+
+    .top-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
     .alma-title {
       display: flex;
       align-items: center;
       gap: 10px;
-      margin-bottom: 12px;
     }
 
     .alma-logo {
-      width: 45px;
-      height: 45px;
+      width: 46px;
+      height: 46px;
+      flex: 0 0 46px;
       border-radius: 12px;
       display: flex;
       align-items: center;
@@ -59,19 +72,30 @@
       background: #146c43;
       color: white;
       font-weight: bold;
-      font-size: 18px;
+      font-size: 19px;
     }
 
     .alma-title h1 {
       margin: 0;
-      font-size: 23px;
+      font-size: 22px;
       color: #1f2937;
     }
 
     .alma-title p {
-      margin: 2px 0 0;
+      margin: 3px 0 0;
       font-size: 13px;
       color: #6b7280;
+    }
+
+    .language-select {
+      border: 1px solid #d1d5db;
+      border-radius: 10px;
+      background: white;
+      padding: 8px 7px;
+      font-size: 13px;
+      outline: none;
+      cursor: pointer;
+      max-width: 105px;
     }
 
     .search-box {
@@ -92,7 +116,7 @@
     .search-box button {
       border: 0;
       border-radius: 10px;
-      padding: 0 15px;
+      padding: 0 16px;
       background: #146c43;
       color: white;
       cursor: pointer;
@@ -111,11 +135,34 @@
       font-size: 14px;
     }
 
+    .status {
+      display: none;
+      margin-top: 10px;
+      padding: 9px 10px;
+      border-radius: 9px;
+      background: #f9fafb;
+      color: #4b5563;
+      font-size: 13px;
+    }
+
     @media (max-width: 600px) {
-      .alma-header {
+      .alma-panel {
         top: 10px;
         right: 10px;
         width: calc(100% - 20px);
+      }
+
+      html[dir="ltr"] .alma-panel {
+        left: 10px;
+        right: auto;
+      }
+
+      .top-row {
+        align-items: flex-start;
+      }
+
+      .alma-title h1 {
+        font-size: 20px;
       }
     }
   </style>
@@ -123,29 +170,56 @@
 
 <body>
 
-  <div class="alma-header">
+  <div class="alma-panel">
 
-    <div class="alma-title">
-      <div class="alma-logo">A</div>
+    <div class="top-row">
 
-      <div>
-        <h1>ALMA Maps</h1>
-        <p>دليلك الذكي في العراق</p>
+      <div class="alma-title">
+        <div class="alma-logo">A</div>
+
+        <div>
+          <h1>ALMA Maps</h1>
+          <p id="subtitle">دليلك الذكي في العراق</p>
+        </div>
       </div>
+
+      <select
+        id="languageSelect"
+        class="language-select"
+        aria-label="Language"
+      >
+        <option value="ar">العربية</option>
+        <option value="ku">کوردی</option>
+        <option value="en">English</option>
+        <option value="tr">Türkçe</option>
+        <option value="fa">فارسی</option>
+      </select>
+
     </div>
 
     <div class="search-box">
+
       <input
         id="searchInput"
         type="text"
         placeholder="ابحث عن مدينة أو مكان في العراق"
       >
-      <button onclick="searchPlace()">بحث</button>
+
+      <button id="searchButton" onclick="searchPlace()">
+        بحث
+      </button>
+
     </div>
 
-    <button class="location-button" onclick="findMyLocation()">
+    <button
+      id="locationButton"
+      class="location-button"
+      onclick="findMyLocation()"
+    >
       تحديد موقعي
     </button>
+
+    <div id="status" class="status"></div>
 
   </div>
 
@@ -156,14 +230,109 @@
   </script>
 
   <script>
-    const map = L.map("map").setView([33.2232, 43.6793], 6);
+
+    const translations = {
+
+      ar: {
+        subtitle: "دليلك الذكي في العراق",
+        placeholder: "ابحث عن مدينة أو مكان في العراق",
+        search: "بحث",
+        myLocation: "تحديد موقعي",
+        emptySearch: "اكتب اسم المكان أولاً",
+        notFound: "لم يتم العثور على المكان",
+        searchError: "تعذر تنفيذ البحث حالياً",
+        locating: "جارٍ تحديد موقعك...",
+        currentLocation: "موقعك الحالي",
+        locationUnsupported: "المتصفح لا يدعم تحديد الموقع",
+        locationError:
+          "تعذر تحديد موقعك. تأكد من السماح للموقع بالوصول إلى موقعك."
+      },
+
+      ku: {
+        subtitle: "ڕێبەری زیرەکی تۆ لە عێراق",
+        placeholder: "بۆ شار یان شوێنێک لە عێراق بگەڕێ",
+        search: "گەڕان",
+        myLocation: "شوێنی من",
+        emptySearch: "تکایە ناوی شوێن بنووسە",
+        notFound: "شوێنەکە نەدۆزرایەوە",
+        searchError: "گەڕان لە ئێستادا ئەنجام نەدرا",
+        locating: "شوێنت دیاری دەکرێت...",
+        currentLocation: "شوێنی ئێستای تۆ",
+        locationUnsupported: "وێبگەڕەکەت دیاریکردنی شوێن پشتگیری ناکات",
+        locationError:
+          "نەتوانرا شوێنت دیاری بکرێت. ڕێگە بە وێبگەڕەکە بدە بۆ بەکارهێنانی شوێنت."
+      },
+
+      en: {
+        subtitle: "Your smart guide in Iraq",
+        placeholder: "Search for a city or place in Iraq",
+        search: "Search",
+        myLocation: "My location",
+        emptySearch: "Enter a place name first",
+        notFound: "Place not found",
+        searchError: "Search is currently unavailable",
+        locating: "Locating you...",
+        currentLocation: "Your current location",
+        locationUnsupported:
+          "Your browser does not support geolocation",
+        locationError:
+          "Unable to determine your location. Please allow location access."
+      },
+
+      tr: {
+        subtitle: "Irak'taki akıllı rehberiniz",
+        placeholder: "Irak'ta bir şehir veya yer arayın",
+        search: "Ara",
+        myLocation: "Konumum",
+        emptySearch: "Önce bir yer adı girin",
+        notFound: "Yer bulunamadı",
+        searchError: "Arama şu anda kullanılamıyor",
+        locating: "Konumunuz belirleniyor...",
+        currentLocation: "Mevcut konumunuz",
+        locationUnsupported:
+          "Tarayıcınız konum belirlemeyi desteklemiyor",
+        locationError:
+          "Konumunuz belirlenemedi. Lütfen konum erişimine izin verin."
+      },
+
+      fa: {
+        subtitle: "راهنمای هوشمند شما در عراق",
+        placeholder: "شهر یا مکانی را در عراق جستجو کنید",
+        search: "جستجو",
+        myLocation: "موقعیت من",
+        emptySearch: "ابتدا نام مکان را وارد کنید",
+        notFound: "مکان پیدا نشد",
+        searchError: "جستجو در حال حاضر امکان‌پذیر نیست",
+        locating: "در حال تعیین موقعیت شما...",
+        currentLocation: "موقعیت فعلی شما",
+        locationUnsupported:
+          "مرورگر شما از تعیین موقعیت پشتیبانی نمی‌کند",
+        locationError:
+          "موقعیت شما تعیین نشد. لطفاً اجازه دسترسی به موقعیت را بدهید."
+      }
+
+    };
+
+    const languageDirections = {
+      ar: "rtl",
+      ku: "rtl",
+      en: "ltr",
+      tr: "ltr",
+      fa: "rtl"
+    };
+
+    let currentLanguage = "ar";
+
+    const map = L.map("map").setView(
+      [33.2232, 43.6793],
+      6
+    );
 
     L.tileLayer(
       "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
       {
         maxZoom: 19,
-        attribution:
-          '&copy; OpenStreetMap contributors'
+        attribution: "&copy; OpenStreetMap contributors"
       }
     ).addTo(map);
 
@@ -171,37 +340,112 @@
       .addTo(map)
       .bindPopup("<strong>بغداد</strong><br>العراق");
 
+    function setLanguage(language) {
+
+      currentLanguage = language;
+
+      const t = translations[language];
+
+      document.documentElement.lang = language;
+      document.documentElement.dir =
+        languageDirections[language];
+
+      document.getElementById("subtitle").textContent =
+        t.subtitle;
+
+      document.getElementById("searchInput").placeholder =
+        t.placeholder;
+
+      document.getElementById("searchButton").textContent =
+        t.search;
+
+      document.getElementById("locationButton").textContent =
+        t.myLocation;
+
+      localStorage.setItem(
+        "almaLanguage",
+        language
+      );
+
+      setTimeout(function() {
+        map.invalidateSize();
+      }, 100);
+    }
+
+    function showStatus(message) {
+
+      const status =
+        document.getElementById("status");
+
+      status.textContent = message;
+      status.style.display = "block";
+
+    }
+
+    function hideStatus() {
+
+      document.getElementById(
+        "status"
+      ).style.display = "none";
+
+    }
+
     async function searchPlace() {
-      const input = document.getElementById("searchInput");
-      const query = input.value.trim();
+
+      const input =
+        document.getElementById("searchInput");
+
+      const query =
+        input.value.trim();
+
+      const t =
+        translations[currentLanguage];
 
       if (!query) {
-        alert("اكتب اسم المكان أولاً");
+        alert(t.emptySearch);
         return;
       }
 
+      showStatus(t.search + "...");
+
       try {
+
         const url =
           "https://nominatim.openstreetmap.org/search" +
           "?format=json" +
           "&limit=1" +
           "&countrycodes=iq" +
-          "&q=" + encodeURIComponent(query);
+          "&accept-language=" +
+          encodeURIComponent(currentLanguage) +
+          "&q=" +
+          encodeURIComponent(query);
 
-        const response = await fetch(url);
-        const results = await response.json();
+        const response =
+          await fetch(url);
+
+        const results =
+          await response.json();
+
+        hideStatus();
 
         if (!results.length) {
-          alert("لم يتم العثور على المكان");
+          alert(t.notFound);
           return;
         }
 
-        const place = results[0];
+        const place =
+          results[0];
 
-        const lat = Number(place.lat);
-        const lon = Number(place.lon);
+        const lat =
+          Number(place.lat);
 
-        map.setView([lat, lon], 15);
+        const lon =
+          Number(place.lon);
+
+        map.setView(
+          [lat, lon],
+          15
+        );
 
         L.marker([lat, lon])
           .addTo(map)
@@ -209,46 +453,105 @@
           .openPopup();
 
       } catch (error) {
-        alert("تعذر تنفيذ البحث حالياً");
+
+        hideStatus();
+        alert(t.searchError);
+
       }
     }
 
     function findMyLocation() {
+
+      const t =
+        translations[currentLanguage];
+
       if (!navigator.geolocation) {
-        alert("المتصفح لا يدعم تحديد الموقع");
+        alert(t.locationUnsupported);
         return;
       }
 
-      navigator.geolocation.getCurrentPosition(
-        function(position) {
-          const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
+      showStatus(t.locating);
 
-          map.setView([lat, lon], 16);
+      navigator.geolocation.getCurrentPosition(
+
+        function(position) {
+
+          hideStatus();
+
+          const lat =
+            position.coords.latitude;
+
+          const lon =
+            position.coords.longitude;
+
+          map.setView(
+            [lat, lon],
+            16
+          );
 
           L.marker([lat, lon])
             .addTo(map)
-            .bindPopup("موقعك الحالي")
+            .bindPopup(t.currentLocation)
             .openPopup();
+
         },
 
         function() {
-          alert("تعذر تحديد موقعك. تأكد من السماح للموقع بالوصول إلى موقعك.");
+
+          hideStatus();
+          alert(t.locationError);
+
         },
 
         {
           enableHighAccuracy: true
         }
+
       );
     }
 
     document
       .getElementById("searchInput")
-      .addEventListener("keydown", function(event) {
-        if (event.key === "Enter") {
-          searchPlace();
+      .addEventListener(
+        "keydown",
+        function(event) {
+
+          if (event.key === "Enter") {
+            searchPlace();
+          }
+
         }
-      });
+      );
+
+    document
+      .getElementById("languageSelect")
+      .addEventListener(
+        "change",
+        function() {
+          setLanguage(this.value);
+        }
+      );
+
+    const savedLanguage =
+      localStorage.getItem("almaLanguage");
+
+    if (
+      savedLanguage &&
+      translations[savedLanguage]
+    ) {
+
+      document.getElementById(
+        "languageSelect"
+      ).value = savedLanguage;
+
+      setLanguage(savedLanguage);
+
+    } else {
+
+      setLanguage("ar");
+
+    }
+
   </script>
 
 </body>
