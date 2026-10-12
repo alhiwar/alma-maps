@@ -476,6 +476,8 @@ ar:{
   onto:"إلى",
   arrive:"لقد وصلت إلى وجهتك",
   after:"بعد",
+  now:"الآن",
+  thenShort:"ثم بعد مسافة قصيرة",
   km:"كم",
   meter:"متر",
   min:"دقيقة",
@@ -521,6 +523,8 @@ ckb:{
   onto:"بۆ",
   arrive:"گەیشتیتە مەبەست",
   after:"دوای",
+  now:"ئێستا",
+  thenShort:"پاشان دوای مەودایەکی کورت",
   km:"کم",
   meter:"مەتر",
   min:"خولەک",
@@ -566,6 +570,8 @@ en:{
   onto:"onto",
   arrive:"You have arrived",
   after:"In",
+  now:"Now",
+  thenShort:"then shortly",
   km:"km",
   meter:"meters",
   min:"min",
@@ -611,6 +617,8 @@ tr:{
   onto:"üzerine",
   arrive:"Hedefinize ulaştınız",
   after:"Sonra",
+  now:"Şimdi",
+  thenShort:"ardından kısa bir mesafe sonra",
   km:"km",
   meter:"metre",
   min:"dk",
@@ -656,6 +664,8 @@ fa:{
   onto:"به",
   arrive:"به مقصد رسیدید",
   after:"پس از",
+  now:"اکنون",
+  thenShort:"سپس پس از فاصله‌ای کوتاه",
   km:"کیلومتر",
   meter:"متر",
   min:"دقیقه",
@@ -710,6 +720,11 @@ let voiceEnabled=true;
 let availableVoices=[];
 let lastSpokenStep=-1;
 let lastSpokenText="";
+let lastVoiceTime=0;
+let spokenStages={};
+
+const VOICE_COOLDOWN=4500;
+const CLOSE_MANEUVER_DISTANCE=140;
 
 const OFF_ROUTE_DISTANCE=80;
 const RECALCULATION_DELAY=10000;
@@ -741,9 +756,7 @@ const carIcon=L.divIcon({
 
 function loadVoices(){
 
-  if(
-    "speechSynthesis" in window
-  ){
+  if("speechSynthesis" in window){
     availableVoices=
       window.speechSynthesis.getVoices();
   }
@@ -794,12 +807,6 @@ function findVoice(language){
     return sameLanguage;
   }
 
-  /*
-  الكردية السورانية قد لا يكون لها صوت
-  مثبت في المتصفح أو نظام التشغيل.
-  لا نستبدلها عمداً بلغة أخرى.
-  */
-
   return null;
 }
 
@@ -810,9 +817,7 @@ function speakNavigation(text,stepIndex,force=false){
     return;
   }
 
-  if(
-    !("speechSynthesis" in window)
-  ){
+  if(!("speechSynthesis" in window)){
     return;
   }
 
@@ -862,6 +867,8 @@ function resetSpokenInstruction(){
 
   lastSpokenStep=-1;
   lastSpokenText="";
+  lastVoiceTime=0;
+  spokenStages={};
 }
 
 
@@ -877,7 +884,9 @@ function toggleVoice(){
   updateVoiceButton();
 
   if(!voiceEnabled){
+
     stopSpeech();
+
   }else{
 
     const text=
@@ -1648,24 +1657,16 @@ function updateInstruction(position){
   let bestIndex=currentStepIndex;
   let bestDistance=Infinity;
 
-  const searchEnd=
-    Math.min(
-      routeSteps.length,
-      currentStepIndex+5
-    );
+  const searchEnd=Math.min(
+    routeSteps.length,
+    currentStepIndex+5
+  );
 
-  for(
-    let i=currentStepIndex;
-    i<searchEnd;
-    i++
-  ){
+  for(let i=currentStepIndex;i<searchEnd;i++){
 
     const maneuver=routeSteps[i].maneuver;
 
-    if(
-      !maneuver ||
-      !maneuver.location
-    ){
+    if(!maneuver || !maneuver.location){
       continue;
     }
 
@@ -1674,28 +1675,21 @@ function updateInstruction(position){
       maneuver.location[0]
     ];
 
-    const distance=
-      map.distance(position,point);
+    const distance=map.distance(position,point);
 
     if(distance<bestDistance){
-
       bestDistance=distance;
       bestIndex=i;
     }
   }
 
   if(bestIndex>currentStepIndex){
-
     currentStepIndex=bestIndex;
   }
 
   let step=routeSteps[currentStepIndex];
 
-  if(
-    !step ||
-    !step.maneuver ||
-    !step.maneuver.location
-  ){
+  if(!step || !step.maneuver || !step.maneuver.location){
     return;
   }
 
@@ -1705,10 +1699,7 @@ function updateInstruction(position){
   ];
 
   let distanceToManeuver=
-    map.distance(
-      position,
-      maneuverPoint
-    );
+    map.distance(position,maneuverPoint);
 
   if(
     distanceToManeuver<30 &&
@@ -1719,11 +1710,7 @@ function updateInstruction(position){
 
     step=routeSteps[currentStepIndex];
 
-    if(
-      step &&
-      step.maneuver &&
-      step.maneuver.location
-    ){
+    if(step && step.maneuver && step.maneuver.location){
 
       maneuverPoint=[
         step.maneuver.location[1],
@@ -1731,10 +1718,7 @@ function updateInstruction(position){
       ];
 
       distanceToManeuver=
-        map.distance(
-          position,
-          maneuverPoint
-        );
+        map.distance(position,maneuverPoint);
     }
   }
 
@@ -1747,32 +1731,322 @@ function updateInstruction(position){
   document.getElementById("instructionText").textContent=
     instruction.text;
 
-  const distanceText=
-    formatNavigationDistance(
-      distanceToManeuver
-    );
-
   document.getElementById("instructionDistance").textContent=
-    distanceText;
+    formatNavigationDistance(distanceToManeuver);
+
+  handleSmartVoiceGuidance(
+    step,
+    distanceToManeuver
+  );
+}
+
+
+/*
+  =====================================================
+  نظام ALMA الجديد للإرشاد الصوتي الهادئ
+  =====================================================
+
+  التعليمات المكتوبة تبقى مستمرة.
+
+  أما الصوت فلا ينطق كل خطوة صغيرة.
+
+  ننطق أساساً:
+  1. الانعطافات المهمة.
+  2. الدوارات.
+  3. الاستدارة.
+  4. الوصول.
+
+  ونتجنب الإكثار من "تابع إلى الأمام".
+*/
+
+
+function isImportantManeuver(step){
+
+  if(!step || !step.maneuver){
+    return false;
+  }
+
+  const type=
+    step.maneuver.type || "";
+
+  const modifier=
+    step.maneuver.modifier || "";
+
+  if(type==="arrive"){
+    return true;
+  }
+
+  if(
+    type==="roundabout" ||
+    type==="rotary" ||
+    type==="roundabout turn"
+  ){
+    return true;
+  }
+
+  return[
+    "right",
+    "left",
+    "slight right",
+    "slight left",
+    "sharp right",
+    "sharp left",
+    "uturn"
+  ].includes(modifier);
+}
+
+
+function maneuverDistanceBetween(stepA,stepB){
+
+  if(
+    !stepA ||
+    !stepB ||
+    !stepA.maneuver ||
+    !stepB.maneuver ||
+    !stepA.maneuver.location ||
+    !stepB.maneuver.location
+  ){
+    return Infinity;
+  }
+
+  return map.distance(
+    [
+      stepA.maneuver.location[1],
+      stepA.maneuver.location[0]
+    ],
+    [
+      stepB.maneuver.location[1],
+      stepB.maneuver.location[0]
+    ]
+  );
+}
+
+
+function getNextImportantStep(index){
+
+  for(
+    let i=index+1;
+    i<routeSteps.length;
+    i++
+  ){
+
+    if(isImportantManeuver(routeSteps[i])){
+
+      return{
+        step:routeSteps[i],
+        index:i
+      };
+    }
+  }
+
+  return null;
+}
+
+
+function handleSmartVoiceGuidance(
+  step,
+  meters
+){
+
+  if(
+    !voiceEnabled ||
+    !isImportantManeuver(step)
+  ){
+    return;
+  }
+
+  const type=
+    step.maneuver?.type || "";
 
   /*
-  لا ننطق التعليمة في كل حركة للسيارة.
-  ننطقها فقط عندما ننتقل إلى خطوة جديدة.
+    الوصول لا يحتاج إلى عدة تنبيهات.
   */
 
-  if(currentStepIndex!==lastSpokenStep){
+  if(type==="arrive"){
 
-    const spokenText=
+    if(
+      !spokenStages[currentStepIndex]?.arrive
+    ){
+
+      spokenStages[currentStepIndex]={
+        ...(spokenStages[currentStepIndex]||{}),
+        arrive:true
+      };
+
+      speakNavigation(
+        translations[currentLanguage].arrive,
+        currentStepIndex,
+        true
+      );
+    }
+
+    return;
+  }
+
+
+  /*
+    بدلاً من الكلام المستمر نعتمد ثلاث مناطق فقط.
+
+    بعيد:
+    تقريباً من 450 إلى 900 متر.
+
+    قريب:
+    تقريباً من 120 إلى 260 متراً.
+
+    الآن:
+    عند الوصول إلى نحو 55 متراً.
+
+    إذا لم تمر السيارة بإحدى هذه النوافذ
+    فلا نحاول إجبار النظام على الكلام.
+  */
+
+  let stage=null;
+
+  if(
+    meters>450 &&
+    meters<=900
+  ){
+
+    stage="early";
+
+  }else if(
+    meters>120 &&
+    meters<=260
+  ){
+
+    stage="near";
+
+  }else if(
+    meters<=55
+  ){
+
+    stage="now";
+
+  }else{
+
+    return;
+  }
+
+
+  const state=
+    spokenStages[currentStepIndex] || {};
+
+
+  /*
+    لا نكرر المرحلة نفسها.
+  */
+
+  if(state[stage]){
+    return;
+  }
+
+
+  const nowTime=Date.now();
+
+
+  /*
+    مهلة تمنع تداخل الجمل.
+
+    الاستثناء الوحيد هو "الآن"،
+    لأنها تعليمة فورية لا ينبغي تأخيرها.
+  */
+
+  if(
+    nowTime-lastVoiceTime <
+    VOICE_COOLDOWN &&
+    stage!=="now"
+  ){
+    return;
+  }
+
+
+  const instruction=
+    buildNavigationInstruction(step);
+
+  let spokenText="";
+
+
+  if(stage==="now"){
+
+    spokenText=
+      instruction.text+
+      "، "+
+      translations[currentLanguage].now;
+
+  }else{
+
+    spokenText=
       buildSpokenInstruction(
         instruction.text,
-        distanceToManeuver
+        meters
       );
+  }
 
-    speakNavigation(
-      spokenText,
+
+  /*
+    إذا كان هناك انعطاف مهم ثانٍ
+    بعد الانعطاف الحالي مباشرة تقريباً،
+    نحاول دمجه في الجملة الحالية.
+
+    مثال:
+    "انعطف يميناً، ثم بعد مسافة قصيرة انعطف يساراً."
+
+    هذا أفضل من جملتين متداخلتين.
+  */
+
+  const next=
+    getNextImportantStep(
       currentStepIndex
     );
+
+  if(
+    next &&
+    maneuverDistanceBetween(
+      step,
+      next.step
+    )<=CLOSE_MANEUVER_DISTANCE
+  ){
+
+    const nextInstruction=
+      buildNavigationInstruction(
+        next.step
+      );
+
+    spokenText+=
+      "، "+
+      translations[currentLanguage].thenShort+
+      "، "+
+      nextInstruction.text;
+
+
+    /*
+      بما أننا أخبرنا السائق مسبقاً
+      عن الانعطاف التالي القريب،
+      لا نعيد تنبيهاته المبكرة والقريبة.
+      لكن يبقى من الممكن أن يقول "الآن"
+      عند الوصول إليه إذا لزم.
+    */
+
+    spokenStages[next.index]={
+      ...(spokenStages[next.index]||{}),
+      early:true,
+      near:true
+    };
   }
+
+
+  spokenStages[currentStepIndex]={
+    ...state,
+    [stage]:true
+  };
+
+  lastVoiceTime=nowTime;
+
+  speakNavigation(
+    spokenText,
+    currentStepIndex,
+    true
+  );
 }
 
 
@@ -1781,17 +2055,18 @@ function buildSpokenInstruction(
   meters
 ){
 
-  const t=translations[currentLanguage];
+  const t=
+    translations[currentLanguage];
 
-  if(!Number.isFinite(meters)){
-    return instructionText;
-  }
-
-  if(meters<40){
+  if(
+    !Number.isFinite(meters) ||
+    meters<40
+  ){
     return instructionText;
   }
 
   let distanceText;
+
 
   if(meters<1000){
 
@@ -1824,6 +2099,7 @@ function buildSpokenInstruction(
       t.km;
   }
 
+
   return(
     t.after+
     " "+
@@ -1836,12 +2112,17 @@ function buildSpokenInstruction(
 
 function buildNavigationInstruction(step){
 
-  const t=translations[currentLanguage];
+  const t=
+    translations[currentLanguage];
 
-  const maneuver=step.maneuver || {};
+  const maneuver=
+    step.maneuver || {};
 
-  const modifier=maneuver.modifier || "";
-  const type=maneuver.type || "";
+  const modifier=
+    maneuver.modifier || "";
+
+  const type=
+    maneuver.type || "";
 
   const roadName=
     (step.name || "").trim();
@@ -1953,7 +2234,8 @@ function buildNavigationInstruction(step){
 
 function formatNavigationDistance(meters){
 
-  const t=translations[currentLanguage];
+  const t=
+    translations[currentLanguage];
 
   if(!Number.isFinite(meters)){
     return "";
@@ -1998,11 +2280,15 @@ function formatNavigationDistance(meters){
 
 function finishLiveNavigation(){
 
-  const t=translations[currentLanguage];
+  const t=
+    translations[currentLanguage];
 
   if(gpsWatchId!==null){
 
-    navigator.geolocation.clearWatch(gpsWatchId);
+    navigator.geolocation.clearWatch(
+      gpsWatchId
+    );
+
     gpsWatchId=null;
   }
 
@@ -2011,8 +2297,12 @@ function finishLiveNavigation(){
   document.getElementById("liveBadge").style.display="none";
 
   document.getElementById("turnIcon").textContent="🏁";
-  document.getElementById("instructionText").textContent=t.arrive;
+
+  document.getElementById("instructionText").textContent=
+    t.arrive;
+
   document.getElementById("instructionDistance").textContent="";
+
   document.getElementById("progressBar").style.width="100%";
 
   speakNavigation(
@@ -2027,7 +2317,9 @@ function finishLiveNavigation(){
 }
 
 
-function stopAllNavigation(hideNavigation=true){
+function stopAllNavigation(
+  hideNavigation=true
+){
 
   if(previewTimer){
 
@@ -2037,7 +2329,10 @@ function stopAllNavigation(hideNavigation=true){
 
   if(gpsWatchId!==null){
 
-    navigator.geolocation.clearWatch(gpsWatchId);
+    navigator.geolocation.clearWatch(
+      gpsWatchId
+    );
+
     gpsWatchId=null;
   }
 
@@ -2074,19 +2369,31 @@ function stopAllNavigation(hideNavigation=true){
 
 function formatDuration(minutes){
 
-  const t=translations[currentLanguage];
+  const t=
+    translations[currentLanguage];
 
   if(minutes<60){
 
-    return minutes+" "+t.min;
+    return(
+      minutes+
+      " "+
+      t.min
+    );
   }
 
-  const hours=Math.floor(minutes/60);
-  const remaining=minutes%60;
+  const hours=
+    Math.floor(minutes/60);
+
+  const remaining=
+    minutes%60;
 
   if(!remaining){
 
-    return hours+" "+t.hour;
+    return(
+      hours+
+      " "+
+      t.hour
+    );
   }
 
   return(
@@ -2141,17 +2448,27 @@ document
 
 
 let savedLanguage=
-  localStorage.getItem("almaLanguage");
+  localStorage.getItem(
+    "almaLanguage"
+  );
+
 
 if(savedLanguage==="ku"){
 
   savedLanguage="ckb";
-  localStorage.setItem("almaLanguage","ckb");
+
+  localStorage.setItem(
+    "almaLanguage",
+    "ckb"
+  );
 }
 
 
 const savedVoice=
-  localStorage.getItem("almaVoice");
+  localStorage.getItem(
+    "almaVoice"
+  );
+
 
 if(savedVoice==="off"){
   voiceEnabled=false;
@@ -2163,8 +2480,9 @@ if(
   translations[savedLanguage]
 ){
 
-  document.getElementById("languageSelect").value=
-    savedLanguage;
+  document.getElementById(
+    "languageSelect"
+  ).value=savedLanguage;
 
   setLanguage(savedLanguage);
 
@@ -2172,6 +2490,7 @@ if(
 
   setLanguage("ar");
 }
+
 
 updateVoiceButton();
 
