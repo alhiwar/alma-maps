@@ -134,7 +134,8 @@ html[dir="ltr"] .my-location{
 .main-button,
 .preview-button,
 .navigation-button,
-.stop-button{
+.stop-button,
+.voice-button{
   width:100%;
   border:0;
   border-radius:11px;
@@ -152,6 +153,19 @@ html[dir="ltr"] .my-location{
 .main-button:disabled{
   opacity:.6;
   cursor:wait
+}
+
+.voice-button{
+  margin-top:10px;
+  background:#f3f4f6;
+  color:#111827;
+  border:1px solid #d1d5db
+}
+
+.voice-button.active{
+  background:#dcfce7;
+  color:#166534;
+  border-color:#86efac
 }
 
 .preview-button{
@@ -284,7 +298,7 @@ html[dir="ltr"] .my-location{
     top:8px;
     right:8px;
     width:calc(100% - 16px);
-    max-height:60vh
+    max-height:65vh
   }
 
   html[dir="ltr"] .alma-panel{
@@ -346,6 +360,13 @@ html[dir="ltr"] .my-location{
     class="main-button"
     onclick="calculateRoute()">
     🚗 احسب الطريق
+  </button>
+
+  <button
+    id="voiceButton"
+    class="voice-button active"
+    onclick="toggleVoice()">
+    🔊 الإرشاد الصوتي: يعمل
   </button>
 
   <div id="status" class="status"></div>
@@ -425,6 +446,8 @@ ar:{
   preview:"▶ معاينة الرحلة",
   navigate:"🧭 ابدأ الرحلة",
   stop:"■ إيقاف",
+  voiceOn:"🔊 الإرشاد الصوتي: يعمل",
+  voiceOff:"🔇 الإرشاد الصوتي: متوقف",
   distance:"المسافة",
   duration:"الوقت التقريبي",
   searching:"جارٍ البحث عن المواقع...",
@@ -454,7 +477,7 @@ ar:{
   arrive:"لقد وصلت إلى وجهتك",
   after:"بعد",
   km:"كم",
-  meter:"م",
+  meter:"متر",
   min:"دقيقة",
   hour:"ساعة"
 },
@@ -468,6 +491,8 @@ ckb:{
   preview:"▶ پێشبینینی گەشت",
   navigate:"🧭 دەستپێکردنی گەشت",
   stop:"■ وەستاندن",
+  voiceOn:"🔊 ڕێنمایی دەنگی: کار دەکات",
+  voiceOff:"🔇 ڕێنمایی دەنگی: وەستاوە",
   distance:"دووری",
   duration:"کاتی خەمڵێنراو",
   searching:"گەڕان بۆ شوێنەکان...",
@@ -497,7 +522,7 @@ ckb:{
   arrive:"گەیشتیتە مەبەست",
   after:"دوای",
   km:"کم",
-  meter:"م",
+  meter:"مەتر",
   min:"خولەک",
   hour:"کاتژمێر"
 },
@@ -511,6 +536,8 @@ en:{
   preview:"▶ Preview trip",
   navigate:"🧭 Start navigation",
   stop:"■ Stop",
+  voiceOn:"🔊 Voice guidance: On",
+  voiceOff:"🔇 Voice guidance: Off",
   distance:"Distance",
   duration:"Estimated time",
   searching:"Searching for locations...",
@@ -540,7 +567,7 @@ en:{
   arrive:"You have arrived",
   after:"In",
   km:"km",
-  meter:"m",
+  meter:"meters",
   min:"min",
   hour:"hr"
 },
@@ -554,6 +581,8 @@ tr:{
   preview:"▶ Yolculuğu önizle",
   navigate:"🧭 Navigasyonu başlat",
   stop:"■ Durdur",
+  voiceOn:"🔊 Sesli yönlendirme: Açık",
+  voiceOff:"🔇 Sesli yönlendirme: Kapalı",
   distance:"Mesafe",
   duration:"Tahmini süre",
   searching:"Konumlar aranıyor...",
@@ -583,7 +612,7 @@ tr:{
   arrive:"Hedefinize ulaştınız",
   after:"Sonra",
   km:"km",
-  meter:"m",
+  meter:"metre",
   min:"dk",
   hour:"sa"
 },
@@ -597,6 +626,8 @@ fa:{
   preview:"▶ پیش‌نمایش سفر",
   navigate:"🧭 شروع مسیریابی",
   stop:"■ توقف",
+  voiceOn:"🔊 راهنمای صوتی: روشن",
+  voiceOff:"🔇 راهنمای صوتی: خاموش",
   distance:"مسافت",
   duration:"زمان تقریبی",
   searching:"در حال جستجوی مکان‌ها...",
@@ -641,6 +672,14 @@ const directions={
   fa:"rtl"
 };
 
+const speechLanguages={
+  ar:"ar-IQ",
+  ckb:"ckb-IQ",
+  en:"en-US",
+  tr:"tr-TR",
+  fa:"fa-IR"
+};
+
 let currentLanguage="ar";
 
 let currentLocationCoordinates=null;
@@ -666,6 +705,11 @@ let previewIndex=0;
 let gpsWatchId=null;
 let liveNavigation=false;
 let lastRecalculation=0;
+
+let voiceEnabled=true;
+let availableVoices=[];
+let lastSpokenStep=-1;
+let lastSpokenText="";
 
 const OFF_ROUTE_DISTANCE=80;
 const RECALCULATION_DELAY=10000;
@@ -695,6 +739,190 @@ const carIcon=L.divIcon({
 });
 
 
+function loadVoices(){
+
+  if(
+    "speechSynthesis" in window
+  ){
+    availableVoices=
+      window.speechSynthesis.getVoices();
+  }
+}
+
+
+if("speechSynthesis" in window){
+
+  loadVoices();
+
+  window.speechSynthesis.onvoiceschanged=
+    loadVoices;
+}
+
+
+function findVoice(language){
+
+  if(!availableVoices.length){
+    loadVoices();
+  }
+
+  const target=
+    speechLanguages[language] || language;
+
+  const exact=
+    availableVoices.find(
+      voice=>
+        voice.lang &&
+        voice.lang.toLowerCase()===
+        target.toLowerCase()
+    );
+
+  if(exact){
+    return exact;
+  }
+
+  const base=
+    target.split("-")[0].toLowerCase();
+
+  const sameLanguage=
+    availableVoices.find(
+      voice=>
+        voice.lang &&
+        voice.lang.toLowerCase().startsWith(base)
+    );
+
+  if(sameLanguage){
+    return sameLanguage;
+  }
+
+  /*
+  الكردية السورانية قد لا يكون لها صوت
+  مثبت في المتصفح أو نظام التشغيل.
+  لا نستبدلها عمداً بلغة أخرى.
+  */
+
+  return null;
+}
+
+
+function speakNavigation(text,stepIndex,force=false){
+
+  if(!voiceEnabled){
+    return;
+  }
+
+  if(
+    !("speechSynthesis" in window)
+  ){
+    return;
+  }
+
+  if(
+    !force &&
+    stepIndex===lastSpokenStep &&
+    text===lastSpokenText
+  ){
+    return;
+  }
+
+  const utterance=
+    new SpeechSynthesisUtterance(text);
+
+  utterance.lang=
+    speechLanguages[currentLanguage] ||
+    currentLanguage;
+
+  const voice=
+    findVoice(currentLanguage);
+
+  if(voice){
+    utterance.voice=voice;
+  }
+
+  utterance.rate=1;
+  utterance.pitch=1;
+  utterance.volume=1;
+
+  window.speechSynthesis.cancel();
+  window.speechSynthesis.speak(utterance);
+
+  lastSpokenStep=stepIndex;
+  lastSpokenText=text;
+}
+
+
+function stopSpeech(){
+
+  if("speechSynthesis" in window){
+    window.speechSynthesis.cancel();
+  }
+}
+
+
+function resetSpokenInstruction(){
+
+  lastSpokenStep=-1;
+  lastSpokenText="";
+}
+
+
+function toggleVoice(){
+
+  voiceEnabled=!voiceEnabled;
+
+  localStorage.setItem(
+    "almaVoice",
+    voiceEnabled ? "on" : "off"
+  );
+
+  updateVoiceButton();
+
+  if(!voiceEnabled){
+    stopSpeech();
+  }else{
+
+    const text=
+      document.getElementById("instructionText")
+      .textContent
+      .trim();
+
+    if(
+      document.getElementById("navigationBox")
+      .style.display==="block" &&
+      text
+    ){
+      resetSpokenInstruction();
+
+      speakNavigation(
+        text,
+        currentStepIndex,
+        true
+      );
+    }
+  }
+}
+
+
+function updateVoiceButton(){
+
+  const button=
+    document.getElementById("voiceButton");
+
+  const t=
+    translations[currentLanguage];
+
+  if(voiceEnabled){
+
+    button.textContent=t.voiceOn;
+    button.classList.add("active");
+
+  }else{
+
+    button.textContent=t.voiceOff;
+    button.classList.remove("active");
+  }
+}
+
+
 function setLanguage(language){
 
   currentLanguage=language;
@@ -718,11 +946,16 @@ function setLanguage(language){
   document.getElementById("durationLabel").textContent=t.duration;
   document.getElementById("liveBadge").textContent=t.live;
 
+  updateVoiceButton();
+
   if(usingCurrentLocation){
     document.getElementById("fromInput").value=t.currentLocation;
   }
 
   localStorage.setItem("almaLanguage",language);
+
+  stopSpeech();
+  resetSpokenInstruction();
 
   setTimeout(()=>{
     map.invalidateSize();
@@ -858,6 +1091,8 @@ async function requestRoute(start,destination){
 function prepareRoute(route){
 
   currentStepIndex=0;
+  resetSpokenInstruction();
+
   currentRoute=route;
 
   routeCoordinates=
@@ -1050,6 +1285,8 @@ function startPreview(){
   previewIndex=0;
   currentStepIndex=0;
 
+  resetSpokenInstruction();
+
   document.getElementById("navigationBox").style.display="block";
   document.getElementById("previewButton").style.display="none";
   document.getElementById("navigationButton").style.display="none";
@@ -1140,6 +1377,12 @@ function finishPreview(){
   document.getElementById("instructionDistance").textContent="";
   document.getElementById("progressBar").style.width="100%";
 
+  speakNavigation(
+    t.arrive,
+    routeSteps.length,
+    true
+  );
+
   document.getElementById("stopButton").style.display="none";
   document.getElementById("previewButton").style.display="block";
   document.getElementById("navigationButton").style.display="block";
@@ -1184,12 +1427,6 @@ function startLiveNavigation(){
           routeStart
         );
 
-      /*
-      حماية مهمة:
-      إذا كان GPS بعيداً جداً عن نقطة بداية الطريق،
-      لا نحاول تحويل مسار داخل العراق إلى رحلة من قارة أخرى.
-      */
-
       if(distanceFromStart>MAX_START_DISTANCE){
 
         hideStatus();
@@ -1201,6 +1438,7 @@ function startLiveNavigation(){
 
       liveNavigation=true;
       currentStepIndex=0;
+      resetSpokenInstruction();
 
       document.getElementById("liveBadge").style.display="block";
       document.getElementById("navigationBox").style.display="block";
@@ -1407,11 +1645,6 @@ function updateInstruction(position){
     currentStepIndex=routeSteps.length-1;
   }
 
-  /*
-  نبحث ابتداءً من التعليمة الحالية فقط.
-  هذا يمنع Alma من الرجوع إلى انعطاف قديم تم تجاوزه.
-  */
-
   let bestIndex=currentStepIndex;
   let bestDistance=Infinity;
 
@@ -1451,11 +1684,6 @@ function updateInstruction(position){
     }
   }
 
-  /*
-  إذا أصبحت تعليمة لاحقة أقرب بوضوح،
-  نعتبر أن التعليمات السابقة تم تنفيذها.
-  */
-
   if(bestIndex>currentStepIndex){
 
     currentStepIndex=bestIndex;
@@ -1481,11 +1709,6 @@ function updateInstruction(position){
       position,
       maneuverPoint
     );
-
-  /*
-  عند الوصول إلى نقطة المناورة،
-  انتقل إلى التعليمة التالية.
-  */
 
   if(
     distanceToManeuver<30 &&
@@ -1524,10 +1747,90 @@ function updateInstruction(position){
   document.getElementById("instructionText").textContent=
     instruction.text;
 
-  document.getElementById("instructionDistance").textContent=
+  const distanceText=
     formatNavigationDistance(
       distanceToManeuver
     );
+
+  document.getElementById("instructionDistance").textContent=
+    distanceText;
+
+  /*
+  لا ننطق التعليمة في كل حركة للسيارة.
+  ننطقها فقط عندما ننتقل إلى خطوة جديدة.
+  */
+
+  if(currentStepIndex!==lastSpokenStep){
+
+    const spokenText=
+      buildSpokenInstruction(
+        instruction.text,
+        distanceToManeuver
+      );
+
+    speakNavigation(
+      spokenText,
+      currentStepIndex
+    );
+  }
+}
+
+
+function buildSpokenInstruction(
+  instructionText,
+  meters
+){
+
+  const t=translations[currentLanguage];
+
+  if(!Number.isFinite(meters)){
+    return instructionText;
+  }
+
+  if(meters<40){
+    return instructionText;
+  }
+
+  let distanceText;
+
+  if(meters<1000){
+
+    let rounded;
+
+    if(meters<100){
+
+      rounded=
+        Math.max(
+          10,
+          Math.round(meters/10)*10
+        );
+
+    }else{
+
+      rounded=
+        Math.round(meters/50)*50;
+    }
+
+    distanceText=
+      rounded+
+      " "+
+      t.meter;
+
+  }else{
+
+    distanceText=
+      (meters/1000).toFixed(1)+
+      " "+
+      t.km;
+  }
+
+  return(
+    t.after+
+    " "+
+    distanceText+
+    "، "+
+    instructionText
+  );
 }
 
 
@@ -1712,6 +2015,12 @@ function finishLiveNavigation(){
   document.getElementById("instructionDistance").textContent="";
   document.getElementById("progressBar").style.width="100%";
 
+  speakNavigation(
+    t.arrive,
+    routeSteps.length,
+    true
+  );
+
   document.getElementById("stopButton").style.display="none";
   document.getElementById("previewButton").style.display="block";
   document.getElementById("navigationButton").style.display="block";
@@ -1733,6 +2042,9 @@ function stopAllNavigation(hideNavigation=true){
   }
 
   liveNavigation=false;
+
+  stopSpeech();
+  resetSpokenInstruction();
 
   document.getElementById("liveBadge").style.display="none";
   document.getElementById("stopButton").style.display="none";
@@ -1831,15 +2143,18 @@ document
 let savedLanguage=
   localStorage.getItem("almaLanguage");
 
-/*
-النسخة القديمة كانت تستخدم ku.
-ننقلها تلقائياً إلى ckb للكردية السورانية.
-*/
-
 if(savedLanguage==="ku"){
 
   savedLanguage="ckb";
   localStorage.setItem("almaLanguage","ckb");
+}
+
+
+const savedVoice=
+  localStorage.getItem("almaVoice");
+
+if(savedVoice==="off"){
+  voiceEnabled=false;
 }
 
 
@@ -1857,6 +2172,8 @@ if(
 
   setLanguage("ar");
 }
+
+updateVoiceButton();
 
 </script>
 
