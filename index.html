@@ -10,289 +10,288 @@
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
 
 <style>
-
 *{box-sizing:border-box}
 
 html,body{
-margin:0;
-width:100%;
-height:100%;
-font-family:Arial,sans-serif
+  margin:0;
+  width:100%;
+  height:100%;
+  font-family:Arial,sans-serif
 }
 
 #map{
-width:100%;
-height:100vh
+  width:100%;
+  height:100vh
 }
 
 .alma-panel{
-position:absolute;
-top:18px;
-right:18px;
-z-index:1000;
-width:min(420px,calc(100% - 36px));
-background:rgba(255,255,255,.97);
-border-radius:20px;
-padding:16px;
-box-shadow:0 7px 30px rgba(0,0,0,.20);
-max-height:calc(100vh - 36px);
-overflow-y:auto
+  position:absolute;
+  top:18px;
+  right:18px;
+  z-index:1000;
+  width:min(430px,calc(100% - 36px));
+  background:rgba(255,255,255,.97);
+  border-radius:20px;
+  padding:16px;
+  box-shadow:0 7px 30px rgba(0,0,0,.20);
+  max-height:calc(100vh - 36px);
+  overflow-y:auto
 }
 
 html[dir="ltr"] .alma-panel{
-right:auto;
-left:18px
+  right:auto;
+  left:18px
 }
 
 .top-row{
-display:flex;
-justify-content:space-between;
-align-items:center;
-gap:10px;
-margin-bottom:15px
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:15px
 }
 
 .brand{
-display:flex;
-align-items:center;
-gap:10px
+  display:flex;
+  align-items:center;
+  gap:10px
 }
 
 .logo{
-width:46px;
-height:46px;
-border-radius:13px;
-background:#146c43;
-color:white;
-display:flex;
-align-items:center;
-justify-content:center;
-font-weight:bold;
-font-size:20px
+  width:46px;
+  height:46px;
+  border-radius:13px;
+  background:#146c43;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  font-size:20px
 }
 
 .brand h1{
-margin:0;
-font-size:22px;
-color:#1f2937
+  margin:0;
+  font-size:22px;
+  color:#1f2937
 }
 
 .brand p{
-margin:3px 0 0;
-color:#6b7280;
-font-size:12px
+  margin:3px 0 0;
+  color:#6b7280;
+  font-size:12px
 }
 
 #languageSelect{
-border:1px solid #d1d5db;
-border-radius:10px;
-padding:8px;
-background:white;
-max-width:105px
+  border:1px solid #d1d5db;
+  border-radius:10px;
+  padding:8px;
+  background:white;
+  max-width:110px
 }
 
 .route-row{
-display:flex;
-align-items:center;
-gap:8px;
-margin-bottom:9px
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:9px
 }
 
 .route-icon{
-width:28px;
-text-align:center;
-font-size:18px
+  width:28px;
+  text-align:center;
+  font-size:18px
 }
 
 .route-row input{
-flex:1;
-min-width:0;
-border:1px solid #d1d5db;
-border-radius:11px;
-padding:12px;
-font-size:15px;
-outline:none
+  flex:1;
+  min-width:0;
+  border:1px solid #d1d5db;
+  border-radius:11px;
+  padding:12px;
+  font-size:15px;
+  outline:none
 }
 
 .route-row input:focus{
-border-color:#146c43
+  border-color:#146c43
 }
 
 .my-location{
-margin:2px 36px 12px 0;
-border:0;
-background:transparent;
-color:#146c43;
-font-size:13px;
-cursor:pointer;
-padding:0
+  margin:2px 36px 12px 0;
+  border:0;
+  background:transparent;
+  color:#146c43;
+  font-size:13px;
+  cursor:pointer;
+  padding:0
 }
 
 html[dir="ltr"] .my-location{
-margin:2px 0 12px 36px
+  margin:2px 0 12px 36px
 }
 
 .main-button,
 .preview-button,
 .navigation-button,
 .stop-button{
-width:100%;
-border:0;
-border-radius:11px;
-padding:13px;
-font-size:15px;
-font-weight:bold;
-cursor:pointer
+  width:100%;
+  border:0;
+  border-radius:11px;
+  padding:13px;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer
 }
 
 .main-button{
-background:#146c43;
-color:white
+  background:#146c43;
+  color:white
 }
 
 .main-button:disabled{
-opacity:.6;
-cursor:wait
-}
-
-.route-result{
-display:none;
-margin-top:12px;
-background:#f3f4f6;
-border-radius:12px;
-padding:12px
-}
-
-.route-summary{
-display:flex;
-justify-content:space-around;
-text-align:center;
-gap:10px
-}
-
-.route-summary strong{
-display:block;
-font-size:18px;
-margin-bottom:3px
-}
-
-.route-summary span{
-color:#6b7280;
-font-size:12px
+  opacity:.6;
+  cursor:wait
 }
 
 .preview-button{
-display:none;
-margin-top:10px;
-background:#2563eb;
-color:white
+  display:none;
+  margin-top:10px;
+  background:#2563eb;
+  color:white
 }
 
 .navigation-button{
-display:none;
-margin-top:8px;
-background:#111827;
-color:white
+  display:none;
+  margin-top:8px;
+  background:#111827;
+  color:white
 }
 
 .stop-button{
-display:none;
-margin-top:8px;
-background:#e5e7eb;
-color:#111827
+  display:none;
+  margin-top:8px;
+  background:#e5e7eb;
+  color:#111827
+}
+
+.route-result{
+  display:none;
+  margin-top:12px;
+  background:#f3f4f6;
+  border-radius:12px;
+  padding:12px
+}
+
+.route-summary{
+  display:flex;
+  justify-content:space-around;
+  text-align:center;
+  gap:10px
+}
+
+.route-summary strong{
+  display:block;
+  font-size:18px;
+  margin-bottom:3px
+}
+
+.route-summary span{
+  color:#6b7280;
+  font-size:12px
 }
 
 .navigation-box{
-display:none;
-margin-top:12px;
-border-radius:14px;
-padding:14px;
-background:#146c43;
-color:white
+  display:none;
+  margin-top:12px;
+  border-radius:14px;
+  padding:14px;
+  background:#146c43;
+  color:white
 }
 
 .instruction-row{
-display:flex;
-align-items:center;
-gap:13px
+  display:flex;
+  align-items:center;
+  gap:13px
 }
 
 #turnIcon{
-font-size:34px;
-min-width:45px;
-text-align:center
+  font-size:36px;
+  min-width:48px;
+  text-align:center
 }
 
 #instructionText{
-font-size:18px;
-font-weight:bold;
-line-height:1.5
+  font-size:18px;
+  font-weight:bold;
+  line-height:1.5
 }
 
 #instructionDistance{
-margin-top:5px;
-font-size:13px;
-opacity:.9
+  margin-top:5px;
+  font-size:14px;
+  opacity:.92
 }
 
 .progress-wrap{
-margin-top:12px;
-height:6px;
-background:rgba(255,255,255,.3);
-border-radius:10px;
-overflow:hidden
+  margin-top:12px;
+  height:6px;
+  background:rgba(255,255,255,.3);
+  border-radius:10px;
+  overflow:hidden
 }
 
 #progressBar{
-width:0%;
-height:100%;
-background:white;
-border-radius:10px
+  width:0%;
+  height:100%;
+  background:white;
+  border-radius:10px
 }
 
 .status{
-display:none;
-margin-top:10px;
-text-align:center;
-font-size:13px;
-color:#4b5563
-}
-
-.car-icon{
-font-size:30px;
-line-height:30px;
-text-align:center;
-filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))
+  display:none;
+  margin-top:10px;
+  padding:9px;
+  border-radius:9px;
+  background:#f3f4f6;
+  text-align:center;
+  font-size:13px;
+  color:#4b5563
 }
 
 .live-badge{
-display:none;
-margin-bottom:9px;
-padding:7px 10px;
-border-radius:9px;
-background:#dcfce7;
-color:#166534;
-font-size:12px;
-font-weight:bold;
-text-align:center
+  display:none;
+  margin-bottom:10px;
+  padding:8px 10px;
+  border-radius:9px;
+  background:#dcfce7;
+  color:#166534;
+  font-size:12px;
+  font-weight:bold;
+  text-align:center
+}
+
+.car-icon{
+  font-size:30px;
+  line-height:30px;
+  text-align:center;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))
 }
 
 @media(max-width:600px){
+  .alma-panel{
+    top:8px;
+    right:8px;
+    width:calc(100% - 16px);
+    max-height:60vh
+  }
 
-.alma-panel{
-top:8px;
-right:8px;
-width:calc(100% - 16px);
-max-height:58vh
+  html[dir="ltr"] .alma-panel{
+    left:8px;
+    right:auto
+  }
 }
-
-html[dir="ltr"] .alma-panel{
-left:8px;
-right:auto
-}
-
-}
-
 </style>
 </head>
 
@@ -300,349 +299,355 @@ right:auto
 
 <div class="alma-panel">
 
-<div class="top-row">
+  <div class="top-row">
 
-<div class="brand">
+    <div class="brand">
+      <div class="logo">A</div>
 
-<div class="logo">A</div>
+      <div>
+        <h1>ALMA Maps</h1>
+        <p id="subtitle">دليلك الذكي في العراق</p>
+      </div>
+    </div>
 
-<div>
-<h1>ALMA Maps</h1>
-<p id="subtitle">دليلك الذكي في العراق</p>
-</div>
+    <select id="languageSelect">
+      <option value="ar">العربية</option>
+      <option value="ckb">کوردی</option>
+      <option value="en">English</option>
+      <option value="tr">Türkçe</option>
+      <option value="fa">فارسی</option>
+    </select>
 
-</div>
+  </div>
 
-<select id="languageSelect">
-<option value="ar">العربية</option>
-<option value="ku">کوردی</option>
-<option value="en">English</option>
-<option value="tr">Türkçe</option>
-<option value="fa">فارسی</option>
-</select>
+  <div id="liveBadge" class="live-badge">
+    🛰️ الملاحة الحية تعمل
+  </div>
 
-</div>
+  <div class="route-row">
+    <div class="route-icon">●</div>
+    <input id="fromInput" type="text" placeholder="من أين؟">
+  </div>
 
-<div id="liveBadge" class="live-badge">
-🛰️ الملاحة الحية تعمل
-</div>
+  <button
+    id="myLocationButton"
+    class="my-location"
+    onclick="useMyLocation()">
+    📍 استخدم موقعي الحالي
+  </button>
 
-<div class="route-row">
+  <div class="route-row">
+    <div class="route-icon">🏁</div>
+    <input id="toInput" type="text" placeholder="إلى أين؟">
+  </div>
 
-<div class="route-icon">●</div>
+  <button
+    id="routeButton"
+    class="main-button"
+    onclick="calculateRoute()">
+    🚗 احسب الطريق
+  </button>
 
-<input
-id="fromInput"
-type="text"
-placeholder="من أين؟">
+  <div id="status" class="status"></div>
 
-</div>
+  <div id="routeResult" class="route-result">
+    <div class="route-summary">
 
-<button
-id="myLocationButton"
-class="my-location"
-onclick="useMyLocation()">
-📍 استخدم موقعي الحالي
-</button>
+      <div>
+        <strong id="distanceValue">—</strong>
+        <span id="distanceLabel">المسافة</span>
+      </div>
 
-<div class="route-row">
+      <div>
+        <strong id="durationValue">—</strong>
+        <span id="durationLabel">الوقت التقريبي</span>
+      </div>
 
-<div class="route-icon">🏁</div>
+    </div>
+  </div>
 
-<input
-id="toInput"
-type="text"
-placeholder="إلى أين؟">
+  <button
+    id="previewButton"
+    class="preview-button"
+    onclick="startPreview()">
+    ▶ معاينة الرحلة
+  </button>
 
-</div>
+  <button
+    id="navigationButton"
+    class="navigation-button"
+    onclick="startLiveNavigation()">
+    🧭 ابدأ الرحلة
+  </button>
 
-<button
-id="routeButton"
-class="main-button"
-onclick="calculateRoute()">
-🚗 احسب الطريق
-</button>
+  <button
+    id="stopButton"
+    class="stop-button"
+    onclick="stopAllNavigation()">
+    ■ إيقاف
+  </button>
 
-<div id="status" class="status"></div>
+  <div id="navigationBox" class="navigation-box">
 
-<div id="routeResult" class="route-result">
+    <div class="instruction-row">
 
-<div class="route-summary">
+      <div id="turnIcon">⬆️</div>
 
-<div>
-<strong id="distanceValue">—</strong>
-<span id="distanceLabel">المسافة</span>
-</div>
+      <div>
+        <div id="instructionText">تابع إلى الأمام</div>
+        <div id="instructionDistance"></div>
+      </div>
 
-<div>
-<strong id="durationValue">—</strong>
-<span id="durationLabel">الوقت التقريبي</span>
-</div>
+    </div>
 
-</div>
+    <div class="progress-wrap">
+      <div id="progressBar"></div>
+    </div>
 
-</div>
-
-<button
-id="previewButton"
-class="preview-button"
-onclick="startPreview()">
-▶ معاينة الرحلة
-</button>
-
-<button
-id="navigationButton"
-class="navigation-button"
-onclick="startLiveNavigation()">
-🧭 ابدأ الرحلة
-</button>
-
-<button
-id="stopButton"
-class="stop-button"
-onclick="stopAllNavigation()">
-■ إيقاف
-</button>
-
-<div id="navigationBox" class="navigation-box">
-
-<div class="instruction-row">
-
-<div id="turnIcon">⬆️</div>
-
-<div>
-
-<div id="instructionText">
-تابع إلى الأمام
-</div>
-
-<div id="instructionDistance"></div>
-
-</div>
-
-</div>
-
-<div class="progress-wrap">
-<div id="progressBar"></div>
-</div>
-
-</div>
+  </div>
 
 </div>
 
 <div id="map"></div>
 
-<script
-src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js">
-</script>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
 <script>
 
 const translations={
 
 ar:{
-subtitle:"دليلك الذكي في العراق",
-from:"من أين؟",
-to:"إلى أين؟",
-myLocation:"📍 استخدم موقعي الحالي",
-route:"🚗 احسب الطريق",
-preview:"▶ معاينة الرحلة",
-navigate:"🧭 ابدأ الرحلة",
-stop:"■ إيقاف",
-distance:"المسافة",
-duration:"الوقت التقريبي",
-searching:"جارٍ البحث عن المواقع...",
-calculating:"جارٍ حساب الطريق...",
-notFound:"لم يتم العثور على أحد الموقعين.",
-routeError:"تعذر حساب الطريق حالياً.",
-enterPlaces:"أدخل نقطة الانطلاق والوجهة.",
-locating:"جارٍ تحديد موقعك...",
-locationReady:"تم تحديد موقعك.",
-currentLocation:"موقعي الحالي",
-locationError:"تعذر تحديد موقعك. تأكد من السماح بالوصول إلى الموقع.",
-live:"🛰️ الملاحة الحية تعمل",
-waitingGPS:"في انتظار إشارة GPS...",
-recalculating:"خرجت عن المسار. جارٍ إعادة حساب الطريق...",
-straight:"تابع إلى الأمام",
-right:"انعطف يميناً",
-left:"انعطف يساراً",
-slightRight:"اتجه قليلاً إلى اليمين",
-slightLeft:"اتجه قليلاً إلى اليسار",
-uturn:"قم بالاستدارة",
-roundabout:"ادخل الدوار",
-arrive:"لقد وصلت إلى وجهتك",
-after:"بعد",
-km:"كم",
-meter:"م",
-min:"دقيقة",
-hour:"ساعة"
+  subtitle:"دليلك الذكي في العراق",
+  from:"من أين؟",
+  to:"إلى أين؟",
+  myLocation:"📍 استخدم موقعي الحالي",
+  route:"🚗 احسب الطريق",
+  preview:"▶ معاينة الرحلة",
+  navigate:"🧭 ابدأ الرحلة",
+  stop:"■ إيقاف",
+  distance:"المسافة",
+  duration:"الوقت التقريبي",
+  searching:"جارٍ البحث عن المواقع...",
+  calculating:"جارٍ حساب الطريق...",
+  notFound:"لم يتم العثور على أحد الموقعين.",
+  routeError:"تعذر حساب الطريق حالياً.",
+  enterPlaces:"أدخل نقطة الانطلاق والوجهة.",
+  locating:"جارٍ تحديد موقعك...",
+  locationReady:"تم تحديد موقعك.",
+  currentLocation:"موقعي الحالي",
+  locationError:"تعذر تحديد موقعك. تأكد من السماح بالوصول إلى الموقع.",
+  live:"🛰️ الملاحة الحية تعمل",
+  waitingGPS:"في انتظار تحديد موقعك...",
+  recalculating:"خرجت عن المسار. جارٍ إعادة حساب الطريق...",
+  farFromStart:"موقعك الحالي بعيد جداً عن نقطة انطلاق هذه الرحلة. استخدم معاينة الرحلة، أو احسب طريقاً جديداً من موقعك الحالي.",
+  straight:"تابع إلى الأمام",
+  right:"انعطف يميناً",
+  left:"انعطف يساراً",
+  slightRight:"اتجه قليلاً إلى اليمين",
+  slightLeft:"اتجه قليلاً إلى اليسار",
+  sharpRight:"انعطف بشدة إلى اليمين",
+  sharpLeft:"انعطف بشدة إلى اليسار",
+  uturn:"قم بالاستدارة",
+  roundabout:"ادخل الدوار",
+  exit:"خذ المخرج رقم",
+  onto:"إلى",
+  arrive:"لقد وصلت إلى وجهتك",
+  after:"بعد",
+  km:"كم",
+  meter:"م",
+  min:"دقيقة",
+  hour:"ساعة"
 },
 
-ku:{
-subtitle:"ڕێبەری زیرەکی تۆ لە عێراق",
-from:"لە کوێوە؟",
-to:"بۆ کوێ؟",
-myLocation:"📍 شوێنی ئێستام بەکاربهێنە",
-route:"🚗 ڕێگا دیاری بکە",
-preview:"▶ پێشبینینی گەشت",
-navigate:"🧭 دەستپێکردنی گەشت",
-stop:"■ وەستاندن",
-distance:"دووری",
-duration:"کاتی خەمڵێنراو",
-searching:"گەڕان بۆ شوێنەکان...",
-calculating:"ڕێگا هەژمار دەکرێت...",
-notFound:"یەکێک لە شوێنەکان نەدۆزرایەوە.",
-routeError:"نەتوانرا ڕێگا دیاری بکرێت.",
-enterPlaces:"شوێنی دەستپێک و مەبەست بنووسە.",
-locating:"شوێنت دیاری دەکرێت...",
-locationReady:"شوێنت دیاری کرا.",
-currentLocation:"شوێنی ئێستام",
-locationError:"نەتوانرا شوێنت دیاری بکرێت.",
-live:"🛰️ ڕێنیشاندانی ڕاستەوخۆ کار دەکات",
-waitingGPS:"چاوەڕوانی GPS...",
-recalculating:"لە ڕێگاکە دەرچوویت. ڕێگا نوێ دەکرێتەوە...",
-straight:"بەردەوام بە بۆ پێشەوە",
-right:"بۆ ڕاست بپیچە",
-left:"بۆ چەپ بپیچە",
-slightRight:"کەمێک بۆ ڕاست بڕۆ",
-slightLeft:"کەمێک بۆ چەپ بڕۆ",
-uturn:"بگەڕێوە",
-roundabout:"بچۆ ناو بازنەکە",
-arrive:"گەیشتیتە مەبەست",
-after:"دوای",
-km:"کم",
-meter:"م",
-min:"خولەک",
-hour:"کاتژمێر"
+ckb:{
+  subtitle:"ڕێبەری زیرەکی تۆ لە عێراق",
+  from:"لە کوێوە؟",
+  to:"بۆ کوێ؟",
+  myLocation:"📍 شوێنی ئێستام بەکاربهێنە",
+  route:"🚗 ڕێگا دیاری بکە",
+  preview:"▶ پێشبینینی گەشت",
+  navigate:"🧭 دەستپێکردنی گەشت",
+  stop:"■ وەستاندن",
+  distance:"دووری",
+  duration:"کاتی خەمڵێنراو",
+  searching:"گەڕان بۆ شوێنەکان...",
+  calculating:"ڕێگا هەژمار دەکرێت...",
+  notFound:"یەکێک لە شوێنەکان نەدۆزرایەوە.",
+  routeError:"نەتوانرا ڕێگا دیاری بکرێت.",
+  enterPlaces:"شوێنی دەستپێک و مەبەست بنووسە.",
+  locating:"شوێنت دیاری دەکرێت...",
+  locationReady:"شوێنت دیاری کرا.",
+  currentLocation:"شوێنی ئێستام",
+  locationError:"نەتوانرا شوێنت دیاری بکرێت.",
+  live:"🛰️ ڕێنیشاندانی ڕاستەوخۆ کار دەکات",
+  waitingGPS:"چاوەڕوانی دیاریکردنی شوێن...",
+  recalculating:"لە ڕێگاکە دەرچوویت. ڕێگا نوێ دەکرێتەوە...",
+  farFromStart:"شوێنی ئێستات زۆر لە خاڵی دەستپێکی ئەم گەشتە دوورە. پێشبینینی گەشت بەکاربهێنە یان ڕێگایەکی نوێ لە شوێنی ئێستاتەوە هەژمار بکە.",
+  straight:"بەردەوام بە بۆ پێشەوە",
+  right:"بۆ ڕاست بپیچە",
+  left:"بۆ چەپ بپیچە",
+  slightRight:"کەمێک بۆ ڕاست بڕۆ",
+  slightLeft:"کەمێک بۆ چەپ بڕۆ",
+  sharpRight:"بە توندی بۆ ڕاست بپیچە",
+  sharpLeft:"بە توندی بۆ چەپ بپیچە",
+  uturn:"بگەڕێوە",
+  roundabout:"بچۆ ناو بازنەکە",
+  exit:"دەرچوونی ژمارە",
+  onto:"بۆ",
+  arrive:"گەیشتیتە مەبەست",
+  after:"دوای",
+  km:"کم",
+  meter:"م",
+  min:"خولەک",
+  hour:"کاتژمێر"
 },
 
 en:{
-subtitle:"Your smart guide in Iraq",
-from:"From where?",
-to:"Where to?",
-myLocation:"📍 Use my current location",
-route:"🚗 Calculate route",
-preview:"▶ Preview trip",
-navigate:"🧭 Start navigation",
-stop:"■ Stop",
-distance:"Distance",
-duration:"Estimated time",
-searching:"Searching for locations...",
-calculating:"Calculating route...",
-notFound:"One of the locations could not be found.",
-routeError:"The route could not be calculated.",
-enterPlaces:"Enter a starting point and destination.",
-locating:"Locating you...",
-locationReady:"Your location is ready.",
-currentLocation:"My current location",
-locationError:"Unable to determine your location. Please allow location access.",
-live:"🛰️ Live navigation active",
-waitingGPS:"Waiting for GPS...",
-recalculating:"You left the route. Recalculating...",
-straight:"Continue straight",
-right:"Turn right",
-left:"Turn left",
-slightRight:"Keep slightly right",
-slightLeft:"Keep slightly left",
-uturn:"Make a U-turn",
-roundabout:"Enter the roundabout",
-arrive:"You have arrived",
-after:"In",
-km:"km",
-meter:"m",
-min:"min",
-hour:"hr"
+  subtitle:"Your smart guide in Iraq",
+  from:"From where?",
+  to:"Where to?",
+  myLocation:"📍 Use my current location",
+  route:"🚗 Calculate route",
+  preview:"▶ Preview trip",
+  navigate:"🧭 Start navigation",
+  stop:"■ Stop",
+  distance:"Distance",
+  duration:"Estimated time",
+  searching:"Searching for locations...",
+  calculating:"Calculating route...",
+  notFound:"One of the locations could not be found.",
+  routeError:"The route could not be calculated.",
+  enterPlaces:"Enter a starting point and destination.",
+  locating:"Locating you...",
+  locationReady:"Your location is ready.",
+  currentLocation:"My current location",
+  locationError:"Unable to determine your location. Please allow location access.",
+  live:"🛰️ Live navigation active",
+  waitingGPS:"Waiting for your location...",
+  recalculating:"You left the route. Recalculating...",
+  farFromStart:"Your current location is too far from the starting point of this trip. Use trip preview or calculate a new route from your current location.",
+  straight:"Continue straight",
+  right:"Turn right",
+  left:"Turn left",
+  slightRight:"Keep slightly right",
+  slightLeft:"Keep slightly left",
+  sharpRight:"Turn sharply right",
+  sharpLeft:"Turn sharply left",
+  uturn:"Make a U-turn",
+  roundabout:"Enter the roundabout",
+  exit:"Take exit",
+  onto:"onto",
+  arrive:"You have arrived",
+  after:"In",
+  km:"km",
+  meter:"m",
+  min:"min",
+  hour:"hr"
 },
 
 tr:{
-subtitle:"Irak'taki akıllı rehberiniz",
-from:"Nereden?",
-to:"Nereye?",
-myLocation:"📍 Mevcut konumumu kullan",
-route:"🚗 Rotayı hesapla",
-preview:"▶ Yolculuğu önizle",
-navigate:"🧭 Navigasyonu başlat",
-stop:"■ Durdur",
-distance:"Mesafe",
-duration:"Tahmini süre",
-searching:"Konumlar aranıyor...",
-calculating:"Rota hesaplanıyor...",
-notFound:"Konumlardan biri bulunamadı.",
-routeError:"Rota hesaplanamadı.",
-enterPlaces:"Başlangıç ve varış noktası girin.",
-locating:"Konumunuz belirleniyor...",
-locationReady:"Konumunuz hazır.",
-currentLocation:"Mevcut konumum",
-locationError:"Konumunuz belirlenemedi.",
-live:"🛰️ Canlı navigasyon etkin",
-waitingGPS:"GPS bekleniyor...",
-recalculating:"Rotadan çıktınız. Yeniden hesaplanıyor...",
-straight:"Düz devam edin",
-right:"Sağa dönün",
-left:"Sola dönün",
-slightRight:"Hafif sağa yönelin",
-slightLeft:"Hafif sola yönelin",
-uturn:"U dönüşü yapın",
-roundabout:"Döner kavşağa girin",
-arrive:"Hedefinize ulaştınız",
-after:"Sonra",
-km:"km",
-meter:"m",
-min:"dk",
-hour:"sa"
+  subtitle:"Irak'taki akıllı rehberiniz",
+  from:"Nereden?",
+  to:"Nereye?",
+  myLocation:"📍 Mevcut konumumu kullan",
+  route:"🚗 Rotayı hesapla",
+  preview:"▶ Yolculuğu önizle",
+  navigate:"🧭 Navigasyonu başlat",
+  stop:"■ Durdur",
+  distance:"Mesafe",
+  duration:"Tahmini süre",
+  searching:"Konumlar aranıyor...",
+  calculating:"Rota hesaplanıyor...",
+  notFound:"Konumlardan biri bulunamadı.",
+  routeError:"Rota hesaplanamadı.",
+  enterPlaces:"Başlangıç ve varış noktası girin.",
+  locating:"Konumunuz belirleniyor...",
+  locationReady:"Konumunuz hazır.",
+  currentLocation:"Mevcut konumum",
+  locationError:"Konumunuz belirlenemedi.",
+  live:"🛰️ Canlı navigasyon etkin",
+  waitingGPS:"Konum bekleniyor...",
+  recalculating:"Rotadan çıktınız. Yeniden hesaplanıyor...",
+  farFromStart:"Mevcut konumunuz bu yolculuğun başlangıç noktasından çok uzakta. Yolculuk önizlemesini kullanın veya mevcut konumunuzdan yeni bir rota hesaplayın.",
+  straight:"Düz devam edin",
+  right:"Sağa dönün",
+  left:"Sola dönün",
+  slightRight:"Hafif sağa yönelin",
+  slightLeft:"Hafif sola yönelin",
+  sharpRight:"Keskin sağa dönün",
+  sharpLeft:"Keskin sola dönün",
+  uturn:"U dönüşü yapın",
+  roundabout:"Döner kavşağa girin",
+  exit:"Çıkışı kullan",
+  onto:"üzerine",
+  arrive:"Hedefinize ulaştınız",
+  after:"Sonra",
+  km:"km",
+  meter:"m",
+  min:"dk",
+  hour:"sa"
 },
 
 fa:{
-subtitle:"راهنمای هوشمند شما در عراق",
-from:"از کجا؟",
-to:"به کجا؟",
-myLocation:"📍 استفاده از موقعیت فعلی من",
-route:"🚗 محاسبه مسیر",
-preview:"▶ پیش‌نمایش سفر",
-navigate:"🧭 شروع مسیریابی",
-stop:"■ توقف",
-distance:"مسافت",
-duration:"زمان تقریبی",
-searching:"در حال جستجوی مکان‌ها...",
-calculating:"در حال محاسبه مسیر...",
-notFound:"یکی از مکان‌ها پیدا نشد.",
-routeError:"مسیر قابل محاسبه نیست.",
-enterPlaces:"مبدأ و مقصد را وارد کنید.",
-locating:"در حال تعیین موقعیت شما...",
-locationReady:"موقعیت شما آماده است.",
-currentLocation:"موقعیت فعلی من",
-locationError:"موقعیت شما تعیین نشد.",
-live:"🛰️ مسیریابی زنده فعال است",
-waitingGPS:"در انتظار GPS...",
-recalculating:"از مسیر خارج شدید. مسیر دوباره محاسبه می‌شود...",
-straight:"مستقیم ادامه دهید",
-right:"به راست بپیچید",
-left:"به چپ بپیچید",
-slightRight:"کمی به راست بروید",
-slightLeft:"کمی به چپ بروید",
-uturn:"دور بزنید",
-roundabout:"وارد میدان شوید",
-arrive:"به مقصد رسیدید",
-after:"پس از",
-km:"کیلومتر",
-meter:"متر",
-min:"دقیقه",
-hour:"ساعت"
+  subtitle:"راهنمای هوشمند شما در عراق",
+  from:"از کجا؟",
+  to:"به کجا؟",
+  myLocation:"📍 استفاده از موقعیت فعلی من",
+  route:"🚗 محاسبه مسیر",
+  preview:"▶ پیش‌نمایش سفر",
+  navigate:"🧭 شروع مسیریابی",
+  stop:"■ توقف",
+  distance:"مسافت",
+  duration:"زمان تقریبی",
+  searching:"در حال جستجوی مکان‌ها...",
+  calculating:"در حال محاسبه مسیر...",
+  notFound:"یکی از مکان‌ها پیدا نشد.",
+  routeError:"مسیر قابل محاسبه نیست.",
+  enterPlaces:"مبدأ و مقصد را وارد کنید.",
+  locating:"در حال تعیین موقعیت شما...",
+  locationReady:"موقعیت شما آماده است.",
+  currentLocation:"موقعیت فعلی من",
+  locationError:"موقعیت شما تعیین نشد.",
+  live:"🛰️ مسیریابی زنده فعال است",
+  waitingGPS:"در انتظار موقعیت...",
+  recalculating:"از مسیر خارج شدید. مسیر دوباره محاسبه می‌شود...",
+  farFromStart:"موقعیت فعلی شما از نقطه شروع این سفر بسیار دور است. از پیش‌نمایش سفر استفاده کنید یا مسیر جدیدی از موقعیت فعلی خود محاسبه کنید.",
+  straight:"مستقیم ادامه دهید",
+  right:"به راست بپیچید",
+  left:"به چپ بپیچید",
+  slightRight:"کمی به راست بروید",
+  slightLeft:"کمی به چپ بروید",
+  sharpRight:"به شدت به راست بپیچید",
+  sharpLeft:"به شدت به چپ بپیچید",
+  uturn:"دور بزنید",
+  roundabout:"وارد میدان شوید",
+  exit:"از خروجی شماره",
+  onto:"به",
+  arrive:"به مقصد رسیدید",
+  after:"پس از",
+  km:"کیلومتر",
+  meter:"متر",
+  min:"دقیقه",
+  hour:"ساعت"
 }
 
 };
 
 const directions={
-ar:"rtl",
-ku:"rtl",
-en:"ltr",
-tr:"ltr",
-fa:"rtl"
+  ar:"rtl",
+  ckb:"rtl",
+  en:"ltr",
+  tr:"ltr",
+  fa:"rtl"
 };
 
 let currentLanguage="ar";
 
 let currentLocationCoordinates=null;
+let usingCurrentLocation=false;
+
+let startCoordinates=null;
+let destinationCoordinates=null;
 
 let startMarker=null;
 let destinationMarker=null;
@@ -653,1037 +658,1204 @@ let currentRoute=null;
 let routeCoordinates=[];
 let routeSteps=[];
 
-let destinationCoordinates=null;
+let currentStepIndex=0;
 
 let previewTimer=null;
 let previewIndex=0;
 
 let gpsWatchId=null;
 let liveNavigation=false;
-
 let lastRecalculation=0;
 
 const OFF_ROUTE_DISTANCE=80;
 const RECALCULATION_DELAY=10000;
+const MAX_START_DISTANCE=20000;
 
 
 const map=L.map("map").setView(
-[33.2232,43.6793],
-6
+  [33.2232,43.6793],
+  6
 );
 
+
 L.tileLayer(
-"https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-{
-maxZoom:19,
-attribution:"&copy; OpenStreetMap contributors"
-}
+  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
+  {
+    maxZoom:19,
+    attribution:"&copy; OpenStreetMap contributors"
+  }
 ).addTo(map);
 
 
 const carIcon=L.divIcon({
-className:"",
-html:'<div class="car-icon">🚗</div>',
-iconSize:[36,36],
-iconAnchor:[18,18]
+  className:"",
+  html:'<div class="car-icon">🚗</div>',
+  iconSize:[36,36],
+  iconAnchor:[18,18]
 });
 
 
 function setLanguage(language){
 
-currentLanguage=language;
+  currentLanguage=language;
 
-const t=translations[language];
+  const t=translations[language];
 
-document.documentElement.lang=language;
-document.documentElement.dir=directions[language];
+  document.documentElement.lang=language;
+  document.documentElement.dir=directions[language];
 
-document.getElementById("subtitle").textContent=t.subtitle;
-document.getElementById("fromInput").placeholder=t.from;
-document.getElementById("toInput").placeholder=t.to;
+  document.getElementById("subtitle").textContent=t.subtitle;
+  document.getElementById("fromInput").placeholder=t.from;
+  document.getElementById("toInput").placeholder=t.to;
 
-document.getElementById("myLocationButton").textContent=t.myLocation;
-document.getElementById("routeButton").textContent=t.route;
-document.getElementById("previewButton").textContent=t.preview;
-document.getElementById("navigationButton").textContent=t.navigate;
-document.getElementById("stopButton").textContent=t.stop;
+  document.getElementById("myLocationButton").textContent=t.myLocation;
+  document.getElementById("routeButton").textContent=t.route;
+  document.getElementById("previewButton").textContent=t.preview;
+  document.getElementById("navigationButton").textContent=t.navigate;
+  document.getElementById("stopButton").textContent=t.stop;
 
-document.getElementById("distanceLabel").textContent=t.distance;
-document.getElementById("durationLabel").textContent=t.duration;
+  document.getElementById("distanceLabel").textContent=t.distance;
+  document.getElementById("durationLabel").textContent=t.duration;
+  document.getElementById("liveBadge").textContent=t.live;
 
-document.getElementById("liveBadge").textContent=t.live;
+  if(usingCurrentLocation){
+    document.getElementById("fromInput").value=t.currentLocation;
+  }
 
-localStorage.setItem("almaLanguage",language);
+  localStorage.setItem("almaLanguage",language);
 
-setTimeout(()=>{
-map.invalidateSize();
-},100);
-
+  setTimeout(()=>{
+    map.invalidateSize();
+  },100);
 }
 
 
 function showStatus(message){
 
-const status=document.getElementById("status");
+  const status=document.getElementById("status");
 
-status.textContent=message;
-status.style.display="block";
-
+  status.textContent=message;
+  status.style.display="block";
 }
 
 
 function hideStatus(){
-
-document.getElementById("status").style.display="none";
-
+  document.getElementById("status").style.display="none";
 }
 
 
 async function geocodePlace(query){
 
-const url=
-"https://nominatim.openstreetmap.org/search"+
-"?format=json"+
-"&limit=1"+
-"&countrycodes=iq"+
-"&accept-language="+encodeURIComponent(currentLanguage)+
-"&q="+encodeURIComponent(query);
+  const url=
+    "https://nominatim.openstreetmap.org/search"+
+    "?format=json"+
+    "&limit=1"+
+    "&countrycodes=iq"+
+    "&accept-language="+encodeURIComponent(currentLanguage)+
+    "&q="+encodeURIComponent(query);
 
-const response=await fetch(url);
+  const response=await fetch(url);
 
-if(!response.ok){
-throw new Error("Geocoding error");
-}
+  if(!response.ok){
+    throw new Error("Geocoding error");
+  }
 
-const data=await response.json();
+  const data=await response.json();
 
-if(!data.length){
-return null;
-}
+  if(!data.length){
+    return null;
+  }
 
-return{
-lat:Number(data[0].lat),
-lon:Number(data[0].lon),
-name:data[0].display_name
-};
-
+  return{
+    lat:Number(data[0].lat),
+    lon:Number(data[0].lon),
+    name:data[0].display_name
+  };
 }
 
 
 function useMyLocation(){
 
-const t=translations[currentLanguage];
+  const t=translations[currentLanguage];
 
-if(!navigator.geolocation){
+  if(!navigator.geolocation){
+    alert(t.locationError);
+    return;
+  }
 
-alert(t.locationError);
-return;
+  showStatus(t.locating);
 
-}
+  navigator.geolocation.getCurrentPosition(
 
-showStatus(t.locating);
+    position=>{
 
-navigator.geolocation.getCurrentPosition(
+      currentLocationCoordinates={
+        lat:position.coords.latitude,
+        lon:position.coords.longitude
+      };
 
-position=>{
+      usingCurrentLocation=true;
 
-currentLocationCoordinates={
-lat:position.coords.latitude,
-lon:position.coords.longitude
-};
+      document.getElementById("fromInput").value=
+        t.currentLocation;
 
-document.getElementById("fromInput").value=
-t.currentLocation;
+      hideStatus();
+      showStatus(t.locationReady);
 
-hideStatus();
-showStatus(t.locationReady);
+      setTimeout(hideStatus,1500);
 
-setTimeout(hideStatus,1500);
+      map.setView(
+        [
+          currentLocationCoordinates.lat,
+          currentLocationCoordinates.lon
+        ],
+        16
+      );
+    },
 
-map.setView(
-[
-currentLocationCoordinates.lat,
-currentLocationCoordinates.lon
-],
-16
-);
+    ()=>{
+      hideStatus();
+      alert(t.locationError);
+    },
 
-},
-
-()=>{
-hideStatus();
-alert(t.locationError);
-},
-
-{
-enableHighAccuracy:true,
-timeout:15000,
-maximumAge:0
-}
-
-);
-
+    {
+      enableHighAccuracy:true,
+      timeout:15000,
+      maximumAge:0
+    }
+  );
 }
 
 
 async function requestRoute(start,destination){
 
-const routeURL=
-"https://router.project-osrm.org/route/v1/driving/"+
-start.lon+","+start.lat+";"+
-destination.lon+","+destination.lat+
-"?overview=full&geometries=geojson&steps=true";
+  const routeURL=
+    "https://router.project-osrm.org/route/v1/driving/"+
+    start.lon+","+start.lat+";"+
+    destination.lon+","+destination.lat+
+    "?overview=full&geometries=geojson&steps=true";
 
-const response=await fetch(routeURL);
+  const response=await fetch(routeURL);
 
-if(!response.ok){
-throw new Error("Routing error");
-}
+  if(!response.ok){
+    throw new Error("Routing error");
+  }
 
-const data=await response.json();
+  const data=await response.json();
 
-if(
-data.code!=="Ok" ||
-!data.routes ||
-!data.routes.length
-){
-throw new Error("No route");
-}
+  if(
+    data.code!=="Ok" ||
+    !data.routes ||
+    !data.routes.length
+  ){
+    throw new Error("No route");
+  }
 
-return data.routes[0];
-
+  return data.routes[0];
 }
 
 
 function prepareRoute(route){
 
-currentRoute=route;
+  currentStepIndex=0;
+  currentRoute=route;
 
-routeCoordinates=
-route.geometry.coordinates.map(
-coordinate=>[
-coordinate[1],
-coordinate[0]
-]
-);
+  routeCoordinates=
+    route.geometry.coordinates.map(
+      coordinate=>[
+        coordinate[1],
+        coordinate[0]
+      ]
+    );
 
-routeSteps=[];
+  routeSteps=[];
 
-route.legs.forEach(leg=>{
-
-leg.steps.forEach(step=>{
-routeSteps.push(step);
-});
-
-});
-
+  route.legs.forEach(leg=>{
+    leg.steps.forEach(step=>{
+      routeSteps.push(step);
+    });
+  });
 }
 
 
 function drawRoute(){
 
-if(routeLine){
-map.removeLayer(routeLine);
-}
+  if(routeLine){
+    map.removeLayer(routeLine);
+  }
 
-routeLine=L.polyline(
-routeCoordinates,
-{
-weight:6,
-opacity:.85
-}
-).addTo(map);
-
+  routeLine=L.polyline(
+    routeCoordinates,
+    {
+      weight:6,
+      opacity:.85
+    }
+  ).addTo(map);
 }
 
 
 async function calculateRoute(){
 
-stopAllNavigation(false);
+  stopAllNavigation(false);
 
-const t=translations[currentLanguage];
+  const t=translations[currentLanguage];
 
-const fromText=
-document.getElementById("fromInput").value.trim();
+  const fromText=
+    document.getElementById("fromInput").value.trim();
 
-const toText=
-document.getElementById("toInput").value.trim();
+  const toText=
+    document.getElementById("toInput").value.trim();
 
-if(!fromText || !toText){
+  if(!fromText || !toText){
+    alert(t.enterPlaces);
+    return;
+  }
 
-alert(t.enterPlaces);
-return;
+  const button=document.getElementById("routeButton");
 
-}
+  button.disabled=true;
 
-const button=document.getElementById("routeButton");
+  document.getElementById("routeResult").style.display="none";
+  document.getElementById("previewButton").style.display="none";
+  document.getElementById("navigationButton").style.display="none";
 
-button.disabled=true;
+  try{
 
-document.getElementById("routeResult").style.display="none";
-document.getElementById("previewButton").style.display="none";
-document.getElementById("navigationButton").style.display="none";
+    showStatus(t.searching);
 
-try{
+    let start;
 
-showStatus(t.searching);
+    if(usingCurrentLocation && currentLocationCoordinates){
 
-let start;
+      start={
+        lat:currentLocationCoordinates.lat,
+        lon:currentLocationCoordinates.lon,
+        name:t.currentLocation
+      };
 
-if(
-currentLocationCoordinates &&
-fromText===t.currentLocation
-){
+    }else{
 
-start={
-lat:currentLocationCoordinates.lat,
-lon:currentLocationCoordinates.lon,
-name:t.currentLocation
-};
+      start=await geocodePlace(fromText);
+    }
 
-}else{
+    const destination=
+      await geocodePlace(toText);
 
-start=await geocodePlace(fromText);
+    if(!start || !destination){
 
-}
+      hideStatus();
+      alert(t.notFound);
+      return;
+    }
 
-const destination=
-await geocodePlace(toText);
+    startCoordinates={
+      lat:start.lat,
+      lon:start.lon,
+      name:start.name
+    };
 
-if(!start || !destination){
+    destinationCoordinates={
+      lat:destination.lat,
+      lon:destination.lon,
+      name:destination.name
+    };
 
-hideStatus();
-alert(t.notFound);
-return;
+    showStatus(t.calculating);
 
-}
+    const route=
+      await requestRoute(
+        startCoordinates,
+        destinationCoordinates
+      );
 
-destinationCoordinates={
-lat:destination.lat,
-lon:destination.lon,
-name:destination.name
-};
+    prepareRoute(route);
+    drawRoute();
 
-showStatus(t.calculating);
+    if(startMarker){
+      map.removeLayer(startMarker);
+    }
 
-const route=
-await requestRoute(
-start,
-destinationCoordinates
-);
+    if(destinationMarker){
+      map.removeLayer(destinationMarker);
+    }
 
-prepareRoute(route);
-drawRoute();
+    startMarker=
+      L.marker([
+        startCoordinates.lat,
+        startCoordinates.lon
+      ])
+      .addTo(map)
+      .bindPopup(startCoordinates.name);
 
-if(startMarker){
-map.removeLayer(startMarker);
-}
+    destinationMarker=
+      L.marker([
+        destinationCoordinates.lat,
+        destinationCoordinates.lon
+      ])
+      .addTo(map)
+      .bindPopup(destinationCoordinates.name);
 
-if(destinationMarker){
-map.removeLayer(destinationMarker);
-}
+    map.fitBounds(
+      routeLine.getBounds(),
+      {padding:[45,45]}
+    );
 
-startMarker=
-L.marker([start.lat,start.lon])
-.addTo(map)
-.bindPopup(start.name);
+    updateRouteSummary();
 
-destinationMarker=
-L.marker([
-destination.lat,
-destination.lon
-])
-.addTo(map)
-.bindPopup(destination.name);
+    document.getElementById("routeResult").style.display="block";
+    document.getElementById("previewButton").style.display="block";
+    document.getElementById("navigationButton").style.display="block";
 
-map.fitBounds(
-routeLine.getBounds(),
-{padding:[45,45]}
-);
+    hideStatus();
 
-updateRouteSummary();
+  }catch(error){
 
-document.getElementById("routeResult").style.display="block";
-document.getElementById("previewButton").style.display="block";
-document.getElementById("navigationButton").style.display="block";
+    hideStatus();
+    alert(t.routeError);
 
-hideStatus();
+  }finally{
 
-}catch(error){
-
-hideStatus();
-alert(t.routeError);
-
-}finally{
-
-button.disabled=false;
-
-}
-
+    button.disabled=false;
+  }
 }
 
 
 function updateRouteSummary(){
 
-const t=translations[currentLanguage];
+  const t=translations[currentLanguage];
 
-const distanceKm=currentRoute.distance/1000;
-const durationMinutes=Math.round(currentRoute.duration/60);
+  if(!currentRoute){
+    return;
+  }
 
-document.getElementById("distanceValue").textContent=
-distanceKm.toFixed(1)+" "+t.km;
+  const distanceKm=currentRoute.distance/1000;
+  const durationMinutes=Math.round(currentRoute.duration/60);
 
-document.getElementById("durationValue").textContent=
-formatDuration(durationMinutes);
+  document.getElementById("distanceValue").textContent=
+    distanceKm.toFixed(1)+" "+t.km;
 
+  document.getElementById("durationValue").textContent=
+    formatDuration(durationMinutes);
 }
 
 
 function startPreview(){
 
-if(!currentRoute || !routeCoordinates.length){
-return;
-}
+  if(!currentRoute || !routeCoordinates.length){
+    return;
+  }
 
-stopAllNavigation(false);
+  stopAllNavigation(false);
 
-previewIndex=0;
+  previewIndex=0;
+  currentStepIndex=0;
 
-document.getElementById("navigationBox").style.display="block";
-document.getElementById("previewButton").style.display="none";
-document.getElementById("navigationButton").style.display="none";
-document.getElementById("stopButton").style.display="block";
+  document.getElementById("navigationBox").style.display="block";
+  document.getElementById("previewButton").style.display="none";
+  document.getElementById("navigationButton").style.display="none";
+  document.getElementById("stopButton").style.display="block";
 
-if(carMarker){
-map.removeLayer(carMarker);
-}
+  if(carMarker){
+    map.removeLayer(carMarker);
+  }
 
-carMarker=
-L.marker(
-routeCoordinates[0],
-{
-icon:carIcon,
-zIndexOffset:1000
-}
-).addTo(map);
+  carMarker=
+    L.marker(
+      routeCoordinates[0],
+      {
+        icon:carIcon,
+        zIndexOffset:1000
+      }
+    ).addTo(map);
 
-map.setView(routeCoordinates[0],17);
+  map.setView(routeCoordinates[0],17);
 
-updateInstruction(routeCoordinates[0]);
+  updateInstruction(routeCoordinates[0]);
 
-previewTimer=setInterval(
-movePreview,
-220
-);
-
+  previewTimer=setInterval(
+    movePreview,
+    220
+  );
 }
 
 
 function movePreview(){
 
-previewIndex+=Math.max(
-1,
-Math.floor(routeCoordinates.length/700)
-);
+  previewIndex+=Math.max(
+    1,
+    Math.floor(routeCoordinates.length/700)
+  );
 
-if(previewIndex>=routeCoordinates.length){
+  if(previewIndex>=routeCoordinates.length){
 
-finishPreview();
-return;
+    finishPreview();
+    return;
+  }
 
-}
+  const position=
+    routeCoordinates[previewIndex];
 
-const position=routeCoordinates[previewIndex];
+  if(carMarker){
+    carMarker.setLatLng(position);
+  }
 
-carMarker.setLatLng(position);
+  map.panTo(
+    position,
+    {
+      animate:true,
+      duration:.2
+    }
+  );
 
-map.panTo(
-position,
-{
-animate:true,
-duration:.2
-}
-);
+  const progress=
+    (previewIndex/(routeCoordinates.length-1))*100;
 
-const progress=
-(previewIndex/(routeCoordinates.length-1))*100;
+  document.getElementById("progressBar").style.width=
+    progress+"%";
 
-document.getElementById("progressBar").style.width=
-progress+"%";
-
-updateInstruction(position);
-
+  updateInstruction(position);
 }
 
 
 function finishPreview(){
 
-if(previewTimer){
+  if(previewTimer){
+    clearInterval(previewTimer);
+    previewTimer=null;
+  }
 
-clearInterval(previewTimer);
-previewTimer=null;
+  const t=translations[currentLanguage];
 
-}
+  const last=
+    routeCoordinates[routeCoordinates.length-1];
 
-const t=translations[currentLanguage];
+  if(carMarker){
 
-const last=
-routeCoordinates[routeCoordinates.length-1];
+    carMarker.setLatLng(last);
+    map.panTo(last);
+  }
 
-if(carMarker){
+  document.getElementById("turnIcon").textContent="🏁";
+  document.getElementById("instructionText").textContent=t.arrive;
+  document.getElementById("instructionDistance").textContent="";
+  document.getElementById("progressBar").style.width="100%";
 
-carMarker.setLatLng(last);
-map.panTo(last);
-
-}
-
-document.getElementById("turnIcon").textContent="🏁";
-document.getElementById("instructionText").textContent=t.arrive;
-document.getElementById("instructionDistance").textContent="";
-document.getElementById("progressBar").style.width="100%";
-
-document.getElementById("stopButton").style.display="none";
-document.getElementById("previewButton").style.display="block";
-document.getElementById("navigationButton").style.display="block";
-
+  document.getElementById("stopButton").style.display="none";
+  document.getElementById("previewButton").style.display="block";
+  document.getElementById("navigationButton").style.display="block";
 }
 
 
 function startLiveNavigation(){
 
-const t=translations[currentLanguage];
+  const t=translations[currentLanguage];
 
-if(!destinationCoordinates){
+  if(!destinationCoordinates || !startCoordinates){
 
-alert(t.enterPlaces);
-return;
+    alert(t.enterPlaces);
+    return;
+  }
 
-}
+  if(!navigator.geolocation){
 
-if(!navigator.geolocation){
+    alert(t.locationError);
+    return;
+  }
 
-alert(t.locationError);
-return;
+  showStatus(t.waitingGPS);
 
-}
+  navigator.geolocation.getCurrentPosition(
 
-stopAllNavigation(false);
+    function(position){
 
-liveNavigation=true;
+      const realPosition=[
+        position.coords.latitude,
+        position.coords.longitude
+      ];
 
-document.getElementById("liveBadge").style.display="block";
-document.getElementById("navigationBox").style.display="block";
-document.getElementById("previewButton").style.display="none";
-document.getElementById("navigationButton").style.display="none";
-document.getElementById("stopButton").style.display="block";
+      const routeStart=[
+        startCoordinates.lat,
+        startCoordinates.lon
+      ];
 
-showStatus(t.waitingGPS);
+      const distanceFromStart=
+        map.distance(
+          realPosition,
+          routeStart
+        );
 
-gpsWatchId=
-navigator.geolocation.watchPosition(
+      /*
+      حماية مهمة:
+      إذا كان GPS بعيداً جداً عن نقطة بداية الطريق،
+      لا نحاول تحويل مسار داخل العراق إلى رحلة من قارة أخرى.
+      */
 
-handleLivePosition,
+      if(distanceFromStart>MAX_START_DISTANCE){
 
-handleLiveLocationError,
+        hideStatus();
+        alert(t.farFromStart);
+        return;
+      }
 
-{
-enableHighAccuracy:true,
-maximumAge:1000,
-timeout:15000
-}
+      stopAllNavigation(false);
 
-);
+      liveNavigation=true;
+      currentStepIndex=0;
 
+      document.getElementById("liveBadge").style.display="block";
+      document.getElementById("navigationBox").style.display="block";
+      document.getElementById("previewButton").style.display="none";
+      document.getElementById("navigationButton").style.display="none";
+      document.getElementById("stopButton").style.display="block";
+
+      handleLivePosition(position);
+
+      gpsWatchId=
+        navigator.geolocation.watchPosition(
+
+          handleLivePosition,
+          handleLiveLocationError,
+
+          {
+            enableHighAccuracy:true,
+            maximumAge:1000,
+            timeout:15000
+          }
+        );
+    },
+
+    function(){
+
+      hideStatus();
+      alert(t.locationError);
+    },
+
+    {
+      enableHighAccuracy:true,
+      maximumAge:0,
+      timeout:15000
+    }
+  );
 }
 
 
 async function handleLivePosition(position){
 
-if(!liveNavigation){
-return;
-}
+  if(!liveNavigation){
+    return;
+  }
 
-hideStatus();
+  hideStatus();
 
-const lat=position.coords.latitude;
-const lon=position.coords.longitude;
+  const lat=position.coords.latitude;
+  const lon=position.coords.longitude;
 
-currentLocationCoordinates={lat,lon};
+  currentLocationCoordinates={lat,lon};
 
-const currentPoint=[lat,lon];
+  const currentPoint=[lat,lon];
 
-if(!carMarker){
+  if(!carMarker){
 
-carMarker=
-L.marker(
-currentPoint,
-{
-icon:carIcon,
-zIndexOffset:1000
-}
-).addTo(map);
+    carMarker=
+      L.marker(
+        currentPoint,
+        {
+          icon:carIcon,
+          zIndexOffset:1000
+        }
+      ).addTo(map);
 
-}else{
+  }else{
 
-carMarker.setLatLng(currentPoint);
+    carMarker.setLatLng(currentPoint);
+  }
 
-}
+  map.setView(currentPoint,17);
 
-map.setView(currentPoint,17);
+  updateInstruction(currentPoint);
 
-updateInstruction(currentPoint);
+  if(destinationCoordinates){
 
-if(destinationCoordinates){
+    const distanceToDestination=
+      map.distance(
+        currentPoint,
+        [
+          destinationCoordinates.lat,
+          destinationCoordinates.lon
+        ]
+      );
 
-const distanceToDestination=
-map.distance(
-currentPoint,
-[
-destinationCoordinates.lat,
-destinationCoordinates.lon
-]
-);
+    if(distanceToDestination<35){
 
-if(distanceToDestination<35){
+      finishLiveNavigation();
+      return;
+    }
+  }
 
-finishLiveNavigation();
-return;
+  const offRouteDistance=
+    distanceFromRoute(currentPoint);
 
-}
+  if(offRouteDistance>OFF_ROUTE_DISTANCE){
 
-}
+    const now=Date.now();
 
-const offRouteDistance=
-distanceFromRoute(currentPoint);
+    if(
+      now-lastRecalculation >
+      RECALCULATION_DELAY
+    ){
 
-if(offRouteDistance>OFF_ROUTE_DISTANCE){
+      lastRecalculation=now;
 
-const now=Date.now();
-
-if(
-now-lastRecalculation >
-RECALCULATION_DELAY
-){
-
-lastRecalculation=now;
-
-await recalculateFromCurrentPosition(
-lat,
-lon
-);
-
-}
-
-}
-
+      await recalculateFromCurrentPosition(
+        lat,
+        lon
+      );
+    }
+  }
 }
 
 
 function handleLiveLocationError(){
 
-const t=translations[currentLanguage];
+  const t=translations[currentLanguage];
 
-hideStatus();
+  hideStatus();
+  alert(t.locationError);
 
-alert(t.locationError);
-
-stopAllNavigation();
-
+  stopAllNavigation();
 }
 
 
 async function recalculateFromCurrentPosition(lat,lon){
 
-if(!destinationCoordinates){
-return;
-}
+  if(!destinationCoordinates){
+    return;
+  }
 
-const t=translations[currentLanguage];
+  const t=translations[currentLanguage];
 
-showStatus(t.recalculating);
+  showStatus(t.recalculating);
 
-try{
+  try{
 
-const newRoute=
-await requestRoute(
-{lat,lon},
-destinationCoordinates
-);
+    const newRoute=
+      await requestRoute(
+        {lat,lon},
+        destinationCoordinates
+      );
 
-prepareRoute(newRoute);
-drawRoute();
-updateRouteSummary();
+    startCoordinates={
+      lat:lat,
+      lon:lon,
+      name:t.currentLocation
+    };
 
-hideStatus();
+    prepareRoute(newRoute);
+    drawRoute();
+    updateRouteSummary();
 
-}catch(error){
+    hideStatus();
 
-hideStatus();
+  }catch(error){
 
-}
-
+    hideStatus();
+  }
 }
 
 
 function distanceFromRoute(point){
 
-if(!routeCoordinates.length){
-return Infinity;
-}
+  if(!routeCoordinates.length){
+    return Infinity;
+  }
 
-let minimum=Infinity;
+  let minimum=Infinity;
 
-const jump=Math.max(
-1,
-Math.floor(routeCoordinates.length/500)
-);
+  const jump=Math.max(
+    1,
+    Math.floor(routeCoordinates.length/700)
+  );
 
-for(
-let i=0;
-i<routeCoordinates.length;
-i+=jump
-){
+  for(
+    let i=0;
+    i<routeCoordinates.length;
+    i+=jump
+  ){
 
-const distance=
-map.distance(
-point,
-routeCoordinates[i]
-);
+    const distance=
+      map.distance(
+        point,
+        routeCoordinates[i]
+      );
 
-if(distance<minimum){
-minimum=distance;
-}
+    if(distance<minimum){
+      minimum=distance;
+    }
+  }
 
-}
-
-return minimum;
-
-}
-
-
-function finishLiveNavigation(){
-
-const t=translations[currentLanguage];
-
-if(gpsWatchId!==null){
-
-navigator.geolocation.clearWatch(gpsWatchId);
-gpsWatchId=null;
-
-}
-
-liveNavigation=false;
-
-document.getElementById("liveBadge").style.display="none";
-
-document.getElementById("turnIcon").textContent="🏁";
-document.getElementById("instructionText").textContent=t.arrive;
-document.getElementById("instructionDistance").textContent="";
-
-document.getElementById("progressBar").style.width="100%";
-
-document.getElementById("stopButton").style.display="none";
-document.getElementById("previewButton").style.display="block";
-document.getElementById("navigationButton").style.display="block";
-
+  return minimum;
 }
 
 
 function updateInstruction(position){
 
-if(!routeSteps.length){
-return;
+  if(!routeSteps.length){
+    return;
+  }
+
+  if(currentStepIndex>=routeSteps.length){
+    currentStepIndex=routeSteps.length-1;
+  }
+
+  /*
+  نبحث ابتداءً من التعليمة الحالية فقط.
+  هذا يمنع Alma من الرجوع إلى انعطاف قديم تم تجاوزه.
+  */
+
+  let bestIndex=currentStepIndex;
+  let bestDistance=Infinity;
+
+  const searchEnd=
+    Math.min(
+      routeSteps.length,
+      currentStepIndex+5
+    );
+
+  for(
+    let i=currentStepIndex;
+    i<searchEnd;
+    i++
+  ){
+
+    const maneuver=routeSteps[i].maneuver;
+
+    if(
+      !maneuver ||
+      !maneuver.location
+    ){
+      continue;
+    }
+
+    const point=[
+      maneuver.location[1],
+      maneuver.location[0]
+    ];
+
+    const distance=
+      map.distance(position,point);
+
+    if(distance<bestDistance){
+
+      bestDistance=distance;
+      bestIndex=i;
+    }
+  }
+
+  /*
+  إذا أصبحت تعليمة لاحقة أقرب بوضوح،
+  نعتبر أن التعليمات السابقة تم تنفيذها.
+  */
+
+  if(bestIndex>currentStepIndex){
+
+    currentStepIndex=bestIndex;
+  }
+
+  let step=routeSteps[currentStepIndex];
+
+  if(
+    !step ||
+    !step.maneuver ||
+    !step.maneuver.location
+  ){
+    return;
+  }
+
+  let maneuverPoint=[
+    step.maneuver.location[1],
+    step.maneuver.location[0]
+  ];
+
+  let distanceToManeuver=
+    map.distance(
+      position,
+      maneuverPoint
+    );
+
+  /*
+  عند الوصول إلى نقطة المناورة،
+  انتقل إلى التعليمة التالية.
+  */
+
+  if(
+    distanceToManeuver<30 &&
+    currentStepIndex<routeSteps.length-1
+  ){
+
+    currentStepIndex++;
+
+    step=routeSteps[currentStepIndex];
+
+    if(
+      step &&
+      step.maneuver &&
+      step.maneuver.location
+    ){
+
+      maneuverPoint=[
+        step.maneuver.location[1],
+        step.maneuver.location[0]
+      ];
+
+      distanceToManeuver=
+        map.distance(
+          position,
+          maneuverPoint
+        );
+    }
+  }
+
+  const instruction=
+    buildNavigationInstruction(step);
+
+  document.getElementById("turnIcon").textContent=
+    instruction.icon;
+
+  document.getElementById("instructionText").textContent=
+    instruction.text;
+
+  document.getElementById("instructionDistance").textContent=
+    formatNavigationDistance(
+      distanceToManeuver
+    );
 }
 
-let nearestStep=null;
-let nearestDistance=Infinity;
 
-for(let i=0;i<routeSteps.length;i++){
+function buildNavigationInstruction(step){
 
-const maneuver=routeSteps[i].maneuver;
+  const t=translations[currentLanguage];
 
-if(!maneuver || !maneuver.location){
-continue;
-}
+  const maneuver=step.maneuver || {};
 
-const stepPoint=[
-maneuver.location[1],
-maneuver.location[0]
-];
+  const modifier=maneuver.modifier || "";
+  const type=maneuver.type || "";
 
-const distance=
-map.distance(
-position,
-stepPoint
-);
+  const roadName=
+    (step.name || "").trim();
 
-if(distance<nearestDistance){
-
-nearestDistance=distance;
-nearestStep=routeSteps[i];
-
-}
-
-}
-
-if(!nearestStep){
-return;
-}
-
-const instruction=
-translateManeuver(
-nearestStep.maneuver
-);
-
-document.getElementById("turnIcon").textContent=
-instruction.icon;
-
-document.getElementById("instructionText").textContent=
-instruction.text;
-
-document.getElementById("instructionDistance").textContent=
-formatNavigationDistance(nearestDistance);
-
-}
+  let icon="⬆️";
+  let text=t.straight;
 
 
-function translateManeuver(maneuver){
+  if(type==="arrive"){
 
-const t=translations[currentLanguage];
+    return{
+      icon:"🏁",
+      text:t.arrive
+    };
+  }
 
-const modifier=maneuver.modifier || "";
-const type=maneuver.type || "";
 
-if(type==="arrive"){
+  if(
+    type==="roundabout" ||
+    type==="rotary" ||
+    type==="roundabout turn"
+  ){
 
-return{
-icon:"🏁",
-text:t.arrive
-};
+    icon="↻";
+    text=t.roundabout;
 
-}
+    if(maneuver.exit){
 
-if(
-type==="roundabout" ||
-type==="rotary"
-){
+      text+=" — "+
+        t.exit+
+        " "+
+        maneuver.exit;
+    }
 
-return{
-icon:"↻",
-text:t.roundabout
-};
+    if(roadName){
 
-}
+      text+=" "+
+        t.onto+
+        " "+
+        roadName;
+    }
 
-if(modifier==="right"){
+    return{
+      icon,
+      text
+    };
+  }
 
-return{
-icon:"➡️",
-text:t.right
-};
 
-}
+  if(modifier==="right"){
 
-if(modifier==="left"){
+    icon="➡️";
+    text=t.right;
 
-return{
-icon:"⬅️",
-text:t.left
-};
+  }else if(modifier==="left"){
 
-}
+    icon="⬅️";
+    text=t.left;
 
-if(modifier==="slight right"){
+  }else if(modifier==="slight right"){
 
-return{
-icon:"↗️",
-text:t.slightRight
-};
+    icon="↗️";
+    text=t.slightRight;
 
-}
+  }else if(modifier==="slight left"){
 
-if(modifier==="slight left"){
+    icon="↖️";
+    text=t.slightLeft;
 
-return{
-icon:"↖️",
-text:t.slightLeft
-};
+  }else if(modifier==="sharp right"){
 
-}
+    icon="⤵️";
+    text=t.sharpRight;
 
-if(modifier==="uturn"){
+  }else if(modifier==="sharp left"){
 
-return{
-icon:"↩️",
-text:t.uturn
-};
+    icon="⤴️";
+    text=t.sharpLeft;
 
-}
+  }else if(modifier==="uturn"){
 
-return{
-icon:"⬆️",
-text:t.straight
-};
+    icon="↩️";
+    text=t.uturn;
 
+  }else{
+
+    icon="⬆️";
+    text=t.straight;
+  }
+
+
+  if(
+    roadName &&
+    type!=="arrive"
+  ){
+
+    text+=" "+
+      t.onto+
+      " "+
+      roadName;
+  }
+
+  return{
+    icon,
+    text
+  };
 }
 
 
 function formatNavigationDistance(meters){
 
-const t=translations[currentLanguage];
+  const t=translations[currentLanguage];
 
-if(meters<1000){
+  if(!Number.isFinite(meters)){
+    return "";
+  }
 
-const rounded=
-Math.max(
-10,
-Math.round(meters/10)*10
-);
+  if(meters<1000){
 
-return(
-t.after+
-" "+
-rounded+
-" "+
-t.meter
-);
+    let rounded;
 
+    if(meters<100){
+
+      rounded=
+        Math.max(
+          10,
+          Math.round(meters/10)*10
+        );
+
+    }else{
+
+      rounded=
+        Math.round(meters/50)*50;
+    }
+
+    return(
+      t.after+
+      " "+
+      rounded+
+      " "+
+      t.meter
+    );
+  }
+
+  return(
+    t.after+
+    " "+
+    (meters/1000).toFixed(1)+
+    " "+
+    t.km
+  );
 }
 
-return(
-t.after+
-" "+
-(meters/1000).toFixed(1)+
-" "+
-t.km
-);
 
+function finishLiveNavigation(){
+
+  const t=translations[currentLanguage];
+
+  if(gpsWatchId!==null){
+
+    navigator.geolocation.clearWatch(gpsWatchId);
+    gpsWatchId=null;
+  }
+
+  liveNavigation=false;
+
+  document.getElementById("liveBadge").style.display="none";
+
+  document.getElementById("turnIcon").textContent="🏁";
+  document.getElementById("instructionText").textContent=t.arrive;
+  document.getElementById("instructionDistance").textContent="";
+  document.getElementById("progressBar").style.width="100%";
+
+  document.getElementById("stopButton").style.display="none";
+  document.getElementById("previewButton").style.display="block";
+  document.getElementById("navigationButton").style.display="block";
 }
 
 
-function stopAllNavigation(
-hideNavigation=true
-){
+function stopAllNavigation(hideNavigation=true){
 
-if(previewTimer){
+  if(previewTimer){
 
-clearInterval(previewTimer);
-previewTimer=null;
+    clearInterval(previewTimer);
+    previewTimer=null;
+  }
 
-}
+  if(gpsWatchId!==null){
 
-if(gpsWatchId!==null){
+    navigator.geolocation.clearWatch(gpsWatchId);
+    gpsWatchId=null;
+  }
 
-navigator.geolocation.clearWatch(gpsWatchId);
-gpsWatchId=null;
+  liveNavigation=false;
 
-}
+  document.getElementById("liveBadge").style.display="none";
+  document.getElementById("stopButton").style.display="none";
 
-liveNavigation=false;
+  if(carMarker){
 
-document.getElementById("liveBadge").style.display="none";
-document.getElementById("stopButton").style.display="none";
+    map.removeLayer(carMarker);
+    carMarker=null;
+  }
 
-if(carMarker){
+  if(currentRoute){
 
-map.removeLayer(carMarker);
-carMarker=null;
+    document.getElementById("previewButton").style.display="block";
+    document.getElementById("navigationButton").style.display="block";
+  }
 
-}
+  if(hideNavigation){
 
-if(currentRoute){
+    document.getElementById("navigationBox").style.display="none";
+  }
 
-document.getElementById("previewButton").style.display="block";
-document.getElementById("navigationButton").style.display="block";
+  document.getElementById("progressBar").style.width="0%";
 
-}
-
-if(hideNavigation){
-
-document.getElementById("navigationBox").style.display="none";
-
-}
-
-document.getElementById("progressBar").style.width="0%";
-
-hideStatus();
-
+  hideStatus();
 }
 
 
 function formatDuration(minutes){
 
-const t=translations[currentLanguage];
+  const t=translations[currentLanguage];
 
-if(minutes<60){
+  if(minutes<60){
 
-return minutes+" "+t.min;
+    return minutes+" "+t.min;
+  }
 
-}
+  const hours=Math.floor(minutes/60);
+  const remaining=minutes%60;
 
-const hours=Math.floor(minutes/60);
-const remaining=minutes%60;
+  if(!remaining){
 
-if(!remaining){
+    return hours+" "+t.hour;
+  }
 
-return hours+" "+t.hour;
-
-}
-
-return(
-hours+
-" "+
-t.hour+
-" "+
-remaining+
-" "+
-t.min
-);
-
+  return(
+    hours+
+    " "+
+    t.hour+
+    " "+
+    remaining+
+    " "+
+    t.min
+  );
 }
 
 
 document
 .getElementById("languageSelect")
 .addEventListener(
-"change",
-function(){
-setLanguage(this.value);
-}
+  "change",
+  function(){
+    setLanguage(this.value);
+  }
+);
+
+
+document
+.getElementById("fromInput")
+.addEventListener(
+  "input",
+  function(){
+
+    if(
+      this.value !==
+      translations[currentLanguage].currentLocation
+    ){
+      usingCurrentLocation=false;
+    }
+  }
 );
 
 
 document
 .getElementById("toInput")
 .addEventListener(
-"keydown",
-function(event){
+  "keydown",
+  function(event){
 
-if(event.key==="Enter"){
-calculateRoute();
-}
-
-}
+    if(event.key==="Enter"){
+      calculateRoute();
+    }
+  }
 );
 
 
-const savedLanguage=
-localStorage.getItem("almaLanguage");
+let savedLanguage=
+  localStorage.getItem("almaLanguage");
+
+/*
+النسخة القديمة كانت تستخدم ku.
+ننقلها تلقائياً إلى ckb للكردية السورانية.
+*/
+
+if(savedLanguage==="ku"){
+
+  savedLanguage="ckb";
+  localStorage.setItem("almaLanguage","ckb");
+}
+
 
 if(
-savedLanguage &&
-translations[savedLanguage]
+  savedLanguage &&
+  translations[savedLanguage]
 ){
 
-document.getElementById("languageSelect").value=
-savedLanguage;
+  document.getElementById("languageSelect").value=
+    savedLanguage;
 
-setLanguage(savedLanguage);
+  setLanguage(savedLanguage);
 
 }else{
 
-setLanguage("ar");
-
+  setLanguage("ar");
 }
 
 </script>
