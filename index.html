@@ -1275,17 +1275,10 @@ function updateTripMetrics(
 
 
 function focusNavigationPosition(
+  function focusNavigationPosition(
   position,
   animate=true
 ){
-
-  map.setView(
-    position,
-    17,
-    {
-      animate:false
-    }
-  );
 
   if(
     window.matchMedia(
@@ -1293,20 +1286,47 @@ function focusNavigationPosition(
     ).matches
   ){
 
-    const offset=
-      Math.round(
-        map.getSize().y*
-        0.18
+    const mapSize=
+      map.getSize();
+
+    const targetPoint=
+      map.project(
+        position,
+        17
       );
 
-    map.panBy(
-      [
-        0,
-        -offset
-      ],
+    const offset=
+      Math.round(
+        mapSize.y*0.18
+      );
+
+    const centerPoint=
+      L.point(
+        targetPoint.x,
+        targetPoint.y-offset
+      );
+
+    const center=
+      map.unproject(
+        centerPoint,
+        17
+      );
+
+    map.setView(
+      center,
+      17,
       {
-        animate:animate,
-        duration:.22
+        animate:false
+      }
+    );
+
+  }else{
+
+    map.setView(
+      position,
+      17,
+      {
+        animate:false
       }
     );
 
