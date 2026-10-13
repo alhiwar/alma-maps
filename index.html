@@ -293,12 +293,48 @@ html[dir="ltr"] .my-location{
   font-weight:bold;
   text-align:center;
 }
-
 .car-icon{
-  font-size:30px;
-  line-height:30px;
-  text-align:center;
-  filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));
+  width:34px;
+  height:46px;
+  position:relative;
+  transform-origin:50% 50%;
+  transition:transform .18s linear;
+  filter:drop-shadow(0 2px 3px rgba(0,0,0,.38));
+}
+
+.car-body{
+  position:absolute;
+  left:5px;
+  top:3px;
+  width:24px;
+  height:39px;
+  background:#146c43;
+  border:3px solid #ffffff;
+  border-radius:12px 12px 8px 8px;
+  box-shadow:0 0 0 1px rgba(0,0,0,.18);
+}
+
+.car-body::before{
+  content:"";
+  position:absolute;
+  left:4px;
+  top:6px;
+  width:10px;
+  height:8px;
+  background:#bfe3f5;
+  border-radius:5px 5px 2px 2px;
+}
+
+.car-body::after{
+  content:"";
+  position:absolute;
+  left:7px;
+  top:-8px;
+  width:0;
+  height:0;
+  border-left:5px solid transparent;
+  border-right:5px solid transparent;
+  border-bottom:9px solid #146c43;
 }
 
 
@@ -912,7 +948,8 @@ let previewIndex=0;
 let gpsWatchId=null;
 let liveNavigation=false;
 let lastRecalculation=0;
-
+let previousLivePosition=null;
+  
 let voiceEnabled=true;
 let availableVoices=[];
 
@@ -946,12 +983,80 @@ L.tileLayer(
 
 const carIcon=L.divIcon({
   className:"",
-  html:'<div class="car-icon">🚗</div>',
-  iconSize:[36,36],
-  iconAnchor:[18,18]
+  html:'<div class="car-icon"><div class="car-body"></div></div>',
+  iconSize:[34,46],
+  iconAnchor:[17,23]
 });
 
+let currentCarBearing=0;
 
+function calculateBearing(from,to){
+
+  if(!from || !to){
+    return currentCarBearing;
+  }
+
+  const lat1=from[0]*Math.PI/180;
+  const lat2=to[0]*Math.PI/180;
+
+  const deltaLon=
+    (to[1]-from[1])*
+    Math.PI/180;
+
+  const y=
+    Math.sin(deltaLon)*
+    Math.cos(lat2);
+
+  const x=
+    Math.cos(lat1)*
+    Math.sin(lat2)-
+    Math.sin(lat1)*
+    Math.cos(lat2)*
+    Math.cos(deltaLon);
+
+  let bearing=
+    Math.atan2(y,x)*
+    180/Math.PI;
+
+  return(
+    bearing+360
+  )%360;
+}
+
+
+function rotateCarMarker(bearing){
+
+  if(
+    !carMarker ||
+    !Number.isFinite(bearing)
+  ){
+    return;
+  }
+
+  currentCarBearing=bearing;
+
+  const markerElement=
+    carMarker.getElement();
+
+  if(!markerElement){
+    return;
+  }
+
+  const car=
+    markerElement.querySelector(
+      ".car-icon"
+    );
+
+  if(car){
+
+    car.style.transform=
+      "rotate("+
+      bearing+
+      "deg)";
+
+  }
+
+}
 const tripLabels={
   ar:{
     time:"الوقت المتبقي",
@@ -2068,7 +2173,17 @@ function startPreview(){
         zIndexOffset:1000
       }
     ).addTo(map);
+  
+if(routeCoordinates.length>1){
 
+  rotateCarMarker(
+    calculateBearing(
+      routeCoordinates[0],
+      routeCoordinates[1]
+    )
+  );
+
+}
   focusNavigationPosition(
     routeCoordinates[0],
     false
@@ -2112,14 +2227,35 @@ function movePreview(){
 
   }
 
-  const position=
-    routeCoordinates[previewIndex];
+ const position=
+  routeCoordinates[previewIndex];
 
-  if(carMarker){
+const previousIndex=
+  Math.max(
+    0,
+    previewIndex-1
+  );
 
-    carMarker.setLatLng(position);
+const previousPosition=
+  routeCoordinates[
+    previousIndex
+  ];
 
-  }
+if(carMarker){
+
+  carMarker.setLatLng(position);
+
+  const bearing=
+    calculateBearing(
+      previousPosition,
+      position
+    );
+
+  rotateCarMarker(
+    bearing
+  );
+
+}
 
   focusNavigationPosition(
     position,
@@ -2362,6 +2498,42 @@ async function handleLivePosition(
     lat,
     lon
   ];
+  let liveBearing=null;
+
+if(
+  Number.isFinite(
+    position.coords.heading
+  ) &&
+  position.coords.heading>=0
+){
+
+  liveBearing=
+    position.coords.heading;
+
+}else if(previousLivePosition){
+
+  const movedDistance=
+    map.distance(
+      previousLivePosition,
+      currentPoint
+    );
+
+  if(movedDistance>=3){
+
+    liveBearing=
+      calculateBearing(
+        previousLivePosition,
+        currentPoint
+      );
+
+  }
+
+}
+
+previousLivePosition=[
+  lat,
+  lon
+];
 
   if(!carMarker){
 
@@ -2381,6 +2553,13 @@ async function handleLivePosition(
     );
 
   }
+  if(liveBearing!==null){
+
+  rotateCarMarker(
+    liveBearing
+  );
+
+}
 
   focusNavigationPosition(
     currentPoint,
