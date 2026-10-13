@@ -2,13 +2,329 @@
 <html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 
 <title>ALMA Maps | خرائط ألما</title>
 
-<link rel="stylesheet"
-href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
-/* ===== ALMA: وضع الملاحة المصغر على الهاتف ===== */
+<link
+  rel="stylesheet"
+  href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+/>
+
+<style>
+
+*{
+  box-sizing:border-box;
+}
+
+html,
+body{
+  margin:0;
+  width:100%;
+  height:100%;
+  font-family:Arial,sans-serif;
+  overflow:hidden;
+}
+
+#map{
+  width:100%;
+  height:100vh;
+  height:100dvh;
+}
+
+.alma-panel{
+  position:absolute;
+  top:18px;
+  right:18px;
+  z-index:1000;
+  width:min(430px,calc(100% - 36px));
+  background:rgba(255,255,255,.97);
+  border-radius:20px;
+  padding:16px;
+  box-shadow:0 7px 30px rgba(0,0,0,.20);
+  max-height:calc(100vh - 36px);
+  overflow-y:auto;
+}
+
+html[dir="ltr"] .alma-panel{
+  right:auto;
+  left:18px;
+}
+
+.top-row{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  gap:10px;
+  margin-bottom:15px;
+}
+
+.brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+}
+
+.logo{
+  width:46px;
+  height:46px;
+  border-radius:13px;
+  background:#146c43;
+  color:white;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-weight:bold;
+  font-size:20px;
+}
+
+.brand h1{
+  margin:0;
+  font-size:22px;
+  color:#1f2937;
+}
+
+.brand p{
+  margin:3px 0 0;
+  color:#6b7280;
+  font-size:12px;
+}
+
+#languageSelect{
+  border:1px solid #d1d5db;
+  border-radius:10px;
+  padding:8px;
+  background:white;
+  max-width:110px;
+}
+
+.route-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:9px;
+}
+
+.route-icon{
+  width:28px;
+  text-align:center;
+  font-size:18px;
+}
+
+.route-row input{
+  flex:1;
+  min-width:0;
+  border:1px solid #d1d5db;
+  border-radius:11px;
+  padding:12px;
+  font-size:15px;
+  outline:none;
+}
+
+.route-row input:focus{
+  border-color:#146c43;
+}
+
+.my-location{
+  margin:2px 36px 12px 0;
+  border:0;
+  background:transparent;
+  color:#146c43;
+  font-size:13px;
+  cursor:pointer;
+  padding:0;
+}
+
+html[dir="ltr"] .my-location{
+  margin:2px 0 12px 36px;
+}
+
+.main-button,
+.preview-button,
+.navigation-button,
+.stop-button,
+.voice-button{
+  width:100%;
+  border:0;
+  border-radius:11px;
+  padding:13px;
+  font-size:15px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.main-button{
+  background:#146c43;
+  color:white;
+}
+
+.main-button:disabled{
+  opacity:.6;
+  cursor:wait;
+}
+
+.voice-button{
+  margin-top:10px;
+  background:#f3f4f6;
+  color:#111827;
+  border:1px solid #d1d5db;
+}
+
+.voice-button.active{
+  background:#dcfce7;
+  color:#166534;
+  border-color:#86efac;
+}
+
+.preview-button{
+  display:none;
+  margin-top:10px;
+  background:#2563eb;
+  color:white;
+}
+
+.navigation-button{
+  display:none;
+  margin-top:8px;
+  background:#111827;
+  color:white;
+}
+
+.stop-button{
+  display:none;
+  margin-top:8px;
+  background:#e5e7eb;
+  color:#111827;
+}
+
+.route-result{
+  display:none;
+  margin-top:12px;
+  background:#f3f4f6;
+  border-radius:12px;
+  padding:12px;
+}
+
+.route-summary{
+  display:flex;
+  justify-content:space-around;
+  text-align:center;
+  gap:10px;
+}
+
+.route-summary strong{
+  display:block;
+  font-size:18px;
+  margin-bottom:3px;
+}
+
+.route-summary span{
+  color:#6b7280;
+  font-size:12px;
+}
+
+.navigation-box{
+  display:none;
+  margin-top:12px;
+  border-radius:14px;
+  padding:14px;
+  background:#146c43;
+  color:white;
+}
+
+.instruction-row{
+  display:flex;
+  align-items:center;
+  gap:13px;
+}
+
+#turnIcon{
+  font-size:36px;
+  min-width:48px;
+  text-align:center;
+}
+
+#instructionText{
+  font-size:18px;
+  font-weight:bold;
+  line-height:1.5;
+}
+
+#instructionDistance{
+  margin-top:5px;
+  font-size:14px;
+  opacity:.92;
+}
+
+.progress-wrap{
+  margin-top:12px;
+  height:6px;
+  background:rgba(255,255,255,.3);
+  border-radius:10px;
+  overflow:hidden;
+}
+
+#progressBar{
+  width:0%;
+  height:100%;
+  background:white;
+  border-radius:10px;
+}
+
+.status{
+  display:none;
+  margin-top:10px;
+  padding:9px;
+  border-radius:9px;
+  background:#f3f4f6;
+  text-align:center;
+  font-size:13px;
+  color:#4b5563;
+}
+
+.live-badge{
+  display:none;
+  margin-bottom:10px;
+  padding:8px 10px;
+  border-radius:9px;
+  background:#dcfce7;
+  color:#166534;
+  font-size:12px;
+  font-weight:bold;
+  text-align:center;
+}
+
+.car-icon{
+  font-size:30px;
+  line-height:30px;
+  text-align:center;
+  filter:drop-shadow(0 2px 2px rgba(0,0,0,.35));
+}
+
+
+/* =====================================================
+   الهاتف قبل بدء الملاحة
+   ===================================================== */
+
+@media(max-width:600px){
+
+  .alma-panel{
+    top:8px;
+    right:8px;
+    width:calc(100% - 16px);
+    max-height:65dvh;
+  }
+
+  html[dir="ltr"] .alma-panel{
+    left:8px;
+    right:auto;
+  }
+}
+
+
+/* =====================================================
+   الهاتف أثناء المعاينة أو الملاحة
+   ===================================================== */
 
 @media(max-width:600px){
 
@@ -19,7 +335,9 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     max-height:none;
     overflow:visible;
     padding:8px;
-    border-radius:15px;
+    background:transparent;
+    box-shadow:none;
+    pointer-events:none;
   }
 
   html[dir="ltr"] body.mobile-navigation .alma-panel{
@@ -39,21 +357,30 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
     display:none !important;
   }
 
+  body.mobile-navigation #liveBadge{
+    pointer-events:auto;
+    margin:0 0 6px;
+    padding:6px 8px;
+  }
+
   body.mobile-navigation #navigationBox{
     display:block !important;
-    margin-top:0;
+    pointer-events:auto;
+    margin:0;
     padding:10px 12px;
+    border-radius:14px;
+    box-shadow:0 4px 16px rgba(0,0,0,.22);
   }
 
   body.mobile-navigation #stopButton{
     display:block !important;
-    margin-top:7px;
-    padding:9px;
-  }
-
-  body.mobile-navigation #liveBadge{
-    margin:0 0 7px;
-    padding:6px 8px;
+    pointer-events:auto;
+    width:auto;
+    min-width:100px;
+    margin:7px auto 0;
+    padding:8px 18px;
+    background:rgba(255,255,255,.96);
+    box-shadow:0 3px 12px rgba(0,0,0,.18);
   }
 
   body.mobile-navigation #turnIcon{
@@ -69,304 +396,12 @@ href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   body.mobile-navigation #instructionDistance{
     font-size:13px;
   }
-}
-<style>
-*{box-sizing:border-box}
 
-html,body{
-  margin:0;
-  width:100%;
-  height:100%;
-  font-family:Arial,sans-serif
-}
-
-#map{
-  width:100%;
-  height:100vh
-}
-
-.alma-panel{
-  position:absolute;
-  top:18px;
-  right:18px;
-  z-index:1000;
-  width:min(430px,calc(100% - 36px));
-  background:rgba(255,255,255,.97);
-  border-radius:20px;
-  padding:16px;
-  box-shadow:0 7px 30px rgba(0,0,0,.20);
-  max-height:calc(100vh - 36px);
-  overflow-y:auto
-}
-
-html[dir="ltr"] .alma-panel{
-  right:auto;
-  left:18px
-}
-
-.top-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom:15px
-}
-
-.brand{
-  display:flex;
-  align-items:center;
-  gap:10px
-}
-
-.logo{
-  width:46px;
-  height:46px;
-  border-radius:13px;
-  background:#146c43;
-  color:white;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-weight:bold;
-  font-size:20px
-}
-
-.brand h1{
-  margin:0;
-  font-size:22px;
-  color:#1f2937
-}
-
-.brand p{
-  margin:3px 0 0;
-  color:#6b7280;
-  font-size:12px
-}
-
-#languageSelect{
-  border:1px solid #d1d5db;
-  border-radius:10px;
-  padding:8px;
-  background:white;
-  max-width:110px
-}
-
-.route-row{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:9px
-}
-
-.route-icon{
-  width:28px;
-  text-align:center;
-  font-size:18px
-}
-
-.route-row input{
-  flex:1;
-  min-width:0;
-  border:1px solid #d1d5db;
-  border-radius:11px;
-  padding:12px;
-  font-size:15px;
-  outline:none
-}
-
-.route-row input:focus{
-  border-color:#146c43
-}
-
-.my-location{
-  margin:2px 36px 12px 0;
-  border:0;
-  background:transparent;
-  color:#146c43;
-  font-size:13px;
-  cursor:pointer;
-  padding:0
-}
-
-html[dir="ltr"] .my-location{
-  margin:2px 0 12px 36px
-}
-
-.main-button,
-.preview-button,
-.navigation-button,
-.stop-button,
-.voice-button{
-  width:100%;
-  border:0;
-  border-radius:11px;
-  padding:13px;
-  font-size:15px;
-  font-weight:bold;
-  cursor:pointer
-}
-
-.main-button{
-  background:#146c43;
-  color:white
-}
-
-.main-button:disabled{
-  opacity:.6;
-  cursor:wait
-}
-
-.voice-button{
-  margin-top:10px;
-  background:#f3f4f6;
-  color:#111827;
-  border:1px solid #d1d5db
-}
-
-.voice-button.active{
-  background:#dcfce7;
-  color:#166534;
-  border-color:#86efac
-}
-
-.preview-button{
-  display:none;
-  margin-top:10px;
-  background:#2563eb;
-  color:white
-}
-
-.navigation-button{
-  display:none;
-  margin-top:8px;
-  background:#111827;
-  color:white
-}
-
-.stop-button{
-  display:none;
-  margin-top:8px;
-  background:#e5e7eb;
-  color:#111827
-}
-
-.route-result{
-  display:none;
-  margin-top:12px;
-  background:#f3f4f6;
-  border-radius:12px;
-  padding:12px
-}
-
-.route-summary{
-  display:flex;
-  justify-content:space-around;
-  text-align:center;
-  gap:10px
-}
-
-.route-summary strong{
-  display:block;
-  font-size:18px;
-  margin-bottom:3px
-}
-
-.route-summary span{
-  color:#6b7280;
-  font-size:12px
-}
-
-.navigation-box{
-  display:none;
-  margin-top:12px;
-  border-radius:14px;
-  padding:14px;
-  background:#146c43;
-  color:white
-}
-
-.instruction-row{
-  display:flex;
-  align-items:center;
-  gap:13px
-}
-
-#turnIcon{
-  font-size:36px;
-  min-width:48px;
-  text-align:center
-}
-
-#instructionText{
-  font-size:18px;
-  font-weight:bold;
-  line-height:1.5
-}
-
-#instructionDistance{
-  margin-top:5px;
-  font-size:14px;
-  opacity:.92
-}
-
-.progress-wrap{
-  margin-top:12px;
-  height:6px;
-  background:rgba(255,255,255,.3);
-  border-radius:10px;
-  overflow:hidden
-}
-
-#progressBar{
-  width:0%;
-  height:100%;
-  background:white;
-  border-radius:10px
-}
-
-.status{
-  display:none;
-  margin-top:10px;
-  padding:9px;
-  border-radius:9px;
-  background:#f3f4f6;
-  text-align:center;
-  font-size:13px;
-  color:#4b5563
-}
-
-.live-badge{
-  display:none;
-  margin-bottom:10px;
-  padding:8px 10px;
-  border-radius:9px;
-  background:#dcfce7;
-  color:#166534;
-  font-size:12px;
-  font-weight:bold;
-  text-align:center
-}
-
-.car-icon{
-  font-size:30px;
-  line-height:30px;
-  text-align:center;
-  filter:drop-shadow(0 2px 2px rgba(0,0,0,.35))
-}
-
-@media(max-width:600px){
-  .alma-panel{
-    top:8px;
-    right:8px;
-    width:calc(100% - 16px);
-    max-height:65vh
-  }
-
-  html[dir="ltr"] .alma-panel{
-    left:8px;
-    right:auto
+  body.mobile-navigation .progress-wrap{
+    margin-top:8px;
   }
 }
+
 </style>
 </head>
 
@@ -377,12 +412,14 @@ html[dir="ltr"] .my-location{
   <div class="top-row">
 
     <div class="brand">
+
       <div class="logo">A</div>
 
       <div>
         <h1>ALMA Maps</h1>
         <p id="subtitle">دليلك الذكي في العراق</p>
       </div>
+
     </div>
 
     <select id="languageSelect">
@@ -401,38 +438,50 @@ html[dir="ltr"] .my-location{
 
   <div class="route-row">
     <div class="route-icon">●</div>
-    <input id="fromInput" type="text" placeholder="من أين؟">
+    <input
+      id="fromInput"
+      type="text"
+      placeholder="من أين؟"
+    >
   </div>
 
   <button
     id="myLocationButton"
     class="my-location"
-    onclick="useMyLocation()">
+    onclick="useMyLocation()"
+  >
     📍 استخدم موقعي الحالي
   </button>
 
   <div class="route-row">
     <div class="route-icon">🏁</div>
-    <input id="toInput" type="text" placeholder="إلى أين؟">
+    <input
+      id="toInput"
+      type="text"
+      placeholder="إلى أين؟"
+    >
   </div>
 
   <button
     id="routeButton"
     class="main-button"
-    onclick="calculateRoute()">
+    onclick="calculateRoute()"
+  >
     🚗 احسب الطريق
   </button>
 
   <button
     id="voiceButton"
     class="voice-button active"
-    onclick="toggleVoice()">
+    onclick="toggleVoice()"
+  >
     🔊 الإرشاد الصوتي: يعمل
   </button>
 
   <div id="status" class="status"></div>
 
   <div id="routeResult" class="route-result">
+
     <div class="route-summary">
 
       <div>
@@ -446,37 +495,47 @@ html[dir="ltr"] .my-location{
       </div>
 
     </div>
+
   </div>
 
   <button
     id="previewButton"
     class="preview-button"
-    onclick="startPreview()">
+    onclick="startPreview()"
+  >
     ▶ معاينة الرحلة
   </button>
 
   <button
     id="navigationButton"
     class="navigation-button"
-    onclick="startLiveNavigation()">
+    onclick="startLiveNavigation()"
+  >
     🧭 ابدأ الرحلة
   </button>
 
   <button
     id="stopButton"
     class="stop-button"
-    onclick="stopAllNavigation()">
+    onclick="stopAllNavigation()"
+  >
     ■ إيقاف
   </button>
 
-  <div id="navigationBox" class="navigation-box">
+  <div
+    id="navigationBox"
+    class="navigation-box"
+  >
 
     <div class="instruction-row">
 
       <div id="turnIcon">⬆️</div>
 
       <div>
-        <div id="instructionText">تابع إلى الأمام</div>
+        <div id="instructionText">
+          تابع إلى الأمام
+        </div>
+
         <div id="instructionDistance"></div>
       </div>
 
@@ -735,6 +794,7 @@ fa:{
 
 };
 
+
 const directions={
   ar:"rtl",
   ckb:"rtl",
@@ -743,6 +803,7 @@ const directions={
   fa:"rtl"
 };
 
+
 const speechLanguages={
   ar:"ar-IQ",
   ckb:"ckb-IQ",
@@ -750,6 +811,7 @@ const speechLanguages={
   tr:"tr-TR",
   fa:"fa-IR"
 };
+
 
 let currentLanguage="ar";
 
@@ -779,6 +841,7 @@ let lastRecalculation=0;
 
 let voiceEnabled=true;
 let availableVoices=[];
+
 let lastSpokenStep=-1;
 let lastSpokenText="";
 let lastVoiceTime=0;
@@ -818,9 +881,12 @@ const carIcon=L.divIcon({
 function loadVoices(){
 
   if("speechSynthesis" in window){
+
     availableVoices=
       window.speechSynthesis.getVoices();
+
   }
+
 }
 
 
@@ -830,6 +896,7 @@ if("speechSynthesis" in window){
 
   window.speechSynthesis.onvoiceschanged=
     loadVoices;
+
 }
 
 
@@ -869,10 +936,15 @@ function findVoice(language){
   }
 
   return null;
+
 }
 
 
-function speakNavigation(text,stepIndex,force=false){
+function speakNavigation(
+  text,
+  stepIndex,
+  force=false
+){
 
   if(!voiceEnabled){
     return;
@@ -913,6 +985,7 @@ function speakNavigation(text,stepIndex,force=false){
 
   lastSpokenStep=stepIndex;
   lastSpokenText=text;
+
 }
 
 
@@ -921,6 +994,7 @@ function stopSpeech(){
   if("speechSynthesis" in window){
     window.speechSynthesis.cancel();
   }
+
 }
 
 
@@ -930,6 +1004,7 @@ function resetSpokenInstruction(){
   lastSpokenText="";
   lastVoiceTime=0;
   spokenStages={};
+
 }
 
 
@@ -951,15 +1026,18 @@ function toggleVoice(){
   }else{
 
     const text=
-      document.getElementById("instructionText")
+      document
+      .getElementById("instructionText")
       .textContent
       .trim();
 
     if(
-      document.getElementById("navigationBox")
+      document
+      .getElementById("navigationBox")
       .style.display==="block" &&
       text
     ){
+
       resetSpokenInstruction();
 
       speakNavigation(
@@ -967,8 +1045,11 @@ function toggleVoice(){
         currentStepIndex,
         true
       );
+
     }
+
   }
+
 }
 
 
@@ -989,7 +1070,9 @@ function updateVoiceButton(){
 
     button.textContent=t.voiceOff;
     button.classList.remove("active");
+
   }
+
 }
 
 
@@ -997,16 +1080,19 @@ function setLanguage(language){
 
   currentLanguage=language;
 
-  const t=translations[language];
+  const t=
+    translations[language];
 
   document.documentElement.lang=language;
   document.documentElement.dir=directions[language];
 
   document.getElementById("subtitle").textContent=t.subtitle;
+
   document.getElementById("fromInput").placeholder=t.from;
   document.getElementById("toInput").placeholder=t.to;
 
   document.getElementById("myLocationButton").textContent=t.myLocation;
+
   document.getElementById("routeButton").textContent=t.route;
   document.getElementById("previewButton").textContent=t.preview;
   document.getElementById("navigationButton").textContent=t.navigate;
@@ -1014,15 +1100,22 @@ function setLanguage(language){
 
   document.getElementById("distanceLabel").textContent=t.distance;
   document.getElementById("durationLabel").textContent=t.duration;
+
   document.getElementById("liveBadge").textContent=t.live;
 
   updateVoiceButton();
 
   if(usingCurrentLocation){
-    document.getElementById("fromInput").value=t.currentLocation;
+
+    document.getElementById("fromInput").value=
+      t.currentLocation;
+
   }
 
-  localStorage.setItem("almaLanguage",language);
+  localStorage.setItem(
+    "almaLanguage",
+    language
+  );
 
   stopSpeech();
   resetSpokenInstruction();
@@ -1030,20 +1123,26 @@ function setLanguage(language){
   setTimeout(()=>{
     map.invalidateSize();
   },100);
+
 }
 
 
 function showStatus(message){
 
-  const status=document.getElementById("status");
+  const status=
+    document.getElementById("status");
 
   status.textContent=message;
   status.style.display="block";
+
 }
 
 
 function hideStatus(){
-  document.getElementById("status").style.display="none";
+
+  document.getElementById("status")
+  .style.display="none";
+
 }
 
 
@@ -1054,16 +1153,20 @@ async function geocodePlace(query){
     "?format=json"+
     "&limit=1"+
     "&countrycodes=iq"+
-    "&accept-language="+encodeURIComponent(currentLanguage)+
-    "&q="+encodeURIComponent(query);
+    "&accept-language="+
+    encodeURIComponent(currentLanguage)+
+    "&q="+
+    encodeURIComponent(query);
 
-  const response=await fetch(url);
+  const response=
+    await fetch(url);
 
   if(!response.ok){
     throw new Error("Geocoding error");
   }
 
-  const data=await response.json();
+  const data=
+    await response.json();
 
   if(!data.length){
     return null;
@@ -1074,16 +1177,20 @@ async function geocodePlace(query){
     lon:Number(data[0].lon),
     name:data[0].display_name
   };
+
 }
 
 
 function useMyLocation(){
 
-  const t=translations[currentLanguage];
+  const t=
+    translations[currentLanguage];
 
   if(!navigator.geolocation){
+
     alert(t.locationError);
     return;
+
   }
 
   showStatus(t.locating);
@@ -1105,7 +1212,10 @@ function useMyLocation(){
       hideStatus();
       showStatus(t.locationReady);
 
-      setTimeout(hideStatus,1500);
+      setTimeout(
+        hideStatus,
+        1500
+      );
 
       map.setView(
         [
@@ -1114,11 +1224,14 @@ function useMyLocation(){
         ],
         16
       );
+
     },
 
     ()=>{
+
       hideStatus();
       alert(t.locationError);
+
     },
 
     {
@@ -1126,25 +1239,34 @@ function useMyLocation(){
       timeout:15000,
       maximumAge:0
     }
+
   );
+
 }
 
 
-async function requestRoute(start,destination){
+async function requestRoute(
+  start,
+  destination
+){
 
   const routeURL=
     "https://router.project-osrm.org/route/v1/driving/"+
-    start.lon+","+start.lat+";"+
-    destination.lon+","+destination.lat+
+    start.lon+","+
+    start.lat+";"+
+    destination.lon+","+
+    destination.lat+
     "?overview=full&geometries=geojson&steps=true";
 
-  const response=await fetch(routeURL);
+  const response=
+    await fetch(routeURL);
 
   if(!response.ok){
     throw new Error("Routing error");
   }
 
-  const data=await response.json();
+  const data=
+    await response.json();
 
   if(
     data.code!=="Ok" ||
@@ -1155,12 +1277,14 @@ async function requestRoute(start,destination){
   }
 
   return data.routes[0];
+
 }
 
 
 function prepareRoute(route){
 
   currentStepIndex=0;
+
   resetSpokenInstruction();
 
   currentRoute=route;
@@ -1175,11 +1299,18 @@ function prepareRoute(route){
 
   routeSteps=[];
 
-  route.legs.forEach(leg=>{
-    leg.steps.forEach(step=>{
-      routeSteps.push(step);
-    });
-  });
+  route.legs.forEach(
+    leg=>{
+
+      leg.steps.forEach(
+        step=>{
+          routeSteps.push(step);
+        }
+      );
+
+    }
+  );
+
 }
 
 
@@ -1189,13 +1320,15 @@ function drawRoute(){
     map.removeLayer(routeLine);
   }
 
-  routeLine=L.polyline(
-    routeCoordinates,
-    {
-      weight:6,
-      opacity:.85
-    }
-  ).addTo(map);
+  routeLine=
+    L.polyline(
+      routeCoordinates,
+      {
+        weight:6,
+        opacity:.85
+      }
+    ).addTo(map);
+
 }
 
 
@@ -1203,26 +1336,41 @@ async function calculateRoute(){
 
   stopAllNavigation(false);
 
-  const t=translations[currentLanguage];
+  const t=
+    translations[currentLanguage];
 
   const fromText=
-    document.getElementById("fromInput").value.trim();
+    document
+    .getElementById("fromInput")
+    .value
+    .trim();
 
   const toText=
-    document.getElementById("toInput").value.trim();
+    document
+    .getElementById("toInput")
+    .value
+    .trim();
 
   if(!fromText || !toText){
+
     alert(t.enterPlaces);
     return;
+
   }
 
-  const button=document.getElementById("routeButton");
+  const button=
+    document.getElementById("routeButton");
 
   button.disabled=true;
 
-  document.getElementById("routeResult").style.display="none";
-  document.getElementById("previewButton").style.display="none";
-  document.getElementById("navigationButton").style.display="none";
+  document.getElementById("routeResult")
+  .style.display="none";
+
+  document.getElementById("previewButton")
+  .style.display="none";
+
+  document.getElementById("navigationButton")
+  .style.display="none";
 
   try{
 
@@ -1230,7 +1378,10 @@ async function calculateRoute(){
 
     let start;
 
-    if(usingCurrentLocation && currentLocationCoordinates){
+    if(
+      usingCurrentLocation &&
+      currentLocationCoordinates
+    ){
 
       start={
         lat:currentLocationCoordinates.lat,
@@ -1240,7 +1391,9 @@ async function calculateRoute(){
 
     }else{
 
-      start=await geocodePlace(fromText);
+      start=
+        await geocodePlace(fromText);
+
     }
 
     const destination=
@@ -1251,6 +1404,7 @@ async function calculateRoute(){
       hideStatus();
       alert(t.notFound);
       return;
+
     }
 
     startCoordinates={
@@ -1302,74 +1456,123 @@ async function calculateRoute(){
 
     map.fitBounds(
       routeLine.getBounds(),
-      {padding:[45,45]}
+      {
+        padding:[45,45]
+      }
     );
 
     updateRouteSummary();
 
-    document.getElementById("routeResult").style.display="block";
-    document.getElementById("previewButton").style.display="block";
-    document.getElementById("navigationButton").style.display="block";
+    document.getElementById("routeResult")
+    .style.display="block";
+
+    document.getElementById("previewButton")
+    .style.display="block";
+
+    document.getElementById("navigationButton")
+    .style.display="block";
 
     hideStatus();
 
   }catch(error){
 
+    console.error(error);
+
     hideStatus();
+
     alert(t.routeError);
 
   }finally{
 
     button.disabled=false;
+
   }
+
 }
 
 
 function updateRouteSummary(){
 
-  const t=translations[currentLanguage];
+  const t=
+    translations[currentLanguage];
 
   if(!currentRoute){
     return;
   }
 
-  const distanceKm=currentRoute.distance/1000;
-  const durationMinutes=Math.round(currentRoute.duration/60);
+  const distanceKm=
+    currentRoute.distance/1000;
 
-  document.getElementById("distanceValue").textContent=
-    distanceKm.toFixed(1)+" "+t.km;
+  const durationMinutes=
+    Math.round(
+      currentRoute.duration/60
+    );
 
-  document.getElementById("durationValue").textContent=
+  document.getElementById("distanceValue")
+  .textContent=
+    distanceKm.toFixed(1)+
+    " "+
+    t.km;
+
+  document.getElementById("durationValue")
+  .textContent=
     formatDuration(durationMinutes);
+
 }
 
-function isMobileNavigationScreen(){
-  return window.matchMedia("(max-width: 600px)").matches;
-}
+
+/* =====================================================
+   وضع الهاتف أثناء الملاحة
+   ===================================================== */
 
 function enterMobileNavigationMode(){
 
-  if(isMobileNavigationScreen()){
+  if(
+    window.matchMedia(
+      "(max-width: 600px)"
+    ).matches
+  ){
 
-    document.body.classList.add("mobile-navigation");
+    document.body.classList.add(
+      "mobile-navigation"
+    );
 
     setTimeout(()=>{
+
       map.invalidateSize();
+
     },100);
+
   }
+
 }
+
 
 function leaveMobileNavigationMode(){
 
-  document.body.classList.remove("mobile-navigation");
+  document.body.classList.remove(
+    "mobile-navigation"
+  );
 
   setTimeout(()=>{
+
     map.invalidateSize();
+
   },100);
+
 }
+
+
+/* =====================================================
+   معاينة الرحلة
+   ===================================================== */
+
 function startPreview(){
 
-  if(!currentRoute || !routeCoordinates.length){
+  if(
+    !currentRoute ||
+    !routeCoordinates.length
+  ){
     return;
   }
 
@@ -1380,14 +1583,24 @@ function startPreview(){
 
   resetSpokenInstruction();
 
-  document.getElementById("navigationBox").style.display="block";
-enterMobileNavigationMode();
-document.getElementById("previewButton").style.display="none";
-  document.getElementById("navigationButton").style.display="none";
-  document.getElementById("stopButton").style.display="block";
+  document.getElementById("navigationBox")
+  .style.display="block";
+
+  document.getElementById("previewButton")
+  .style.display="none";
+
+  document.getElementById("navigationButton")
+  .style.display="none";
+
+  document.getElementById("stopButton")
+  .style.display="block";
+
+  enterMobileNavigationMode();
 
   if(carMarker){
+
     map.removeLayer(carMarker);
+
   }
 
   carMarker=
@@ -1399,35 +1612,51 @@ document.getElementById("previewButton").style.display="none";
       }
     ).addTo(map);
 
-  map.setView(routeCoordinates[0],17);
-
-  updateInstruction(routeCoordinates[0]);
-
-  previewTimer=setInterval(
-    movePreview,
-    220
+  map.setView(
+    routeCoordinates[0],
+    17
   );
+
+  updateInstruction(
+    routeCoordinates[0]
+  );
+
+  previewTimer=
+    setInterval(
+      movePreview,
+      220
+    );
+
 }
 
 
 function movePreview(){
 
-  previewIndex+=Math.max(
-    1,
-    Math.floor(routeCoordinates.length/700)
-  );
+  previewIndex+=
+    Math.max(
+      1,
+      Math.floor(
+        routeCoordinates.length/700
+      )
+    );
 
-  if(previewIndex>=routeCoordinates.length){
+  if(
+    previewIndex>=
+    routeCoordinates.length
+  ){
 
     finishPreview();
     return;
+
   }
 
   const position=
     routeCoordinates[previewIndex];
 
   if(carMarker){
+
     carMarker.setLatLng(position);
+
   }
 
   map.panTo(
@@ -1439,37 +1668,55 @@ function movePreview(){
   );
 
   const progress=
-    (previewIndex/(routeCoordinates.length-1))*100;
+    (
+      previewIndex/
+      (routeCoordinates.length-1)
+    )*100;
 
-  document.getElementById("progressBar").style.width=
+  document.getElementById("progressBar")
+  .style.width=
     progress+"%";
 
   updateInstruction(position);
+
 }
 
 
 function finishPreview(){
 
   if(previewTimer){
+
     clearInterval(previewTimer);
     previewTimer=null;
+
   }
 
-  const t=translations[currentLanguage];
+  const t=
+    translations[currentLanguage];
 
   const last=
-    routeCoordinates[routeCoordinates.length-1];
+    routeCoordinates[
+      routeCoordinates.length-1
+    ];
 
   if(carMarker){
 
     carMarker.setLatLng(last);
     map.panTo(last);
+
   }
 
-  document.getElementById("turnIcon").textContent="🏁";
-  document.getElementById("instructionText").textContent=t.arrive;
-  document.getElementById("instructionDistance").textContent="";
-  document.getElementById("progressBar").style.width="100%";
+  document.getElementById("turnIcon")
+  .textContent="🏁";
+
+  document.getElementById("instructionText")
+  .textContent=t.arrive;
+
+  document.getElementById("instructionDistance")
+  .textContent="";
+
+  document.getElementById("progressBar")
+  .style.width="100%";
 
   speakNavigation(
     t.arrive,
@@ -1477,26 +1724,44 @@ function finishPreview(){
     true
   );
 
-  document.getElementById("stopButton").style.display="none";
-  document.getElementById("previewButton").style.display="block";
-  document.getElementById("navigationButton").style.display="block";
+  leaveMobileNavigationMode();
+
+  document.getElementById("stopButton")
+  .style.display="none";
+
+  document.getElementById("previewButton")
+  .style.display="block";
+
+  document.getElementById("navigationButton")
+  .style.display="block";
+
 }
 
 
+/* =====================================================
+   الملاحة الحية
+   ===================================================== */
+
 function startLiveNavigation(){
 
-  const t=translations[currentLanguage];
+  const t=
+    translations[currentLanguage];
 
-  if(!destinationCoordinates || !startCoordinates){
+  if(
+    !destinationCoordinates ||
+    !startCoordinates
+  ){
 
     alert(t.enterPlaces);
     return;
+
   }
 
   if(!navigator.geolocation){
 
     alert(t.locationError);
     return;
+
   }
 
   showStatus(t.waitingGPS);
@@ -1521,25 +1786,40 @@ function startLiveNavigation(){
           routeStart
         );
 
-      if(distanceFromStart>MAX_START_DISTANCE){
+      if(
+        distanceFromStart>
+        MAX_START_DISTANCE
+      ){
 
         hideStatus();
         alert(t.farFromStart);
         return;
+
       }
 
       stopAllNavigation(false);
 
       liveNavigation=true;
       currentStepIndex=0;
+
       resetSpokenInstruction();
 
-      document.getElementById("liveBadge").style.display="block";
-document.getElementById("navigationBox").style.display="block";
-enterMobileNavigationMode();
-document.getElementById("previewButton").style.display="none";
-      document.getElementById("navigationButton").style.display="none";
-      document.getElementById("stopButton").style.display="block";
+      document.getElementById("liveBadge")
+      .style.display="block";
+
+      document.getElementById("navigationBox")
+      .style.display="block";
+
+      document.getElementById("previewButton")
+      .style.display="none";
+
+      document.getElementById("navigationButton")
+      .style.display="none";
+
+      document.getElementById("stopButton")
+      .style.display="block";
+
+      enterMobileNavigationMode();
 
       handleLivePosition(position);
 
@@ -1547,6 +1827,7 @@ document.getElementById("previewButton").style.display="none";
         navigator.geolocation.watchPosition(
 
           handleLivePosition,
+
           handleLiveLocationError,
 
           {
@@ -1554,13 +1835,16 @@ document.getElementById("previewButton").style.display="none";
             maximumAge:1000,
             timeout:15000
           }
+
         );
+
     },
 
     function(){
 
       hideStatus();
       alert(t.locationError);
+
     },
 
     {
@@ -1568,11 +1852,15 @@ document.getElementById("previewButton").style.display="none";
       maximumAge:0,
       timeout:15000
     }
+
   );
+
 }
 
 
-async function handleLivePosition(position){
+async function handleLivePosition(
+  position
+){
 
   if(!liveNavigation){
     return;
@@ -1580,12 +1868,21 @@ async function handleLivePosition(position){
 
   hideStatus();
 
-  const lat=position.coords.latitude;
-  const lon=position.coords.longitude;
+  const lat=
+    position.coords.latitude;
 
-  currentLocationCoordinates={lat,lon};
+  const lon=
+    position.coords.longitude;
 
-  const currentPoint=[lat,lon];
+  currentLocationCoordinates={
+    lat,
+    lon
+  };
+
+  const currentPoint=[
+    lat,
+    lon
+  ];
 
   if(!carMarker){
 
@@ -1600,12 +1897,20 @@ async function handleLivePosition(position){
 
   }else{
 
-    carMarker.setLatLng(currentPoint);
+    carMarker.setLatLng(
+      currentPoint
+    );
+
   }
 
-  map.setView(currentPoint,17);
+  map.setView(
+    currentPoint,
+    17
+  );
 
-  updateInstruction(currentPoint);
+  updateInstruction(
+    currentPoint
+  );
 
   if(destinationCoordinates){
 
@@ -1618,19 +1923,29 @@ async function handleLivePosition(position){
         ]
       );
 
-    if(distanceToDestination<35){
+    if(
+      distanceToDestination<35
+    ){
 
       finishLiveNavigation();
       return;
+
     }
+
   }
 
   const offRouteDistance=
-    distanceFromRoute(currentPoint);
+    distanceFromRoute(
+      currentPoint
+    );
 
-  if(offRouteDistance>OFF_ROUTE_DISTANCE){
+  if(
+    offRouteDistance>
+    OFF_ROUTE_DISTANCE
+  ){
 
-    const now=Date.now();
+    const now=
+      Date.now();
 
     if(
       now-lastRecalculation >
@@ -1643,37 +1958,52 @@ async function handleLivePosition(position){
         lat,
         lon
       );
+
     }
+
   }
+
 }
 
 
 function handleLiveLocationError(){
 
-  const t=translations[currentLanguage];
+  const t=
+    translations[currentLanguage];
 
   hideStatus();
+
   alert(t.locationError);
 
   stopAllNavigation();
+
 }
 
 
-async function recalculateFromCurrentPosition(lat,lon){
+async function recalculateFromCurrentPosition(
+  lat,
+  lon
+){
 
   if(!destinationCoordinates){
     return;
   }
 
-  const t=translations[currentLanguage];
+  const t=
+    translations[currentLanguage];
 
-  showStatus(t.recalculating);
+  showStatus(
+    t.recalculating
+  );
 
   try{
 
     const newRoute=
       await requestRoute(
-        {lat,lon},
+        {
+          lat,
+          lon
+        },
         destinationCoordinates
       );
 
@@ -1691,8 +2021,11 @@ async function recalculateFromCurrentPosition(lat,lon){
 
   }catch(error){
 
+    console.error(error);
     hideStatus();
+
   }
+
 }
 
 
@@ -1702,12 +2035,16 @@ function distanceFromRoute(point){
     return Infinity;
   }
 
-  let minimum=Infinity;
+  let minimum=
+    Infinity;
 
-  const jump=Math.max(
-    1,
-    Math.floor(routeCoordinates.length/700)
-  );
+  const jump=
+    Math.max(
+      1,
+      Math.floor(
+        routeCoordinates.length/700
+      )
+    );
 
   for(
     let i=0;
@@ -1724,11 +2061,17 @@ function distanceFromRoute(point){
     if(distance<minimum){
       minimum=distance;
     }
+
   }
 
   return minimum;
+
 }
 
+
+/* =====================================================
+   التعليمات المكتوبة والصوتية
+   ===================================================== */
 
 function updateInstruction(position){
 
@@ -1736,23 +2079,41 @@ function updateInstruction(position){
     return;
   }
 
-  if(currentStepIndex>=routeSteps.length){
-    currentStepIndex=routeSteps.length-1;
+  if(
+    currentStepIndex>=
+    routeSteps.length
+  ){
+
+    currentStepIndex=
+      routeSteps.length-1;
+
   }
 
-  let bestIndex=currentStepIndex;
-  let bestDistance=Infinity;
+  let bestIndex=
+    currentStepIndex;
 
-  const searchEnd=Math.min(
-    routeSteps.length,
-    currentStepIndex+5
-  );
+  let bestDistance=
+    Infinity;
 
-  for(let i=currentStepIndex;i<searchEnd;i++){
+  const searchEnd=
+    Math.min(
+      routeSteps.length,
+      currentStepIndex+5
+    );
 
-    const maneuver=routeSteps[i].maneuver;
+  for(
+    let i=currentStepIndex;
+    i<searchEnd;
+    i++
+  ){
 
-    if(!maneuver || !maneuver.location){
+    const maneuver=
+      routeSteps[i].maneuver;
+
+    if(
+      !maneuver ||
+      !maneuver.location
+    ){
       continue;
     }
 
@@ -1761,21 +2122,44 @@ function updateInstruction(position){
       maneuver.location[0]
     ];
 
-    const distance=map.distance(position,point);
+    const distance=
+      map.distance(
+        position,
+        point
+      );
 
-    if(distance<bestDistance){
+    if(
+      distance<
+      bestDistance
+    ){
+
       bestDistance=distance;
       bestIndex=i;
+
     }
+
   }
 
-  if(bestIndex>currentStepIndex){
-    currentStepIndex=bestIndex;
+  if(
+    bestIndex>
+    currentStepIndex
+  ){
+
+    currentStepIndex=
+      bestIndex;
+
   }
 
-  let step=routeSteps[currentStepIndex];
+  let step=
+    routeSteps[
+      currentStepIndex
+    ];
 
-  if(!step || !step.maneuver || !step.maneuver.location){
+  if(
+    !step ||
+    !step.maneuver ||
+    !step.maneuver.location
+  ){
     return;
   }
 
@@ -1785,18 +2169,29 @@ function updateInstruction(position){
   ];
 
   let distanceToManeuver=
-    map.distance(position,maneuverPoint);
+    map.distance(
+      position,
+      maneuverPoint
+    );
 
   if(
     distanceToManeuver<30 &&
-    currentStepIndex<routeSteps.length-1
+    currentStepIndex<
+    routeSteps.length-1
   ){
 
     currentStepIndex++;
 
-    step=routeSteps[currentStepIndex];
+    step=
+      routeSteps[
+        currentStepIndex
+      ];
 
-    if(step && step.maneuver && step.maneuver.location){
+    if(
+      step &&
+      step.maneuver &&
+      step.maneuver.location
+    ){
 
       maneuverPoint=[
         step.maneuver.location[1],
@@ -1804,51 +2199,48 @@ function updateInstruction(position){
       ];
 
       distanceToManeuver=
-        map.distance(position,maneuverPoint);
+        map.distance(
+          position,
+          maneuverPoint
+        );
+
     }
+
   }
 
   const instruction=
-    buildNavigationInstruction(step);
+    buildNavigationInstruction(
+      step
+    );
 
-  document.getElementById("turnIcon").textContent=
+  document.getElementById("turnIcon")
+  .textContent=
     instruction.icon;
 
-  document.getElementById("instructionText").textContent=
+  document.getElementById("instructionText")
+  .textContent=
     instruction.text;
 
-  document.getElementById("instructionDistance").textContent=
-    formatNavigationDistance(distanceToManeuver);
+  document.getElementById("instructionDistance")
+  .textContent=
+    formatNavigationDistance(
+      distanceToManeuver
+    );
 
   handleSmartVoiceGuidance(
     step,
     distanceToManeuver
   );
+
 }
-
-
-/*
-  =====================================================
-  نظام ALMA الجديد للإرشاد الصوتي الهادئ
-  =====================================================
-
-  التعليمات المكتوبة تبقى مستمرة.
-
-  أما الصوت فلا ينطق كل خطوة صغيرة.
-
-  ننطق أساساً:
-  1. الانعطافات المهمة.
-  2. الدوارات.
-  3. الاستدارة.
-  4. الوصول.
-
-  ونتجنب الإكثار من "تابع إلى الأمام".
-*/
 
 
 function isImportantManeuver(step){
 
-  if(!step || !step.maneuver){
+  if(
+    !step ||
+    !step.maneuver
+  ){
     return false;
   }
 
@@ -1879,10 +2271,14 @@ function isImportantManeuver(step){
     "sharp left",
     "uturn"
   ].includes(modifier);
+
 }
 
 
-function maneuverDistanceBetween(stepA,stepB){
+function maneuverDistanceBetween(
+  stepA,
+  stepB
+){
 
   if(
     !stepA ||
@@ -1896,15 +2292,19 @@ function maneuverDistanceBetween(stepA,stepB){
   }
 
   return map.distance(
+
     [
       stepA.maneuver.location[1],
       stepA.maneuver.location[0]
     ],
+
     [
       stepB.maneuver.location[1],
       stepB.maneuver.location[0]
     ]
+
   );
+
 }
 
 
@@ -1916,16 +2316,23 @@ function getNextImportantStep(index){
     i++
   ){
 
-    if(isImportantManeuver(routeSteps[i])){
+    if(
+      isImportantManeuver(
+        routeSteps[i]
+      )
+    ){
 
       return{
         step:routeSteps[i],
         index:i
       };
+
     }
+
   }
 
   return null;
+
 }
 
 
@@ -1944,47 +2351,38 @@ function handleSmartVoiceGuidance(
   const type=
     step.maneuver?.type || "";
 
-  /*
-    الوصول لا يحتاج إلى عدة تنبيهات.
-  */
-
   if(type==="arrive"){
 
     if(
-      !spokenStages[currentStepIndex]?.arrive
+      !spokenStages[
+        currentStepIndex
+      ]?.arrive
     ){
 
-      spokenStages[currentStepIndex]={
-        ...(spokenStages[currentStepIndex]||{}),
+      spokenStages[
+        currentStepIndex
+      ]={
+        ...(
+          spokenStages[
+            currentStepIndex
+          ] || {}
+        ),
         arrive:true
       };
 
       speakNavigation(
-        translations[currentLanguage].arrive,
+        translations[
+          currentLanguage
+        ].arrive,
         currentStepIndex,
         true
       );
+
     }
 
     return;
+
   }
-
-
-  /*
-    بدلاً من الكلام المستمر نعتمد ثلاث مناطق فقط.
-
-    بعيد:
-    تقريباً من 450 إلى 900 متر.
-
-    قريب:
-    تقريباً من 120 إلى 260 متراً.
-
-    الآن:
-    عند الوصول إلى نحو 55 متراً.
-
-    إذا لم تمر السيارة بإحدى هذه النوافذ
-    فلا نحاول إجبار النظام على الكلام.
-  */
 
   let stage=null;
 
@@ -2011,31 +2409,20 @@ function handleSmartVoiceGuidance(
   }else{
 
     return;
+
   }
 
-
   const state=
-    spokenStages[currentStepIndex] || {};
-
-
-  /*
-    لا نكرر المرحلة نفسها.
-  */
+    spokenStages[
+      currentStepIndex
+    ] || {};
 
   if(state[stage]){
     return;
   }
 
-
-  const nowTime=Date.now();
-
-
-  /*
-    مهلة تمنع تداخل الجمل.
-
-    الاستثناء الوحيد هو "الآن"،
-    لأنها تعليمة فورية لا ينبغي تأخيرها.
-  */
+  const nowTime=
+    Date.now();
 
   if(
     nowTime-lastVoiceTime <
@@ -2045,19 +2432,21 @@ function handleSmartVoiceGuidance(
     return;
   }
 
-
   const instruction=
-    buildNavigationInstruction(step);
+    buildNavigationInstruction(
+      step
+    );
 
   let spokenText="";
-
 
   if(stage==="now"){
 
     spokenText=
       instruction.text+
       "، "+
-      translations[currentLanguage].now;
+      translations[
+        currentLanguage
+      ].now;
 
   }else{
 
@@ -2066,19 +2455,8 @@ function handleSmartVoiceGuidance(
         instruction.text,
         meters
       );
+
   }
-
-
-  /*
-    إذا كان هناك انعطاف مهم ثانٍ
-    بعد الانعطاف الحالي مباشرة تقريباً،
-    نحاول دمجه في الجملة الحالية.
-
-    مثال:
-    "انعطف يميناً، ثم بعد مسافة قصيرة انعطف يساراً."
-
-    هذا أفضل من جملتين متداخلتين.
-  */
 
   const next=
     getNextImportantStep(
@@ -2100,39 +2478,42 @@ function handleSmartVoiceGuidance(
 
     spokenText+=
       "، "+
-      translations[currentLanguage].thenShort+
+      translations[
+        currentLanguage
+      ].thenShort+
       "، "+
       nextInstruction.text;
 
-
-    /*
-      بما أننا أخبرنا السائق مسبقاً
-      عن الانعطاف التالي القريب،
-      لا نعيد تنبيهاته المبكرة والقريبة.
-      لكن يبقى من الممكن أن يقول "الآن"
-      عند الوصول إليه إذا لزم.
-    */
-
-    spokenStages[next.index]={
-      ...(spokenStages[next.index]||{}),
+    spokenStages[
+      next.index
+    ]={
+      ...(
+        spokenStages[
+          next.index
+        ] || {}
+      ),
       early:true,
       near:true
     };
+
   }
 
-
-  spokenStages[currentStepIndex]={
+  spokenStages[
+    currentStepIndex
+  ]={
     ...state,
     [stage]:true
   };
 
-  lastVoiceTime=nowTime;
+  lastVoiceTime=
+    nowTime;
 
   speakNavigation(
     spokenText,
     currentStepIndex,
     true
   );
+
 }
 
 
@@ -2142,17 +2523,20 @@ function buildSpokenInstruction(
 ){
 
   const t=
-    translations[currentLanguage];
+    translations[
+      currentLanguage
+    ];
 
   if(
     !Number.isFinite(meters) ||
     meters<40
   ){
+
     return instructionText;
+
   }
 
   let distanceText;
-
 
   if(meters<1000){
 
@@ -2163,13 +2547,18 @@ function buildSpokenInstruction(
       rounded=
         Math.max(
           10,
-          Math.round(meters/10)*10
+          Math.round(
+            meters/10
+          )*10
         );
 
     }else{
 
       rounded=
-        Math.round(meters/50)*50;
+        Math.round(
+          meters/50
+        )*50;
+
     }
 
     distanceText=
@@ -2180,11 +2569,13 @@ function buildSpokenInstruction(
   }else{
 
     distanceText=
-      (meters/1000).toFixed(1)+
+      (
+        meters/1000
+      ).toFixed(1)+
       " "+
       t.km;
-  }
 
+  }
 
   return(
     t.after+
@@ -2193,13 +2584,16 @@ function buildSpokenInstruction(
     "، "+
     instructionText
   );
+
 }
 
 
 function buildNavigationInstruction(step){
 
   const t=
-    translations[currentLanguage];
+    translations[
+      currentLanguage
+    ];
 
   const maneuver=
     step.maneuver || {};
@@ -2211,11 +2605,11 @@ function buildNavigationInstruction(step){
     maneuver.type || "";
 
   const roadName=
-    (step.name || "").trim();
+    (step.name || "")
+    .trim();
 
   let icon="⬆️";
   let text=t.straight;
-
 
   if(type==="arrive"){
 
@@ -2223,8 +2617,8 @@ function buildNavigationInstruction(step){
       icon:"🏁",
       text:t.arrive
     };
-  }
 
+  }
 
   if(
     type==="roundabout" ||
@@ -2237,58 +2631,74 @@ function buildNavigationInstruction(step){
 
     if(maneuver.exit){
 
-      text+=" — "+
+      text+=
+        " — "+
         t.exit+
         " "+
         maneuver.exit;
+
     }
 
     if(roadName){
 
-      text+=" "+
+      text+=
+        " "+
         t.onto+
         " "+
         roadName;
+
     }
 
     return{
       icon,
       text
     };
-  }
 
+  }
 
   if(modifier==="right"){
 
     icon="➡️";
     text=t.right;
 
-  }else if(modifier==="left"){
+  }else if(
+    modifier==="left"
+  ){
 
     icon="⬅️";
     text=t.left;
 
-  }else if(modifier==="slight right"){
+  }else if(
+    modifier==="slight right"
+  ){
 
     icon="↗️";
     text=t.slightRight;
 
-  }else if(modifier==="slight left"){
+  }else if(
+    modifier==="slight left"
+  ){
 
     icon="↖️";
     text=t.slightLeft;
 
-  }else if(modifier==="sharp right"){
+  }else if(
+    modifier==="sharp right"
+  ){
 
     icon="⤵️";
     text=t.sharpRight;
 
-  }else if(modifier==="sharp left"){
+  }else if(
+    modifier==="sharp left"
+  ){
 
     icon="⤴️";
     text=t.sharpLeft;
 
-  }else if(modifier==="uturn"){
+  }else if(
+    modifier==="uturn"
+  ){
 
     icon="↩️";
     text=t.uturn;
@@ -2297,33 +2707,42 @@ function buildNavigationInstruction(step){
 
     icon="⬆️";
     text=t.straight;
-  }
 
+  }
 
   if(
     roadName &&
     type!=="arrive"
   ){
 
-    text+=" "+
+    text+=
+      " "+
       t.onto+
       " "+
       roadName;
+
   }
 
   return{
     icon,
     text
   };
+
 }
 
 
-function formatNavigationDistance(meters){
+function formatNavigationDistance(
+  meters
+){
 
   const t=
-    translations[currentLanguage];
+    translations[
+      currentLanguage
+    ];
 
-  if(!Number.isFinite(meters)){
+  if(
+    !Number.isFinite(meters)
+  ){
     return "";
   }
 
@@ -2336,13 +2755,18 @@ function formatNavigationDistance(meters){
       rounded=
         Math.max(
           10,
-          Math.round(meters/10)*10
+          Math.round(
+            meters/10
+          )*10
         );
 
     }else{
 
       rounded=
-        Math.round(meters/50)*50;
+        Math.round(
+          meters/50
+        )*50;
+
     }
 
     return(
@@ -2352,22 +2776,28 @@ function formatNavigationDistance(meters){
       " "+
       t.meter
     );
+
   }
 
   return(
     t.after+
     " "+
-    (meters/1000).toFixed(1)+
+    (
+      meters/1000
+    ).toFixed(1)+
     " "+
     t.km
   );
+
 }
 
 
 function finishLiveNavigation(){
 
   const t=
-    translations[currentLanguage];
+    translations[
+      currentLanguage
+    ];
 
   if(gpsWatchId!==null){
 
@@ -2376,20 +2806,25 @@ function finishLiveNavigation(){
     );
 
     gpsWatchId=null;
+
   }
 
   liveNavigation=false;
 
-  document.getElementById("liveBadge").style.display="none";
+  document.getElementById("liveBadge")
+  .style.display="none";
 
-  document.getElementById("turnIcon").textContent="🏁";
+  document.getElementById("turnIcon")
+  .textContent="🏁";
 
-  document.getElementById("instructionText").textContent=
-    t.arrive;
+  document.getElementById("instructionText")
+  .textContent=t.arrive;
 
-  document.getElementById("instructionDistance").textContent="";
+  document.getElementById("instructionDistance")
+  .textContent="";
 
-  document.getElementById("progressBar").style.width="100%";
+  document.getElementById("progressBar")
+  .style.width="100%";
 
   speakNavigation(
     t.arrive,
@@ -2397,9 +2832,17 @@ function finishLiveNavigation(){
     true
   );
 
-  document.getElementById("stopButton").style.display="none";
-  document.getElementById("previewButton").style.display="block";
-  document.getElementById("navigationButton").style.display="block";
+  leaveMobileNavigationMode();
+
+  document.getElementById("stopButton")
+  .style.display="none";
+
+  document.getElementById("previewButton")
+  .style.display="block";
+
+  document.getElementById("navigationButton")
+  .style.display="block";
+
 }
 
 
@@ -2409,8 +2852,12 @@ function stopAllNavigation(
 
   if(previewTimer){
 
-    clearInterval(previewTimer);
+    clearInterval(
+      previewTimer
+    );
+
     previewTimer=null;
+
   }
 
   if(gpsWatchId!==null){
@@ -2420,45 +2867,63 @@ function stopAllNavigation(
     );
 
     gpsWatchId=null;
+
   }
 
   liveNavigation=false;
 
-leaveMobileNavigationMode();
+  leaveMobileNavigationMode();
 
-stopSpeech();
+  stopSpeech();
   resetSpokenInstruction();
 
-  document.getElementById("liveBadge").style.display="none";
-  document.getElementById("stopButton").style.display="none";
+  document.getElementById("liveBadge")
+  .style.display="none";
+
+  document.getElementById("stopButton")
+  .style.display="none";
 
   if(carMarker){
 
-    map.removeLayer(carMarker);
+    map.removeLayer(
+      carMarker
+    );
+
     carMarker=null;
+
   }
 
   if(currentRoute){
 
-    document.getElementById("previewButton").style.display="block";
-    document.getElementById("navigationButton").style.display="block";
+    document.getElementById("previewButton")
+    .style.display="block";
+
+    document.getElementById("navigationButton")
+    .style.display="block";
+
   }
 
   if(hideNavigation){
 
-    document.getElementById("navigationBox").style.display="none";
+    document.getElementById("navigationBox")
+    .style.display="none";
+
   }
 
-  document.getElementById("progressBar").style.width="0%";
+  document.getElementById("progressBar")
+  .style.width="0%";
 
   hideStatus();
+
 }
 
 
 function formatDuration(minutes){
 
   const t=
-    translations[currentLanguage];
+    translations[
+      currentLanguage
+    ];
 
   if(minutes<60){
 
@@ -2467,10 +2932,13 @@ function formatDuration(minutes){
       " "+
       t.min
     );
+
   }
 
   const hours=
-    Math.floor(minutes/60);
+    Math.floor(
+      minutes/60
+    );
 
   const remaining=
     minutes%60;
@@ -2482,6 +2950,7 @@ function formatDuration(minutes){
       " "+
       t.hour
     );
+
   }
 
   return(
@@ -2493,15 +2962,24 @@ function formatDuration(minutes){
     " "+
     t.min
   );
+
 }
 
+
+/* =====================================================
+   الأحداث والإعداد الأولي
+   ===================================================== */
 
 document
 .getElementById("languageSelect")
 .addEventListener(
   "change",
   function(){
-    setLanguage(this.value);
+
+    setLanguage(
+      this.value
+    );
+
   }
 );
 
@@ -2514,10 +2992,15 @@ document
 
     if(
       this.value !==
-      translations[currentLanguage].currentLocation
+      translations[
+        currentLanguage
+      ].currentLocation
     ){
+
       usingCurrentLocation=false;
+
     }
+
   }
 );
 
@@ -2528,9 +3011,35 @@ document
   "keydown",
   function(event){
 
-    if(event.key==="Enter"){
+    if(
+      event.key==="Enter"
+    ){
+
       calculateRoute();
+
     }
+
+  }
+);
+
+
+window.addEventListener(
+  "resize",
+  function(){
+
+    if(
+      previewTimer ||
+      liveNavigation
+    ){
+
+      enterMobileNavigationMode();
+
+    }else{
+
+      leaveMobileNavigationMode();
+
+    }
+
   }
 );
 
@@ -2549,6 +3058,7 @@ if(savedLanguage==="ku"){
     "almaLanguage",
     "ckb"
   );
+
 }
 
 
@@ -2559,24 +3069,32 @@ const savedVoice=
 
 
 if(savedVoice==="off"){
+
   voiceEnabled=false;
+
 }
 
 
 if(
   savedLanguage &&
-  translations[savedLanguage]
+  translations[
+    savedLanguage
+  ]
 ){
 
   document.getElementById(
     "languageSelect"
-  ).value=savedLanguage;
+  ).value=
+    savedLanguage;
 
-  setLanguage(savedLanguage);
+  setLanguage(
+    savedLanguage
+  );
 
 }else{
 
   setLanguage("ar");
+
 }
 
 
