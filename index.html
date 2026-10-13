@@ -8,7 +8,68 @@
 
 <link rel="stylesheet"
 href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+/* ===== ALMA: وضع الملاحة المصغر على الهاتف ===== */
 
+@media(max-width:600px){
+
+  body.mobile-navigation .alma-panel{
+    top:8px;
+    right:8px;
+    width:calc(100% - 16px);
+    max-height:none;
+    overflow:visible;
+    padding:8px;
+    border-radius:15px;
+  }
+
+  html[dir="ltr"] body.mobile-navigation .alma-panel{
+    left:8px;
+    right:auto;
+  }
+
+  body.mobile-navigation .top-row,
+  body.mobile-navigation .route-row,
+  body.mobile-navigation .my-location,
+  body.mobile-navigation #routeButton,
+  body.mobile-navigation #voiceButton,
+  body.mobile-navigation #status,
+  body.mobile-navigation #routeResult,
+  body.mobile-navigation #previewButton,
+  body.mobile-navigation #navigationButton{
+    display:none !important;
+  }
+
+  body.mobile-navigation #navigationBox{
+    display:block !important;
+    margin-top:0;
+    padding:10px 12px;
+  }
+
+  body.mobile-navigation #stopButton{
+    display:block !important;
+    margin-top:7px;
+    padding:9px;
+  }
+
+  body.mobile-navigation #liveBadge{
+    margin:0 0 7px;
+    padding:6px 8px;
+  }
+
+  body.mobile-navigation #turnIcon{
+    font-size:30px;
+    min-width:40px;
+  }
+
+  body.mobile-navigation #instructionText{
+    font-size:16px;
+    line-height:1.35;
+  }
+
+  body.mobile-navigation #instructionDistance{
+    font-size:13px;
+  }
+}
 <style>
 *{box-sizing:border-box}
 
@@ -1282,7 +1343,30 @@ function updateRouteSummary(){
     formatDuration(durationMinutes);
 }
 
+function isMobileNavigationScreen(){
+  return window.matchMedia("(max-width: 600px)").matches;
+}
 
+function enterMobileNavigationMode(){
+
+  if(isMobileNavigationScreen()){
+
+    document.body.classList.add("mobile-navigation");
+
+    setTimeout(()=>{
+      map.invalidateSize();
+    },100);
+  }
+}
+
+function leaveMobileNavigationMode(){
+
+  document.body.classList.remove("mobile-navigation");
+
+  setTimeout(()=>{
+    map.invalidateSize();
+  },100);
+}
 function startPreview(){
 
   if(!currentRoute || !routeCoordinates.length){
@@ -1297,7 +1381,8 @@ function startPreview(){
   resetSpokenInstruction();
 
   document.getElementById("navigationBox").style.display="block";
-  document.getElementById("previewButton").style.display="none";
+enterMobileNavigationMode();
+document.getElementById("previewButton").style.display="none";
   document.getElementById("navigationButton").style.display="none";
   document.getElementById("stopButton").style.display="block";
 
@@ -1450,8 +1535,9 @@ function startLiveNavigation(){
       resetSpokenInstruction();
 
       document.getElementById("liveBadge").style.display="block";
-      document.getElementById("navigationBox").style.display="block";
-      document.getElementById("previewButton").style.display="none";
+document.getElementById("navigationBox").style.display="block";
+enterMobileNavigationMode();
+document.getElementById("previewButton").style.display="none";
       document.getElementById("navigationButton").style.display="none";
       document.getElementById("stopButton").style.display="block";
 
@@ -2338,7 +2424,9 @@ function stopAllNavigation(
 
   liveNavigation=false;
 
-  stopSpeech();
+leaveMobileNavigationMode();
+
+stopSpeech();
   resetSpokenInstruction();
 
   document.getElementById("liveBadge").style.display="none";
