@@ -402,6 +402,61 @@ html[dir="ltr"] .my-location{
   }
 }
 
+
+/* ===== ALMA: معلومات الرحلة الحية على الهاتف ===== */
+
+.trip-bar{
+  display:none;
+}
+
+@media(max-width:600px){
+
+  body.mobile-navigation .trip-bar{
+    position:fixed;
+    left:8px;
+    right:8px;
+    bottom:calc(8px + env(safe-area-inset-bottom));
+    z-index:1100;
+    display:flex;
+    align-items:stretch;
+    justify-content:space-between;
+    gap:6px;
+    padding:8px;
+    border-radius:16px;
+    background:rgba(255,255,255,.97);
+    box-shadow:0 4px 18px rgba(0,0,0,.22);
+  }
+
+  body.mobile-navigation .trip-stat{
+    flex:1;
+    min-width:0;
+    text-align:center;
+    padding:4px 2px;
+  }
+
+  body.mobile-navigation .trip-stat + .trip-stat{
+    border-inline-start:1px solid #e5e7eb;
+  }
+
+  body.mobile-navigation .trip-stat strong{
+    display:block;
+    color:#111827;
+    font-size:16px;
+    line-height:1.2;
+    white-space:nowrap;
+    overflow:hidden;
+    text-overflow:ellipsis;
+  }
+
+  body.mobile-navigation .trip-stat span{
+    display:block;
+    margin-top:3px;
+    color:#6b7280;
+    font-size:10px;
+    white-space:nowrap;
+  }
+}
+
 </style>
 </head>
 
@@ -550,6 +605,25 @@ html[dir="ltr"] .my-location{
 </div>
 
 <div id="map"></div>
+
+<div id="tripBar" class="trip-bar">
+
+  <div class="trip-stat">
+    <strong id="remainingTimeValue">—</strong>
+    <span id="remainingTimeLabel">الوقت المتبقي</span>
+  </div>
+
+  <div class="trip-stat">
+    <strong id="remainingDistanceValue">—</strong>
+    <span id="remainingDistanceLabel">المسافة المتبقية</span>
+  </div>
+
+  <div class="trip-stat">
+    <strong id="arrivalTimeValue">—</strong>
+    <span id="arrivalTimeLabel">الوصول</span>
+  </div>
+
+</div>
 
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
@@ -878,6 +952,369 @@ const carIcon=L.divIcon({
 });
 
 
+const tripLabels={
+  ar:{
+    time:"الوقت المتبقي",
+    distance:"المسافة المتبقية",
+    arrival:"الوصول"
+  },
+
+  ckb:{
+    time:"کاتی ماوە",
+    distance:"دووری ماوە",
+    arrival:"گەیشتن"
+  },
+
+  en:{
+    time:"Time left",
+    distance:"Distance left",
+    arrival:"Arrival"
+  },
+
+  tr:{
+    time:"Kalan süre",
+    distance:"Kalan mesafe",
+    arrival:"Varış"
+  },
+
+  fa:{
+    time:"زمان باقی‌مانده",
+    distance:"مسافت باقی‌مانده",
+    arrival:"رسیدن"
+  }
+};
+
+
+function updateTripLabels(){
+
+  const labels=
+    tripLabels[currentLanguage] ||
+    tripLabels.ar;
+
+  document.getElementById(
+    "remainingTimeLabel"
+  ).textContent=
+    labels.time;
+
+  document.getElementById(
+    "remainingDistanceLabel"
+  ).textContent=
+    labels.distance;
+
+  document.getElementById(
+    "arrivalTimeLabel"
+  ).textContent=
+    labels.arrival;
+
+}
+
+
+function formatRemainingDistance(
+  meters
+){
+
+  const t=
+    translations[currentLanguage];
+
+  if(
+    !Number.isFinite(meters)
+  ){
+    return "—";
+  }
+
+  if(meters<1000){
+
+    let rounded;
+
+    if(meters<100){
+
+      rounded=
+        Math.max(
+          10,
+          Math.round(
+            meters/10
+          )*10
+        );
+
+    }else{
+
+      rounded=
+        Math.round(
+          meters/50
+        )*50;
+
+    }
+
+    return(
+      rounded+
+      " "+
+      t.meter
+    );
+
+  }
+
+  return(
+    (
+      meters/1000
+    ).toFixed(
+      meters<10000 ? 1 : 0
+    )+
+    " "+
+    t.km
+  );
+
+}
+
+
+function formatArrivalTime(
+  seconds
+){
+
+  if(
+    !Number.isFinite(seconds)
+  ){
+    return "—";
+  }
+
+  const date=
+    new Date(
+      Date.now()+
+      Math.max(
+        0,
+        seconds
+      )*1000
+    );
+
+  try{
+
+    return new Intl.DateTimeFormat(
+
+      currentLanguage==="ckb"
+        ? "ckb-IQ"
+        : currentLanguage==="ar"
+        ? "ar-IQ"
+        : currentLanguage==="fa"
+        ? "fa-IR"
+        : currentLanguage==="tr"
+        ? "tr-TR"
+        : "en-US",
+
+      {
+        hour:"numeric",
+        minute:"2-digit"
+      }
+
+    ).format(date);
+
+  }catch(error){
+
+    return date.toLocaleTimeString(
+      [],
+      {
+        hour:"2-digit",
+        minute:"2-digit"
+      }
+    );
+
+  }
+
+}
+
+
+function nearestRouteIndex(
+  position
+){
+
+  if(
+    !routeCoordinates.length
+  ){
+    return 0;
+  }
+
+  let best=0;
+  let bestDistance=Infinity;
+
+  const jump=
+    Math.max(
+      1,
+      Math.floor(
+        routeCoordinates.length/900
+      )
+    );
+
+  for(
+    let i=0;
+    i<routeCoordinates.length;
+    i+=jump
+  ){
+
+    const distance=
+      map.distance(
+        position,
+        routeCoordinates[i]
+      );
+
+    if(
+      distance<
+      bestDistance
+    ){
+
+      bestDistance=distance;
+      best=i;
+
+    }
+
+  }
+
+  const start=
+    Math.max(
+      0,
+      best-jump
+    );
+
+  const end=
+    Math.min(
+      routeCoordinates.length-1,
+      best+jump
+    );
+
+  for(
+    let i=start;
+    i<=end;
+    i++
+  ){
+
+    const distance=
+      map.distance(
+        position,
+        routeCoordinates[i]
+      );
+
+    if(
+      distance<
+      bestDistance
+    ){
+
+      bestDistance=distance;
+      best=i;
+
+    }
+
+  }
+
+  return best;
+
+}
+
+
+function updateTripMetrics(
+  position,
+  knownIndex=null
+){
+
+  if(
+    !currentRoute ||
+    !routeCoordinates.length
+  ){
+    return;
+  }
+
+  const index=
+    knownIndex===null
+      ? nearestRouteIndex(position)
+      : knownIndex;
+
+  const ratio=
+    Math.max(
+      0,
+      Math.min(
+        1,
+        index/
+        Math.max(
+          1,
+          routeCoordinates.length-1
+        )
+      )
+    );
+
+  const remainingDistance=
+    currentRoute.distance*
+    (1-ratio);
+
+  const remainingSeconds=
+    currentRoute.duration*
+    (1-ratio);
+
+  document.getElementById(
+    "remainingTimeValue"
+  ).textContent=
+    formatDuration(
+      Math.max(
+        1,
+        Math.ceil(
+          remainingSeconds/60
+        )
+      )
+    );
+
+  document.getElementById(
+    "remainingDistanceValue"
+  ).textContent=
+    formatRemainingDistance(
+      remainingDistance
+    );
+
+  document.getElementById(
+    "arrivalTimeValue"
+  ).textContent=
+    formatArrivalTime(
+      remainingSeconds
+    );
+
+}
+
+
+function focusNavigationPosition(
+  position,
+  animate=true
+){
+
+  map.setView(
+    position,
+    17,
+    {
+      animate:false
+    }
+  );
+
+  if(
+    window.matchMedia(
+      "(max-width: 600px)"
+    ).matches
+  ){
+
+    const offset=
+      Math.round(
+        map.getSize().y*
+        0.18
+      );
+
+    map.panBy(
+      [
+        0,
+        -offset
+      ],
+      {
+        animate:animate,
+        duration:.22
+      }
+    );
+
+  }
+
+}
+
+
 function loadVoices(){
 
   if("speechSynthesis" in window){
@@ -1104,6 +1541,7 @@ function setLanguage(language){
   document.getElementById("liveBadge").textContent=t.live;
 
   updateVoiceButton();
+  updateTripLabels();
 
   if(usingCurrentLocation){
 
@@ -1612,13 +2050,18 @@ function startPreview(){
       }
     ).addTo(map);
 
-  map.setView(
+  focusNavigationPosition(
     routeCoordinates[0],
-    17
+    false
   );
 
   updateInstruction(
     routeCoordinates[0]
+  );
+
+  updateTripMetrics(
+    routeCoordinates[0],
+    0
   );
 
   previewTimer=
@@ -1659,12 +2102,9 @@ function movePreview(){
 
   }
 
-  map.panTo(
+  focusNavigationPosition(
     position,
-    {
-      animate:true,
-      duration:.2
-    }
+    true
   );
 
   const progress=
@@ -1678,6 +2118,11 @@ function movePreview(){
     progress+"%";
 
   updateInstruction(position);
+
+  updateTripMetrics(
+    position,
+    previewIndex
+  );
 
 }
 
@@ -1717,6 +2162,21 @@ function finishPreview(){
 
   document.getElementById("progressBar")
   .style.width="100%";
+
+  document.getElementById(
+    "remainingTimeValue"
+  ).textContent=
+    formatDuration(0);
+
+  document.getElementById(
+    "remainingDistanceValue"
+  ).textContent=
+    formatRemainingDistance(0);
+
+  document.getElementById(
+    "arrivalTimeValue"
+  ).textContent=
+    formatArrivalTime(0);
 
   speakNavigation(
     t.arrive,
@@ -1903,12 +2363,16 @@ async function handleLivePosition(
 
   }
 
-  map.setView(
+  focusNavigationPosition(
     currentPoint,
-    17
+    true
   );
 
   updateInstruction(
+    currentPoint
+  );
+
+  updateTripMetrics(
     currentPoint
   );
 
@@ -2826,6 +3290,21 @@ function finishLiveNavigation(){
   document.getElementById("progressBar")
   .style.width="100%";
 
+  document.getElementById(
+    "remainingTimeValue"
+  ).textContent=
+    formatDuration(0);
+
+  document.getElementById(
+    "remainingDistanceValue"
+  ).textContent=
+    formatRemainingDistance(0);
+
+  document.getElementById(
+    "arrivalTimeValue"
+  ).textContent=
+    formatArrivalTime(0);
+
   speakNavigation(
     t.arrive,
     routeSteps.length,
@@ -2912,6 +3391,18 @@ function stopAllNavigation(
 
   document.getElementById("progressBar")
   .style.width="0%";
+
+  document.getElementById(
+    "remainingTimeValue"
+  ).textContent="—";
+
+  document.getElementById(
+    "remainingDistanceValue"
+  ).textContent="—";
+
+  document.getElementById(
+    "arrivalTimeValue"
+  ).textContent="—";
 
   hideStatus();
 
