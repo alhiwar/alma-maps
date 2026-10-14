@@ -939,6 +939,7 @@ let destinationCoordinates=null;
 let startMarker=null;
 let destinationMarker=null;
 let routeLine=null;
+let routeCasingLine=null;
 let carMarker=null;
 
 let currentRoute=null;
@@ -2246,18 +2247,60 @@ function prepareRoute(route){
 
 function drawRoute(){
 
+  /*
+    إزالة المسار السابق
+  */
+
   if(routeLine){
     map.removeLayer(routeLine);
+    routeLine=null;
   }
+
+  if(routeCasingLine){
+    map.removeLayer(routeCasingLine);
+    routeCasingLine=null;
+  }
+
+  /*
+    الطبقة الخارجية:
+    تفصل مسار الملاحة بصرياً عن الطرق
+    والأسماء الموجودة على الخريطة.
+  */
+
+  routeCasingLine=
+    L.polyline(
+      routeCoordinates,
+      {
+        color:"#ffffff",
+        weight:11,
+        opacity:.96,
+        lineCap:"round",
+        lineJoin:"round"
+      }
+    ).addTo(map);
+
+  /*
+    المسار الرئيسي لـ ALMA
+  */
 
   routeLine=
     L.polyline(
       routeCoordinates,
       {
-        weight:6,
-        opacity:.85
+        color:"#3478f6",
+        weight:7,
+        opacity:1,
+        lineCap:"round",
+        lineJoin:"round"
       }
     ).addTo(map);
+
+  /*
+    إبقاء المسار الرئيسي فوق الحافة
+  */
+
+  routeCasingLine.bringToFront();
+  routeLine.bringToFront();
 
 }
 
