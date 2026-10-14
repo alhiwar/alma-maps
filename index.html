@@ -1549,21 +1549,89 @@ if("speechSynthesis" in window){
 
 }
 
-
 function findVoice(language){
 
   if(!availableVoices.length){
     loadVoices();
   }
 
-  const target=
-    speechLanguages[language] || language;
+  if(!availableVoices.length){
+    return null;
+  }
 
-  const exact=
-    availableVoices.find(
+  const target=
+    speechLanguages[language] ||
+    language;
+
+  const base=
+    target
+    .split("-")[0]
+    .toLowerCase();
+
+  const candidates=
+    availableVoices.filter(
       voice=>
         voice.lang &&
-        voice.lang.toLowerCase()===
+        voice.lang
+        .toLowerCase()
+        .startsWith(base)
+    );
+
+  if(!candidates.length){
+    return null;
+  }
+
+  /*
+    نعطي أولوية للأصوات المحلية عالية الجودة،
+    ثم للصوت المطابق للمنطقة،
+    ثم لأي صوت من اللغة نفسها.
+  */
+
+  const preferredNames=
+    language==="en"
+      ? [
+          "Google US English",
+          "Microsoft Aria",
+          "Microsoft Jenny",
+          "Samantha",
+          "Google UK English Female"
+        ]
+      : language==="ar"
+      ? [
+          "Google العربية",
+          "Microsoft Hamed",
+          "Microsoft Naayf",
+          "Maged",
+          "Tarik"
+        ]
+      : [];
+
+  for(
+    const preferredName
+    of preferredNames
+  ){
+
+    const preferred=
+      candidates.find(
+        voice=>
+          voice.name
+          .toLowerCase()
+          .includes(
+            preferredName.toLowerCase()
+          )
+      );
+
+    if(preferred){
+      return preferred;
+    }
+
+  }
+
+  const exact=
+    candidates.find(
+      voice=>
+        voice.lang
+        .toLowerCase()===
         target.toLowerCase()
     );
 
@@ -1571,23 +1639,19 @@ function findVoice(language){
     return exact;
   }
 
-  const base=
-    target.split("-")[0].toLowerCase();
-
-  const sameLanguage=
-    availableVoices.find(
-      voice=>
-        voice.lang &&
-        voice.lang.toLowerCase().startsWith(base)
+  const local=
+    candidates.find(
+      voice=>voice.localService
     );
 
-  if(sameLanguage){
-    return sameLanguage;
+  if(local){
+    return local;
   }
 
-  return null;
+  return candidates[0];
 
 }
+
 function prepareTextForSpeech(text){
 
   if(
@@ -1767,9 +1831,24 @@ utterance.lang=
     utterance.voice=voice;
   }
 
-  utterance.rate=1;
+  if(currentLanguage==="ar"){
+
+  utterance.rate=0.92;
   utterance.pitch=1;
-  utterance.volume=1;
+
+}else if(currentLanguage==="en"){
+
+  utterance.rate=0.96;
+  utterance.pitch=1;
+
+}else{
+
+  utterance.rate=0.95;
+  utterance.pitch=1;
+
+}
+
+utterance.volume=1;
 
   window.speechSynthesis.cancel();
   window.speechSynthesis.speak(utterance);
