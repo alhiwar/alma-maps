@@ -1366,6 +1366,33 @@ iconAnchor:[16,25]
 });
   
 let currentCarBearing=0;
+function calculateBearing(from,to){
+
+  const lat1=from[0]*Math.PI/180;
+  const lat2=to[0]*Math.PI/180;
+
+  const deltaLon=
+    (to[1]-from[1])*
+    Math.PI/180;
+
+  const y=
+    Math.sin(deltaLon)*
+    Math.cos(lat2);
+
+  const x=
+    Math.cos(lat1)*
+    Math.sin(lat2)-
+    Math.sin(lat1)*
+    Math.cos(lat2)*
+    Math.cos(deltaLon);
+
+  return(
+    Math.atan2(y,x)*
+    180/Math.PI+
+    360
+  )%360;
+
+}  
   
 function rotateCarMarker(bearing){
 
