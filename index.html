@@ -362,29 +362,31 @@ html[dir="ltr"] .my-location{
   }
 }
 
-
 /* =====================================================
-   الهاتف أثناء المعاينة أو الملاحة
+   ALMA - وضع الملاحة الحقيقي على الهاتف
    ===================================================== */
 
 @media(max-width:600px){
 
   body.mobile-navigation .alma-panel{
-    top:8px;
-    right:8px;
-    width:calc(100% - 16px);
+    position:fixed;
+    top:0;
+    right:0;
+    left:0;
+    width:100%;
     max-height:none;
+    padding:0;
     overflow:visible;
-    padding:8px;
     background:transparent;
+    border-radius:0;
     box-shadow:none;
     pointer-events:none;
+    z-index:1200;
   }
 
-  html[dir="ltr"] body.mobile-navigation .alma-panel{
-    left:8px;
-    right:auto;
-  }
+  /*
+    إخفاء لوحة البحث بالكامل أثناء القيادة
+  */
 
   body.mobile-navigation .top-row,
   body.mobile-navigation .route-row,
@@ -398,49 +400,143 @@ html[dir="ltr"] .my-location{
     display:none !important;
   }
 
-  body.mobile-navigation #liveBadge{
-    pointer-events:auto;
-    margin:0 0 6px;
-    padding:6px 8px;
-  }
+  /*
+    بطاقة المناورة الرئيسية
+  */
 
   body.mobile-navigation #navigationBox{
     display:block !important;
-    pointer-events:auto;
+    position:fixed;
+    top:calc(10px + env(safe-area-inset-top));
+    left:10px;
+    right:10px;
+    width:auto;
     margin:0;
-    padding:10px 12px;
-    border-radius:14px;
-    box-shadow:0 4px 16px rgba(0,0,0,.22);
+    padding:16px 18px;
+    border-radius:22px;
+    background:#146c43;
+    color:#ffffff;
+    box-shadow:
+      0 5px 18px rgba(0,0,0,.28);
+    pointer-events:auto;
+    z-index:1250;
   }
 
-  body.mobile-navigation #stopButton{
-    display:block !important;
-    pointer-events:auto;
-    width:auto;
-    min-width:100px;
-    margin:7px auto 0;
-    padding:8px 18px;
-    background:rgba(255,255,255,.96);
-    box-shadow:0 3px 12px rgba(0,0,0,.18);
+  body.mobile-navigation .instruction-row{
+    display:flex;
+    align-items:center;
+    gap:16px;
   }
 
   body.mobile-navigation #turnIcon{
-    font-size:30px;
-    min-width:40px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:62px;
+    width:62px;
+    height:62px;
+    font-size:46px;
+    line-height:1;
+    color:white;
   }
 
   body.mobile-navigation #instructionText{
-    font-size:16px;
-    line-height:1.35;
+    font-size:22px;
+    font-weight:700;
+    line-height:1.3;
+    color:#ffffff;
   }
 
   body.mobile-navigation #instructionDistance{
-    font-size:13px;
+    margin-top:5px;
+    font-size:16px;
+    font-weight:600;
+    color:rgba(255,255,255,.90);
   }
 
+  /*
+    شريط تقدم رفيع داخل بطاقة الاتجاه
+  */
+
   body.mobile-navigation .progress-wrap{
-    margin-top:8px;
+    height:4px;
+    margin-top:12px;
+    background:rgba(255,255,255,.24);
+    border-radius:20px;
   }
+
+  body.mobile-navigation #progressBar{
+    background:#ffffff;
+  }
+
+  /*
+    حالة الملاحة الحية:
+    شارة صغيرة بدلاً من لوحة كبيرة
+  */
+
+  body.mobile-navigation #liveBadge{
+    position:fixed;
+    top:calc(116px + env(safe-area-inset-top));
+    left:50%;
+    transform:translateX(-50%);
+    width:max-content;
+    max-width:80%;
+    margin:0;
+    padding:6px 12px;
+    border-radius:18px;
+    background:rgba(255,255,255,.94);
+    color:#146c43;
+    box-shadow:0 2px 8px rgba(0,0,0,.16);
+    font-size:11px;
+    pointer-events:auto;
+    z-index:1240;
+  }
+
+  /*
+    زر إيقاف الملاحة:
+    زر عائم صغير بدل الشريط الكبير
+  */
+
+  body.mobile-navigation #stopButton{
+    display:flex !important;
+    position:fixed;
+    right:14px;
+    bottom:calc(94px + env(safe-area-inset-bottom));
+    width:54px;
+    height:54px;
+    min-width:54px;
+    margin:0;
+    padding:0;
+    align-items:center;
+    justify-content:center;
+    border-radius:50%;
+    background:#ffffff;
+    color:#b91c1c;
+    border:0;
+    box-shadow:0 3px 14px rgba(0,0,0,.28);
+    font-size:0;
+    pointer-events:auto;
+    z-index:1250;
+  }
+
+  body.mobile-navigation #stopButton::before{
+    content:"■";
+    font-size:21px;
+  }
+
+  /*
+    أدوات Leaflet لا ينبغي أن تتداخل
+    مع بطاقة المناورة.
+  */
+
+  body.mobile-navigation .leaflet-top{
+    top:145px;
+  }
+
+  body.mobile-navigation .leaflet-control-zoom{
+    box-shadow:0 2px 10px rgba(0,0,0,.18);
+  }
+
 }
 
 
