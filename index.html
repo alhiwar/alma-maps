@@ -1527,66 +1527,69 @@ function updateTripMetrics(
 
 }
 
-
-  function focusNavigationPosition(
+function focusNavigationPosition(
   position,
   animate=true
 ){
 
-  if(
-    window.matchMedia(
-      "(max-width: 600px)"
-    ).matches
-  ){
+  const navigationZoom=17;
 
-    const mapSize=
-      map.getSize();
+  /*
+    عند الدخول إلى وضع الملاحة لأول مرة
+    ننتقل مباشرة إلى موقع السيارة.
+  */
 
-    const targetPoint=
-      map.project(
-        position,
-        17
-      );
-
-    const offset=
-      Math.round(
-        mapSize.y*0.18
-      );
-
-    const centerPoint=
-      L.point(
-        targetPoint.x,
-        targetPoint.y-offset
-      );
-
-    const center=
-      map.unproject(
-        centerPoint,
-        17
-      );
-
-    map.setView(
-      center,
-      17,
-      {
-        animate:false
-      }
-    );
-
-  }else{
+  if(!animate){
 
     map.setView(
       position,
-      17,
+      navigationZoom,
       {
         animate:false
       }
     );
 
+    return;
   }
 
-}
+  /*
+    أثناء الحركة لا نعيد setView مع كل نقطة.
+    نحرك الخريطة فقط إذا ابتعدت السيارة
+    مسافة كافية عن مركز العرض.
+  */
 
+  const center=
+    map.getCenter();
+
+  const distanceFromCenter=
+    map.distance(
+      position,
+      [
+        center.lat,
+        center.lng
+      ]
+    );
+
+  /*
+    تجاهل التحركات الصغيرة يمنع اهتزاز
+    الخريطة يميناً ويساراً.
+  */
+
+  if(distanceFromCenter<15){
+    return;
+  }
+
+  map.panTo(
+    position,
+    {
+      animate:true,
+      duration:0.5,
+      easeLinearity:0.2,
+      noMoveStart:true
+    }
+  );
+
+}
 
 function loadVoices(){
 
