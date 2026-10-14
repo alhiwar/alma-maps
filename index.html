@@ -293,56 +293,27 @@ html[dir="ltr"] .my-location{
   font-weight:bold;
   text-align:center;
 }
+/* =====================================================
+   ALMA - سيارة الملاحة
+   ===================================================== */
+
 .car-icon{
-  width:36px;
-  height:50px;
+  width:46px;
+  height:70px;
   position:relative;
   transform-origin:50% 50%;
+  filter:
+    drop-shadow(0 3px 3px rgba(0,0,0,.35))
+    drop-shadow(0 0 2px rgba(255,255,255,.9));
   will-change:transform;
-  filter:drop-shadow(0 3px 4px rgba(0,0,0,.38));
 }
 
-.car-body{
-  position:absolute;
-  left:5px;
-  top:3px;
-  width:26px;
-  height:44px;
-  background:#2563eb;
-  border:2px solid #ffffff;
-  border-radius:13px 13px 9px 9px;
-  box-shadow:
-    0 0 0 1px rgba(0,0,0,.18),
-    inset 0 -3px 5px rgba(0,0,0,.12);
+.car-icon svg{
+  display:block;
+  width:46px;
+  height:70px;
+  overflow:visible;
 }
-
-/* الزجاج الأمامي */
-.car-body::before{
-  content:"";
-  position:absolute;
-  left:4px;
-  top:7px;
-  width:14px;
-  height:10px;
-  background:#bfe4f5;
-  border:1px solid rgba(255,255,255,.75);
-  border-radius:6px 6px 3px 3px;
-  box-shadow:
-    0 20px 0 -2px #8fc4dc;
-}
-
-/* مقدمة السيارة */
-.car-body::after{
-  content:"";
-  position:absolute;
-  left:7px;
-  top:-5px;
-  width:8px;
-  height:5px;
-  background:#2563eb;
-  border-radius:5px 5px 0 0;
-}
-
 /* =====================================================
    الهاتف قبل بدء الملاحة
    ===================================================== */
@@ -1171,48 +1142,230 @@ L.tileLayer(
   }
 ).addTo(map);
 
-
 const carIcon=L.divIcon({
+
   className:"",
-  html:'<div class="car-icon"><div class="car-body"></div></div>',
-  iconSize:[36,50],
-  iconAnchor:[18,25]
+
+  html:`
+    <div class="car-icon">
+
+      <svg
+        viewBox="0 0 46 70"
+        xmlns="http://www.w3.org/2000/svg"
+        aria-hidden="true"
+      >
+
+        <defs>
+
+          <linearGradient
+            id="almaCarBody"
+            x1="0"
+            y1="0"
+            x2="1"
+            y2="1"
+          >
+            <stop
+              offset="0%"
+              stop-color="#f8fafc"
+            />
+            <stop
+              offset="48%"
+              stop-color="#dbe4ea"
+            />
+            <stop
+              offset="100%"
+              stop-color="#9aa8b2"
+            />
+          </linearGradient>
+
+          <linearGradient
+            id="almaGlass"
+            x1="0"
+            y1="0"
+            x2="0"
+            y2="1"
+          >
+            <stop
+              offset="0%"
+              stop-color="#8fd3f4"
+            />
+            <stop
+              offset="100%"
+              stop-color="#24475d"
+            />
+          </linearGradient>
+
+        </defs>
+
+        <!-- العجلات -->
+
+        <rect
+          x="2"
+          y="17"
+          width="6"
+          height="15"
+          rx="2"
+          fill="#20252a"
+        />
+
+        <rect
+          x="38"
+          y="17"
+          width="6"
+          height="15"
+          rx="2"
+          fill="#20252a"
+        />
+
+        <rect
+          x="2"
+          y="45"
+          width="6"
+          height="15"
+          rx="2"
+          fill="#20252a"
+        />
+
+        <rect
+          x="38"
+          y="45"
+          width="6"
+          height="15"
+          rx="2"
+          fill="#20252a"
+        />
+
+        <!-- جسم السيارة -->
+
+        <path
+          d="
+            M23 2
+            C15 2 11 7 9 15
+            L6 50
+            C5 60 11 67 23 68
+            C35 67 41 60 40 50
+            L37 15
+            C35 7 31 2 23 2
+            Z
+          "
+          fill="url(#almaCarBody)"
+          stroke="#64727c"
+          stroke-width="1.4"
+        />
+
+        <!-- الزجاج الأمامي -->
+
+        <path
+          d="
+            M14 18
+            C16 12 19 10 23 10
+            C27 10 30 12 32 18
+            L30 27
+            L16 27
+            Z
+          "
+          fill="url(#almaGlass)"
+          stroke="#ffffff"
+          stroke-width=".8"
+        />
+
+        <!-- السقف -->
+
+        <path
+          d="
+            M16 29
+            L30 29
+            L32 45
+            L14 45
+            Z
+          "
+          fill="#f8fafc"
+          stroke="#9aa8b2"
+          stroke-width=".8"
+        />
+
+        <!-- الزجاج الخلفي -->
+
+        <path
+          d="
+            M14 47
+            L32 47
+            L30 57
+            C28 60 18 60 16 57
+            Z
+          "
+          fill="url(#almaGlass)"
+          stroke="#ffffff"
+          stroke-width=".8"
+        />
+
+        <!-- المرايا -->
+
+        <ellipse
+          cx="6"
+          cy="29"
+          rx="4"
+          ry="2.5"
+          fill="#dbe4ea"
+          stroke="#64727c"
+          stroke-width=".8"
+        />
+
+        <ellipse
+          cx="40"
+          cy="29"
+          rx="4"
+          ry="2.5"
+          fill="#dbe4ea"
+          stroke="#64727c"
+          stroke-width=".8"
+        />
+
+        <!-- المصابيح الأمامية -->
+
+        <ellipse
+          cx="14"
+          cy="9"
+          rx="3.5"
+          ry="2"
+          fill="#fff7bf"
+        />
+
+        <ellipse
+          cx="32"
+          cy="9"
+          rx="3.5"
+          ry="2"
+          fill="#fff7bf"
+        />
+
+        <!-- المصابيح الخلفية -->
+
+        <ellipse
+          cx="13"
+          cy="59"
+          rx="3.5"
+          ry="2.5"
+          fill="#e53935"
+        />
+
+        <ellipse
+          cx="33"
+          cy="59"
+          rx="3.5"
+          ry="2.5"
+          fill="#e53935"
+        />
+
+      </svg>
+
+    </div>
+  `,
+
+  iconSize:[46,70],
+  iconAnchor:[23,35]
+
 });
-
-let currentCarBearing=0;
-
-function calculateBearing(from,to){
-
-  if(!from || !to){
-    return currentCarBearing;
-  }
-
-  const lat1=from[0]*Math.PI/180;
-  const lat2=to[0]*Math.PI/180;
-
-  const deltaLon=
-    (to[1]-from[1])*
-    Math.PI/180;
-
-  const y=
-    Math.sin(deltaLon)*
-    Math.cos(lat2);
-
-  const x=
-    Math.cos(lat1)*
-    Math.sin(lat2)-
-    Math.sin(lat1)*
-    Math.cos(lat2)*
-    Math.cos(deltaLon);
-
-  let bearing=
-    Math.atan2(y,x)*
-    180/Math.PI;
-
-  return(
-    bearing+360
-  )%360;
-}
 
 function rotateCarMarker(bearing){
 
