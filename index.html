@@ -2866,80 +2866,31 @@ if(routeCoordinates.length>1){
 قبل بدء حركة السيارة
 */
 
-const initialVoiceStarted=
-  speakInitialGuidance(
-    routeCoordinates[0]
-  );
-  
+/*
+  تشغيل الإرشاد الأول دون ربطه بحركة السيارة
+*/
+
+speakInitialGuidance(
+  routeCoordinates[0]
+);
+
 updateInstruction(
   routeCoordinates[0]
 );
 
-const beginPreviewMovement=()=>{
+/*
+  تشغيل حركة المعاينة مباشرة
+*/
 
-  if(previewTimer){
-    return;
-  }
-
-  previewTimer=
-    setInterval(
-      movePreview,
-      220
-    );
-
-};
-
-
-if(
-  initialVoiceStarted &&
-  "speechSynthesis" in window
-){
-
-  /*
-    لا ننتظر سبع ثوان.
-    نعطي محرك الصوت مهلة قصيرة فقط
-    ليبدأ النطق، ثم تبدأ السيارة.
-  */
-
-  const voiceStartTime=
-    Date.now();
-
-  const waitForVoice=
-    setInterval(
-      ()=>{
-
-        const speaking=
-          window
-          .speechSynthesis
-          .speaking;
-
-        const waited=
-          Date.now()-
-          voiceStartTime;
-
-        if(
-          speaking ||
-          waited>=1200
-        ){
-
-          clearInterval(
-            waitForVoice
-          );
-
-          beginPreviewMovement();
-
-        }
-
-      },
-      60
-    );
-
-}else{
-
-  beginPreviewMovement();
-
+if(previewTimer){
+  clearInterval(previewTimer);
 }
-  
+
+previewTimer=
+  setInterval(
+    movePreview,
+    220
+  );
 }
 
 function movePreview(){
