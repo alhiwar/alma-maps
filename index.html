@@ -702,7 +702,7 @@ ar:{
   sharpLeft:"انعطف بشدة إلى اليسار",
   uturn:"قم بالاستدارة",
   roundabout:"ادخل الدوار",
-  exit:"خذ المخرج رقم",
+ exit:"خذ المَخْرَج رقم",
   onto:"إلى",
   arrive:"لقد وصلت إلى وجهتك",
   after:"بعد",
@@ -949,7 +949,96 @@ let gpsWatchId=null;
 let liveNavigation=false;
 let lastRecalculation=0;
 let previousLivePosition=null;
-  
+let wakeLock=null;
+let navigationWantsWakeLock=false;
+
+
+async function requestNavigationWakeLock(){
+
+  navigationWantsWakeLock=true;
+
+  if(!("wakeLock" in navigator)){
+    console.warn("Wake Lock غير مدعوم في هذا المتصفح.");
+    return;
+  }
+
+  try{
+
+    if(
+      wakeLock &&
+      !wakeLock.released
+    ){
+      return;
+    }
+
+    wakeLock=
+      await navigator.wakeLock.request(
+        "screen"
+      );
+
+    wakeLock.addEventListener(
+      "release",
+      ()=>{
+        wakeLock=null;
+      }
+    );
+
+  }catch(error){
+
+    console.warn(
+      "تعذر إبقاء الشاشة مضيئة:",
+      error
+    );
+
+  }
+
+}
+
+
+async function releaseNavigationWakeLock(){
+
+  navigationWantsWakeLock=false;
+
+  if(
+    wakeLock &&
+    !wakeLock.released
+  ){
+
+    try{
+
+      await wakeLock.release();
+
+    }catch(error){
+
+      console.warn(
+        "تعذر تحرير Wake Lock:",
+        error
+      );
+
+    }
+
+  }
+
+  wakeLock=null;
+
+}
+
+
+document.addEventListener(
+  "visibilitychange",
+  ()=>{
+
+    if(
+      document.visibilityState==="visible" &&
+      navigationWantsWakeLock
+    ){
+
+      requestNavigationWakeLock();
+
+    }
+
+  }
+);  
 let voiceEnabled=true;
 let availableVoices=[];
 
@@ -1499,8 +1588,69 @@ function findVoice(language){
   return null;
 
 }
+function prepareTextForSpeech(text){
 
+  if(
+    currentLanguage!=="ar" ||
+    !text
+  ){
+    return text;
+  }
 
+  return text
+
+    .replace(
+      /مخرج/g,
+      "مَخْرَج"
+    )
+
+    .replace(
+      /المخرج/g,
+      "المَخْرَج"
+    )
+
+    .replace(
+      /انعطف/g,
+      "اِنْعَطِفْ"
+    )
+
+    .replace(
+      /استمر/g,
+      "اِسْتَمِرَّ"
+    )
+
+    .replace(
+      /ادخل/g,
+      "اُدْخُلْ"
+    )
+
+    .replace(
+      /الدوار/g,
+      "الدَّوَّار"
+    )
+
+    .replace(
+      /يميناً/g,
+      "يَمِينًا"
+    )
+
+    .replace(
+      /يساراً/g,
+      "يَسَارًا"
+    )
+
+    .replace(
+      /يمينًا/g,
+      "يَمِينًا"
+    )
+
+    .replace(
+      /يسارًا/g,
+      "يَسَارًا"
+    );
+
+}
+  
 function speakNavigation(
   text,
   stepIndex,
@@ -1523,13 +1673,17 @@ function speakNavigation(
     return;
   }
 
-  const utterance=
-    new SpeechSynthesisUtterance(text);
+ const speechText=
+  prepareTextForSpeech(text);
 
-  utterance.lang=
-    speechLanguages[currentLanguage] ||
-    currentLanguage;
+const utterance=
+  new SpeechSynthesisUtterance(
+    speechText
+  );
 
+utterance.lang=
+  speechLanguages[currentLanguage] ||
+  currentLanguage;
   const voice=
     findVoice(currentLanguage);
 
@@ -2158,6 +2312,7 @@ function startPreview(){
   .style.display="block";
 
   enterMobileNavigationMode();
+  requestNavigationWakeLock();
 
   if(carMarker){
 
@@ -2187,16 +2342,32 @@ if(routeCoordinates.length>1){
   focusNavigationPosition(
     routeCoordinates[0],
     false
-  );
+);
+  updateTripMetrics(
+  routeCoordinates[0],
+  0
+);
 
-  updateInstruction(
+
+/*
+  إعطاء الإرشاد الأول فوراً
+قبل بدء حركة السيارة
+*/
+
+const initialVoiceStarted=
+  speakInitialGuidance(
     routeCoordinates[0]
   );
+  
+updateInstruction(
+  routeCoordinates[0]
+);
 
-  updateTripMetrics(
-    routeCoordinates[0],
-    0
-  );
+const beginPreviewMovement=()=>{
+
+  if(previewTimer){
+    return;
+  }
 
   previewTimer=
     setInterval(
@@ -2204,7 +2375,58 @@ if(routeCoordinates.length>1){
       220
     );
 
-}
+};
+
+
+if(
+  initialVoiceStarted &&
+  "speechSynthesis" in window
+){
+
+  /*
+    لا ننتظر سبع ثوان.
+    نعطي محرك الصوت مهلة قصيرة فقط
+    ليبدأ النطق، ثم تبدأ السيارة.
+  */
+
+  const voiceStartTime=
+    Date.now();
+
+  const waitForVoice=
+    setInterval(
+      ()=>{
+
+        const speaking=
+          window
+          .speechSynthesis
+          .speaking;
+
+        const waited=
+          Date.now()-
+          voiceStartTime;
+
+        if(
+          speaking ||
+          waited>=1200
+        ){
+
+          clearInterval(
+            waitForVoice
+          );
+
+          beginPreviewMovement();
+
+        }
+
+      },
+      60
+    );
+
+}else{
+
+  beginPreviewMovement();
+
+} 
 
 
 function movePreview(){
@@ -2415,6 +2637,7 @@ function startLiveNavigation(){
       stopAllNavigation(false);
 
       liveNavigation=true;
+      requestNavigationWakeLock();
       currentStepIndex=0;
 
       resetSpokenInstruction();
@@ -2996,8 +3219,360 @@ function getNextImportantStep(index){
   return null;
 
 }
+function getDistanceToStep(
+  position,
+  step
+){
+
+  if(
+    !position ||
+    !step ||
+    !step.maneuver ||
+    !step.maneuver.location
+  ){
+    return Infinity;
+  }
+
+  return map.distance(
+    position,
+    [
+      step.maneuver.location[1],
+      step.maneuver.location[0]
+    ]
+  );
+
+}
 
 
+function speakInitialGuidance(
+  position
+){
+
+  if(
+    !voiceEnabled ||
+    !routeSteps.length
+  ){
+    return false;
+  }
+
+  let targetIndex=
+    currentStepIndex;
+
+  let targetStep=
+    routeSteps[targetIndex];
+
+  if(
+    !isImportantManeuver(
+      targetStep
+    )
+  ){
+
+    const next=
+      getNextImportantStep(
+        currentStepIndex-1
+      );
+
+    if(next){
+
+      targetIndex=
+        next.index;
+
+      targetStep=
+        next.step;
+
+    }
+
+  }
+
+  if(
+    !targetStep ||
+    !isImportantManeuver(
+      targetStep
+    )
+  ){
+    return false;
+  }
+
+  const meters=
+    getDistanceToStep(
+      position,
+      targetStep
+    );
+
+  const instruction=
+    buildNavigationInstruction(
+      targetStep
+    );
+
+  let spokenText;
+
+  if(meters<=55){
+
+    spokenText=
+      instruction.text+
+      "، "+
+      translations[
+        currentLanguage
+      ].now;
+
+  }else{
+
+    spokenText=
+      buildSpokenInstruction(
+        instruction.text,
+        meters
+      );
+
+  }
+
+
+  const next=
+    getNextImportantStep(
+      targetIndex
+    );
+
+  if(
+    next &&
+    maneuverDistanceBetween(
+      targetStep,
+      next.step
+    )<=CLOSE_MANEUVER_DISTANCE
+  ){
+
+    const nextInstruction=
+      buildNavigationInstruction(
+        next.step
+      );
+
+    spokenText+=
+      "، "+
+      translations[
+        currentLanguage
+      ].thenShort+
+      "، "+
+      nextInstruction.text;
+
+    spokenStages[
+      next.index
+    ]={
+      early:true,
+      near:true
+    };
+
+  }
+
+
+  spokenStages[
+    targetIndex
+  ]={
+    early:true
+  };
+
+  if(meters<=260){
+
+    spokenStages[
+      targetIndex
+    ].near=true;
+
+  }
+
+  if(meters<=55){
+
+    spokenStages[
+      targetIndex
+    ].now=true;
+
+  }
+
+  lastVoiceTime=
+    Date.now();
+
+  speakNavigation(
+    spokenText,
+    targetIndex,
+    true
+  );
+
+  return true;
+
+}
+function getDistanceToStep(
+  position,
+  step
+){
+
+  if(
+    !position ||
+    !step ||
+    !step.maneuver ||
+    !step.maneuver.location
+  ){
+    return Infinity;
+  }
+
+  return map.distance(
+    position,
+    [
+      step.maneuver.location[1],
+      step.maneuver.location[0]
+    ]
+  );
+
+}
+
+
+function speakInitialGuidance(
+  position
+){
+
+  if(
+    !voiceEnabled ||
+    !routeSteps.length
+  ){
+    return false;
+  }
+
+  let targetIndex=
+    currentStepIndex;
+
+  let targetStep=
+    routeSteps[targetIndex];
+
+  if(
+    !isImportantManeuver(
+      targetStep
+    )
+  ){
+
+    const next=
+      getNextImportantStep(
+        currentStepIndex-1
+      );
+
+    if(next){
+
+      targetIndex=
+        next.index;
+
+      targetStep=
+        next.step;
+
+    }
+
+  }
+
+  if(
+    !targetStep ||
+    !isImportantManeuver(
+      targetStep
+    )
+  ){
+    return false;
+  }
+
+  const meters=
+    getDistanceToStep(
+      position,
+      targetStep
+    );
+
+  const instruction=
+    buildNavigationInstruction(
+      targetStep
+    );
+
+  let spokenText;
+
+  if(meters<=55){
+
+    spokenText=
+      instruction.text+
+      "، "+
+      translations[
+        currentLanguage
+      ].now;
+
+  }else{
+
+    spokenText=
+      buildSpokenInstruction(
+        instruction.text,
+        meters
+      );
+
+  }
+
+
+  const next=
+    getNextImportantStep(
+      targetIndex
+    );
+
+  if(
+    next &&
+    maneuverDistanceBetween(
+      targetStep,
+      next.step
+    )<=CLOSE_MANEUVER_DISTANCE
+  ){
+
+    const nextInstruction=
+      buildNavigationInstruction(
+        next.step
+      );
+
+    spokenText+=
+      "، "+
+      translations[
+        currentLanguage
+      ].thenShort+
+      "، "+
+      nextInstruction.text;
+
+    spokenStages[
+      next.index
+    ]={
+      early:true,
+      near:true
+    };
+
+  }
+
+
+  spokenStages[
+    targetIndex
+  ]={
+    early:true
+  };
+
+  if(meters<=260){
+
+    spokenStages[
+      targetIndex
+    ].near=true;
+
+  }
+
+  if(meters<=55){
+
+    spokenStages[
+      targetIndex
+    ].now=true;
+
+  }
+
+  lastVoiceTime=
+    Date.now();
+
+  speakNavigation(
+    spokenText,
+    targetIndex,
+    true
+  );
+
+  return true;
+
+}
 function handleSmartVoiceGuidance(
   step,
   meters
@@ -3472,6 +4047,7 @@ function finishLiveNavigation(){
   }
 
   liveNavigation=false;
+  releaseNavigationWakeLock();
 
   document.getElementById("liveBadge")
   .style.display="none";
@@ -3548,7 +4124,8 @@ function stopAllNavigation(
   }
 
   liveNavigation=false;
-
+  releaseNavigationWakeLock();
+  
   leaveMobileNavigationMode();
 
   stopSpeech();
