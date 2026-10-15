@@ -1802,18 +1802,12 @@ function updateTripMetrics(
     );
 
 }
-
 function focusNavigationPosition(
   position,
   animate=true
 ){
 
   const navigationZoom=17;
-
-  /*
-    عند الدخول إلى وضع الملاحة لأول مرة
-    ننتقل مباشرة إلى موقع السيارة.
-  */
 
   if(!animate){
 
@@ -1825,8 +1819,72 @@ function focusNavigationPosition(
       }
     );
 
+    setTimeout(()=>{
+
+      const point=
+        map.latLngToContainerPoint(
+          position
+        );
+
+      const targetPoint=
+        L.point(
+          point.x,
+          point.y-
+          map.getSize().y*0.18
+        );
+
+      const targetCenter=
+        map.containerPointToLatLng(
+          targetPoint
+        );
+
+      map.setView(
+        targetCenter,
+        navigationZoom,
+        {
+          animate:false
+        }
+      );
+
+    },50);
+
     return;
   }
+
+  const point=
+    map.latLngToContainerPoint(
+      position
+    );
+
+  const desiredPoint=
+    L.point(
+      map.getSize().x/2,
+      map.getSize().y*0.68
+    );
+
+  const offset=
+    point.subtract(
+      desiredPoint
+    );
+
+  if(
+    Math.abs(offset.x)<8 &&
+    Math.abs(offset.y)<8
+  ){
+    return;
+  }
+
+  map.panBy(
+    offset,
+    {
+      animate:true,
+      duration:0.35,
+      easeLinearity:0.25,
+      noMoveStart:true
+    }
+  );
+
+}
 
   /*
     أثناء الحركة لا نعيد setView مع كل نقطة.
