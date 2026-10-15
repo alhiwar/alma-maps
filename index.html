@@ -3061,6 +3061,16 @@ const previousPosition=
   routeCoordinates[
     previousIndex
   ];
+  if(navigationMap){
+
+  navigationMap.jumpTo({
+    center:[
+      position[1],
+      position[0]
+    ]
+  });
+
+}
 
 if(carMarker){
 
