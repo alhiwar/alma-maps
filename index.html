@@ -2923,26 +2923,26 @@ function startPreview(){
     );
 
   navigationMapElement.style.display=
-    "block";
+  "block";
 
-  leafletMapElement.style.visibility=
-    "hidden";
+leafletMapElement.style.visibility=
+  "hidden";
+
+setTimeout(()=>{
 
   initializeNavigationMap();
 
-  setTimeout(()=>{
+  navigationMap.resize();
 
-    navigationMap.resize();
+  navigationMap.jumpTo({
+    center:[
+      routeCoordinates[0][1],
+      routeCoordinates[0][0]
+    ],
+    zoom:17
+  });
 
-    navigationMap.jumpTo({
-      center:[
-        routeCoordinates[0][1],
-        routeCoordinates[0][0]
-      ],
-      zoom:17
-    });
-
-  },100);
+},100);
 
   previewIndex=0;
   currentStepIndex=0;
