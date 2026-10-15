@@ -1886,45 +1886,6 @@ function focusNavigationPosition(
 
 }
 
-  /*
-    أثناء الحركة لا نعيد setView مع كل نقطة.
-    نحرك الخريطة فقط إذا ابتعدت السيارة
-    مسافة كافية عن مركز العرض.
-  */
-
-  const center=
-    map.getCenter();
-
-  const distanceFromCenter=
-    map.distance(
-      position,
-      [
-        center.lat,
-        center.lng
-      ]
-    );
-
-  /*
-    تجاهل التحركات الصغيرة يمنع اهتزاز
-    الخريطة يميناً ويساراً.
-  */
-
-  if(distanceFromCenter<15){
-    return;
-  }
-
-  map.panTo(
-    position,
-    {
-      animate:true,
-      duration:0.5,
-      easeLinearity:0.2,
-      noMoveStart:true
-    }
-  );
-
-}
-
 function loadVoices(){
 
   if("speechSynthesis" in window){
