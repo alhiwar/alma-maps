@@ -2907,6 +2907,42 @@ function startPreview(){
   }
 
   stopAllNavigation(false);
+    /*
+    تشغيل خريطة MapLibre
+    الخاصة بوضع الملاحة
+  */
+
+  const navigationMapElement=
+    document.getElementById(
+      "navigationMap"
+    );
+
+  const leafletMapElement=
+    document.getElementById(
+      "map"
+    );
+
+  navigationMapElement.style.display=
+    "block";
+
+  leafletMapElement.style.visibility=
+    "hidden";
+
+  initializeNavigationMap();
+
+  setTimeout(()=>{
+
+    navigationMap.resize();
+
+    navigationMap.jumpTo({
+      center:[
+        routeCoordinates[0][1],
+        routeCoordinates[0][0]
+      ],
+      zoom:17
+    });
+
+  },100);
 
   previewIndex=0;
   currentStepIndex=0;
