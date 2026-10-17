@@ -3063,7 +3063,7 @@ if(previewTimer){
 previewTimer=
   setInterval(
     movePreview,
-  80
+  180
   );
 }
 
@@ -3102,13 +3102,14 @@ const previousPosition=
   ];
   if(navigationMap){
 
-  navigationMap.jumpTo({
-    center:[
-      position[1],
-      position[0]
-    ]
-  });
-
+ navigationMap.easeTo({
+  center:[
+    position[1],
+    position[0]
+  ],
+  duration:180,
+  easing:t=>t
+});
   if(navigationCarMarker){
 
     navigationCarMarker.setLngLat([
