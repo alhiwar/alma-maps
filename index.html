@@ -1154,6 +1154,7 @@ L.tileLayer(
   }
 ).addTo(map);
 let navigationMap=null;
+let navigationCarMarker=null;  
 
 function initializeNavigationMap(){
 
@@ -2938,6 +2939,28 @@ setTimeout(()=>{
     zoom:17
   });
 
+  if(navigationCarMarker){
+    navigationCarMarker.remove();
+  }
+
+  const carElement=
+    document.createElement("div");
+
+  carElement.innerHTML="🚗";
+  carElement.style.fontSize="32px";
+  carElement.style.lineHeight="32px";
+
+  navigationCarMarker=
+    new maplibregl.Marker({
+      element:carElement,
+      anchor:"center"
+    })
+    .setLngLat([
+      routeCoordinates[0][1],
+      routeCoordinates[0][0]
+    ])
+    .addTo(navigationMap);
+
 },100);
 
   previewIndex=0;
@@ -3069,6 +3092,15 @@ const previousPosition=
       position[0]
     ]
   });
+
+  if(navigationCarMarker){
+
+    navigationCarMarker.setLngLat([
+      position[1],
+      position[0]
+    ]);
+
+  }
 
 }
 
