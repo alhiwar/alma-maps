@@ -3116,6 +3116,29 @@ const previousPosition=
       position[0]
     ]);
 
+    const navigationBearing=
+      calculateBearing(
+        previousPosition,
+        position
+      );
+
+    const navigationCarElement=
+      navigationCarMarker.getElement();
+
+    const navigationCar=
+      navigationCarElement.querySelector(
+        ".car-icon"
+      );
+
+    if(navigationCar){
+
+      navigationCar.style.transform=
+        "rotate("+
+        navigationBearing+
+        "deg)";
+
+    }
+
   }
 
 }
