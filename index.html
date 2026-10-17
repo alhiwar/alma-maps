@@ -2944,17 +2944,33 @@ setTimeout(()=>{
   }
 
   const carElement=
-    document.createElement("div");
+  document.createElement("div");
 
-  carElement.innerHTML="🚗";
-  carElement.style.fontSize="32px";
-  carElement.style.lineHeight="32px";
+carElement.innerHTML=
+  carIcon.options.html;
 
-  navigationCarMarker=
-    new maplibregl.Marker({
-      element:carElement,
-      anchor:"center"
-    })
+carElement.style.width="32px";
+carElement.style.height="49px";
+
+const navigationCar=
+  carElement.querySelector(
+    ".car-icon"
+  );
+
+if(navigationCar){
+
+  navigationCar.style.width="32px";
+  navigationCar.style.height="49px";
+  navigationCar.style.transformOrigin=
+    "50% 50%";
+
+}
+
+navigationCarMarker=
+  new maplibregl.Marker({
+    element:carElement,
+    anchor:"center"
+  })
     .setLngLat([
       routeCoordinates[0][1],
       routeCoordinates[0][0]
