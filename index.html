@@ -2976,29 +2976,32 @@ navigationCarMarker=
       routeCoordinates[0][0]
     ])
     .addTo(navigationMap);
+ const drawNavigationRoute=()=>{
+
   if(
-  navigationMap.getSource(
-    "navigation-route"
-  )
-){
+    navigationMap.getSource(
+      "navigation-route"
+    )
+  ){
 
-  navigationMap.getSource(
-    "navigation-route"
-  ).setData({
-    type:"Feature",
-    geometry:{
-      type:"LineString",
-      coordinates:
-        routeCoordinates.map(
-          point=>[
-            point[1],
-            point[0]
-          ]
-        )
-    }
-  });
+    navigationMap.getSource(
+      "navigation-route"
+    ).setData({
+      type:"Feature",
+      geometry:{
+        type:"LineString",
+        coordinates:
+          routeCoordinates.map(
+            point=>[
+              point[1],
+              point[0]
+            ]
+          )
+      }
+    });
 
-}else{
+    return;
+  }
 
   navigationMap.addSource(
     "navigation-route",
@@ -3024,13 +3027,13 @@ navigationCarMarker=
     id:"navigation-route-casing",
     type:"line",
     source:"navigation-route",
-    paint:{
-      "line-color":"#ffffff",
-      "line-width":10
-    },
     layout:{
       "line-cap":"round",
       "line-join":"round"
+    },
+    paint:{
+      "line-color":"#ffffff",
+      "line-width":10
     }
   });
 
@@ -3038,15 +3041,28 @@ navigationCarMarker=
     id:"navigation-route-line",
     type:"line",
     source:"navigation-route",
-    paint:{
-      "line-color":"#1976d2",
-      "line-width":7
-    },
     layout:{
       "line-cap":"round",
       "line-join":"round"
+    },
+    paint:{
+      "line-color":"#3478f6",
+      "line-width":7
     }
   });
+
+};
+
+if(navigationMap.loaded()){
+
+  drawNavigationRoute();
+
+}else{
+
+  navigationMap.once(
+    "load",
+    drawNavigationRoute
+  );
 
 }
 
