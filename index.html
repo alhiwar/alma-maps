@@ -2484,7 +2484,211 @@ function hideStatus(){
 
 }
 
+let searchSuggestionTimer=null;
+let selectedSearchDestination=null;
 
+async function searchPlaceSuggestions(query){
+
+  const url=
+    "https://nominatim.openstreetmap.org/search"+
+    "?format=json"+
+    "&limit=6"+
+    "&countrycodes=iq"+
+    "&addressdetails=1"+
+    "&accept-language="+
+    encodeURIComponent(currentLanguage)+
+    "&q="+
+    encodeURIComponent(query);
+
+  const response=
+    await fetch(url);
+
+  if(!response.ok){
+    throw new Error("Search suggestions error");
+  }
+
+  return await response.json();
+
+}
+
+
+function hideSearchSuggestions(){
+
+  const box=
+    document.getElementById("searchSuggestions");
+
+  if(!box){
+    return;
+  }
+
+  box.style.display="none";
+  box.innerHTML="";
+
+}
+
+
+function selectSearchSuggestion(place){
+
+  const input=
+    document.getElementById("toInput");
+
+  const button=
+    document.getElementById("navigationButton");
+
+  input.value=place.display_name;
+
+  destinationCoordinates={
+    lat:Number(place.lat),
+    lon:Number(place.lon),
+    name:place.display_name
+  };
+
+  selectedSearchDestination={
+    lat:Number(place.lat),
+    lon:Number(place.lon),
+    name:place.display_name
+  };
+
+  hideSearchSuggestions();
+
+  if(button){
+    button.style.display="block";
+  }
+
+}
+
+
+function showSearchSuggestions(results){
+
+  const box=
+    document.getElementById("searchSuggestions");
+
+  if(!box){
+    return;
+  }
+
+  box.innerHTML="";
+
+  if(!results.length){
+    box.style.display="none";
+    return;
+  }
+
+  results.forEach(place=>{
+
+    const item=
+      document.createElement("button");
+
+    item.type="button";
+    item.className="search-suggestion";
+
+    const icon=
+      document.createElement("span");
+
+    icon.className=
+      "search-suggestion-icon";
+
+    icon.textContent="📍";
+
+    const text=
+      document.createElement("span");
+
+    text.textContent=
+      place.display_name;
+
+    item.appendChild(icon);
+    item.appendChild(text);
+
+    item.addEventListener(
+      "click",
+      ()=>{
+        selectSearchSuggestion(place);
+      }
+    );
+
+    box.appendChild(item);
+
+  });
+
+  box.style.display="block";
+
+}
+
+
+async function handleDestinationSearch(){
+
+  const input=
+    document.getElementById("toInput");
+
+  const button=
+    document.getElementById("navigationButton");
+
+  const query=
+    input.value.trim();
+
+  selectedSearchDestination=null;
+  destinationCoordinates=null;
+
+  if(button){
+    button.style.display="none";
+  }
+
+  clearTimeout(searchSuggestionTimer);
+
+  if(query.length<2){
+    hideSearchSuggestions();
+    return;
+  }
+
+  searchSuggestionTimer=
+    setTimeout(
+      async ()=>{
+
+        try{
+
+          const results=
+            await searchPlaceSuggestions(
+              query
+            );
+
+          if(
+            document
+            .getElementById("toInput")
+            .value
+            .trim()!==query
+          ){
+            return;
+          }
+
+          showSearchSuggestions(
+            results
+          );
+
+        }catch(error){
+
+          console.error(
+            "ALMA search:",
+            error
+          );
+
+          hideSearchSuggestions();
+
+        }
+
+      },
+      450
+    );
+
+}
+
+
+document
+.getElementById("toInput")
+.addEventListener(
+  "input",
+  handleDestinationSearch
+);
+  
 async function geocodePlace(query){
 
   const url=
