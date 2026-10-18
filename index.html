@@ -3191,14 +3191,6 @@ const previousPosition=
   ];
   if(navigationMap){
 
- navigationMap.easeTo({
-  center:[
-    position[1],
-    position[0]
-  ],
-  duration:180,
-  easing:t=>t
-});
   if(navigationCarMarker){
 
     navigationCarMarker.setLngLat([
@@ -3210,7 +3202,16 @@ const previousPosition=
       calculateBearing(
         previousPosition,
         position
-      );
+    );
+
+     navigationMap.easeTo({
+  center:[
+    position[1],
+    position[0]
+  ],
+  duration:180,
+  easing:t=>t
+});
 
     const navigationCarElement=
       navigationCarMarker.getElement();
@@ -3221,13 +3222,8 @@ const previousPosition=
       );
 
     if(navigationCar){
-
-      navigationCar.style.transform=
-        "rotate("+
-        navigationBearing+
-        "deg)";
-
-    }
+navigationCar.style.transform=
+  "rotate(0deg)";
 
   }
 
