@@ -628,29 +628,31 @@ html[dir="ltr"] .my-location{
     📍 استخدم موقعي الحالي
   </button>
 
-  <div class="route-row">
-    <div class="route-icon">🏁</div>
+    <div class="route-row">
+    <div class="route-icon">🔍</div>
+
     <input
       id="toInput"
       type="text"
-      placeholder="إلى أين؟"
+      placeholder="إلى أين تريد الذهاب؟"
+      autocomplete="off"
     >
+
+    <button
+      id="microphoneButton"
+      type="button"
+      aria-label="الميكروفون"
+    >
+      🎤
+    </button>
   </div>
 
   <button
-    id="routeButton"
-    class="main-button"
-    onclick="calculateRoute()"
+    id="navigationButton"
+    class="navigation-button"
+    onclick="startAlmaNavigation()"
   >
-    🚗 احسب الطريق
-  </button>
-
-  <button
-    id="voiceButton"
-    class="voice-button active"
-    onclick="toggleVoice()"
-  >
-    🔊 الإرشاد الصوتي: يعمل
+    ابدأ
   </button>
 
   <div id="status" class="status"></div>
@@ -672,23 +674,6 @@ html[dir="ltr"] .my-location{
     </div>
 
   </div>
-
-  <button
-    id="previewButton"
-    class="preview-button"
-    onclick="startPreview()"
-  >
-    ▶ معاينة الرحلة
-  </button>
-
-  <button
-    id="navigationButton"
-    class="navigation-button"
-    onclick="startLiveNavigation()"
-  >
-    🧭 ابدأ الرحلة
-  </button>
-
   <button
     id="stopButton"
     class="stop-button"
@@ -1161,7 +1146,6 @@ function initializeNavigationMap(){
   if(navigationMap){
     return;
   }
-alert("MapLibre: " + typeof maplibregl);
   navigationMap=
     new maplibregl.Map({
       container:"navigationMap",
@@ -2657,7 +2641,134 @@ function drawRoute(){
   routeLine.bringToFront();
 
 }
+async function startAlmaNavigation(){
 
+  const t=
+    translations[currentLanguage];
+
+  const destinationText=
+    document
+    .getElementById("toInput")
+    .value
+    .trim();
+
+  if(!destinationText){
+
+    alert(t.enterPlaces);
+    return;
+
+  }
+
+  if(!navigator.geolocation){
+
+    alert(t.locationError);
+    return;
+
+  }
+
+  const button=
+    document.getElementById(
+      "navigationButton"
+    );
+
+  button.disabled=true;
+
+  showStatus(t.locating);
+
+  navigator.geolocation.getCurrentPosition(
+
+    async position=>{
+
+      try{
+
+        currentLocationCoordinates={
+          lat:position.coords.latitude,
+          lon:position.coords.longitude
+        };
+
+        usingCurrentLocation=true;
+
+        startCoordinates={
+          lat:currentLocationCoordinates.lat,
+          lon:currentLocationCoordinates.lon,
+          name:t.currentLocation
+        };
+
+        showStatus(t.searching);
+
+        const destination=
+          await geocodePlace(
+            destinationText
+          );
+
+        if(!destination){
+
+          hideStatus();
+          alert(t.notFound);
+          button.disabled=false;
+          return;
+
+        }
+
+        destinationCoordinates={
+          lat:destination.lat,
+          lon:destination.lon,
+          name:destination.name
+        };
+
+        showStatus(t.calculating);
+
+        const route=
+          await requestRoute(
+            startCoordinates,
+            destinationCoordinates
+          );
+
+        prepareRoute(route);
+
+        updateRouteSummary();
+
+        document
+        .getElementById("routeResult")
+        .style.display="block";
+
+        hideStatus();
+
+        button.disabled=false;
+
+        startLiveNavigation();
+
+      }catch(error){
+
+        console.error(error);
+
+        hideStatus();
+        button.disabled=false;
+
+        alert(t.routeError);
+
+      }
+
+    },
+
+    ()=>{
+
+      hideStatus();
+      button.disabled=false;
+
+      alert(t.locationError);
+
+    },
+
+    {
+      enableHighAccuracy:true,
+      timeout:15000,
+      maximumAge:0
+    }
+
+  );
+
+}
 
 async function calculateRoute(){
 
@@ -3103,26 +3214,18 @@ if(navigationMap.loaded()){
         zIndexOffset:1000
       }
     ).addTo(map);
-  
-if(routeCoordinates.length>1){
+if(carMarker){
 
-  rotateCarMarker(
-    calculateBearing(
-      routeCoordinates[0],
-      routeCoordinates[1]
-    )
-  );
+  map.removeLayer(carMarker);
+  carMarker=null;
+  currentCarBearing=0;
 
 }
-  focusNavigationPosition(
-    routeCoordinates[0],
-    false
-);
-  updateTripMetrics(
+
+updateTripMetrics(
   routeCoordinates[0],
   0
 );
-
 
 /*
   إعطاء الإرشاد الأول فوراً
@@ -3229,26 +3332,7 @@ navigationCar.style.transform=
 }
 
 }    
-if(carMarker){
 
-  carMarker.setLatLng(position);
-
-  const bearing=
-    calculateBearing(
-      previousPosition,
-      position
-    );
-
-  rotateCarMarker(
-    bearing
-  );
-
-}
-
-  focusNavigationPosition(
-    position,
-    true
-  );
 
   const progress=
     (
