@@ -3204,15 +3204,15 @@ const previousPosition=
         position
     );
 
-     navigationMap.easeTo({
+navigationMap.easeTo({
   center:[
     position[1],
     position[0]
   ],
+  bearing:navigationBearing + 180,
   duration:180,
   easing:t=>t
 });
-
     const navigationCarElement=
       navigationCarMarker.getElement();
 
