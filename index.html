@@ -648,7 +648,26 @@ html[dir="ltr"] .my-location{
 
   cursor:pointer;
 }
+  
+.alma-start-button{
+  position:fixed;
+  left:50%;
+  bottom:28px;
+  transform:translateX(-50%);
+  z-index:1000;
 
+  width:min(90%,420px);
+  height:58px;
+
+  border:0;
+  border-radius:29px;
+
+  font-family:inherit;
+  font-size:20px;
+  font-weight:700;
+
+  cursor:pointer;
+}
 </style>
 </head>
 
@@ -678,6 +697,10 @@ html[dir="ltr"] .my-location{
 
   </div>
 
+    <div
+    id="searchSuggestions"
+    class="search-suggestions"
+  ></div>
   <select id="languageSelect">
     <option value="ar">العربية</option>
     <option value="ckb">کوردی</option>
@@ -714,6 +737,7 @@ html[dir="ltr"] .my-location{
     id="navigationButton"
     class="alma-start-button"
     onclick="startAlmaNavigation()"
+     style="display:none;"
   >
     ابدأ
   </button>
