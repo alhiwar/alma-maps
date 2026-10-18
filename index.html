@@ -576,6 +576,78 @@ html[dir="ltr"] .my-location{
     white-space:nowrap;
   }
 }
+  .alma-search-bar{
+  position:fixed;
+  top:18px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:1000;
+
+  width:min(92%,620px);
+  height:58px;
+
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  padding:0 14px;
+
+  background:#ffffff;
+  border-radius:30px;
+
+  box-shadow:
+    0 2px 8px rgba(0,0,0,.22);
+}
+
+.alma-search-bar input{
+  flex:1;
+  min-width:0;
+
+  border:0;
+  outline:0;
+  background:transparent;
+
+  font-size:18px;
+  font-family:inherit;
+}
+
+.search-icon{
+  font-size:27px;
+  line-height:1;
+}
+
+.microphone-button{
+  width:42px;
+  height:42px;
+
+  border:0;
+  background:transparent;
+
+  font-size:23px;
+  cursor:pointer;
+}
+
+.alma-start-button{
+  position:fixed;
+
+  left:50%;
+  bottom:28px;
+  transform:translateX(-50%);
+
+  z-index:1000;
+
+  width:min(90%,420px);
+  height:58px;
+
+  border:0;
+  border-radius:29px;
+
+  font-family:inherit;
+  font-size:20px;
+  font-weight:700;
+
+  cursor:pointer;
+}
 
 </style>
 </head>
@@ -628,32 +700,36 @@ html[dir="ltr"] .my-location{
     📍 استخدم موقعي الحالي
   </button>
 
-    <div class="route-row">
-    <div class="route-icon">🔍</div>
+<div class="alma-search-bar">
 
-    <input
-      id="toInput"
-      type="text"
-      placeholder="إلى أين تريد الذهاب؟"
-      autocomplete="off"
-    >
+  <span class="search-icon">⌕</span>
 
-    <button
-      id="microphoneButton"
-      type="button"
-      aria-label="الميكروفون"
-    >
-      🎤
-    </button>
-  </div>
+  <input
+    id="toInput"
+    type="text"
+    placeholder="ابحث"
+    autocomplete="off"
+  >
 
   <button
-    id="navigationButton"
-    class="navigation-button"
-    onclick="startAlmaNavigation()"
+    id="microphoneButton"
+    class="microphone-button"
+    type="button"
+    aria-label="الميكروفون"
   >
-    ابدأ
+    🎤
   </button>
+
+</div>
+
+<button
+  id="navigationButton"
+  class="alma-start-button"
+  onclick="startAlmaNavigation()"
+>
+  ابدأ
+</button>
+</button>
 
   <div id="status" class="status"></div>
 
