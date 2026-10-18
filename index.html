@@ -656,80 +656,39 @@ html[dir="ltr"] .my-location{
 
 <div class="alma-panel">
 
-  <div class="top-row">
+  <div class="alma-search-bar">
 
-    <div class="brand">
+    <span class="search-icon">⌕</span>
 
-      <div class="logo">A</div>
+    <input
+      id="toInput"
+      type="text"
+      placeholder="ابحث"
+      autocomplete="off"
+    >
 
-      <div>
-        <h1>ALMA Maps</h1>
-        <p id="subtitle">دليلك الذكي في العراق</p>
-      </div>
-
-    </div>
-
-    <select id="languageSelect">
-      <option value="ar">العربية</option>
-      <option value="ckb">کوردی</option>
-      <option value="en">English</option>
-      <option value="tr">Türkçe</option>
-      <option value="fa">فارسی</option>
-    </select>
+    <button
+      id="microphoneButton"
+      class="microphone-button"
+      type="button"
+      aria-label="الميكروفون"
+    >
+      🎤
+    </button>
 
   </div>
+
+  <select id="languageSelect">
+    <option value="ar">العربية</option>
+    <option value="ckb">کوردی</option>
+    <option value="en">English</option>
+    <option value="tr">Türkçe</option>
+    <option value="fa">فارسی</option>
+  </select>
 
   <div id="liveBadge" class="live-badge">
     🛰️ الملاحة الحية تعمل
   </div>
-
-  <div class="route-row">
-    <div class="route-icon">●</div>
-    <input
-      id="fromInput"
-      type="text"
-      placeholder="من أين؟"
-    >
-  </div>
-
-  <button
-    id="myLocationButton"
-    class="my-location"
-    onclick="useMyLocation()"
-  >
-    📍 استخدم موقعي الحالي
-  </button>
-
-<div class="alma-search-bar">
-
-  <span class="search-icon">⌕</span>
-
-  <input
-    id="toInput"
-    type="text"
-    placeholder="ابحث"
-    autocomplete="off"
-  >
-
-  <button
-    id="microphoneButton"
-    class="microphone-button"
-    type="button"
-    aria-label="الميكروفون"
-  >
-    🎤
-  </button>
-
-</div>
-
-<button
-  id="navigationButton"
-  class="alma-start-button"
-  onclick="startAlmaNavigation()"
->
-  ابدأ
-</button>
-</button>
 
   <div id="status" class="status"></div>
 
@@ -750,6 +709,15 @@ html[dir="ltr"] .my-location{
     </div>
 
   </div>
+
+  <button
+    id="navigationButton"
+    class="alma-start-button"
+    onclick="startAlmaNavigation()"
+  >
+    ابدأ
+  </button>
+
   <button
     id="stopButton"
     class="stop-button"
@@ -768,11 +736,13 @@ html[dir="ltr"] .my-location{
       <div id="turnIcon">⬆️</div>
 
       <div>
+
         <div id="instructionText">
           تابع إلى الأمام
         </div>
 
         <div id="instructionDistance"></div>
+
       </div>
 
     </div>
