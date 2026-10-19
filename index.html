@@ -2920,13 +2920,16 @@ async function startAlmaNavigation(){
   const t=
     translations[currentLanguage];
 
-  const destinationText=
-    document
-    .getElementById("toInput")
-    .value
-    .trim();
+  const button=
+    document.getElementById(
+      "navigationButton"
+    );
 
-  if(!destinationText){
+  if(
+    !destinationCoordinates ||
+    !destinationCoordinates.lat ||
+    !destinationCoordinates.lon
+  ){
 
     alert(t.enterPlaces);
     return;
@@ -2940,12 +2943,9 @@ async function startAlmaNavigation(){
 
   }
 
-  const button=
-    document.getElementById(
-      "navigationButton"
-    );
-
   button.disabled=true;
+
+  hideSearchSuggestions();
 
   showStatus(t.locating);
 
@@ -2968,28 +2968,6 @@ async function startAlmaNavigation(){
           name:t.currentLocation
         };
 
-        showStatus(t.searching);
-
-        const destination=
-          await geocodePlace(
-            destinationText
-          );
-
-        if(!destination){
-
-          hideStatus();
-          alert(t.notFound);
-          button.disabled=false;
-          return;
-
-        }
-
-        destinationCoordinates={
-          lat:destination.lat,
-          lon:destination.lon,
-          name:destination.name
-        };
-
         showStatus(t.calculating);
 
         const route=
@@ -3002,10 +2980,6 @@ async function startAlmaNavigation(){
 
         updateRouteSummary();
 
-        document
-        .getElementById("routeResult")
-        .style.display="block";
-
         hideStatus();
 
         button.disabled=false;
@@ -3014,9 +2988,13 @@ async function startAlmaNavigation(){
 
       }catch(error){
 
-        console.error(error);
+        console.error(
+          "ALMA start navigation:",
+          error
+        );
 
         hideStatus();
+
         button.disabled=false;
 
         alert(t.routeError);
@@ -3028,6 +3006,7 @@ async function startAlmaNavigation(){
     ()=>{
 
       hideStatus();
+
       button.disabled=false;
 
       alert(t.locationError);
@@ -3043,7 +3022,6 @@ async function startAlmaNavigation(){
   );
 
 }
-
 async function calculateRoute(){
 
   stopAllNavigation(false);
@@ -3761,25 +3739,48 @@ function startLiveNavigation(){
       stopAllNavigation(false);
 
       liveNavigation=true;
+
       requestNavigationWakeLock();
+
       currentStepIndex=0;
 
       resetSpokenInstruction();
 
-      document.getElementById("liveBadge")
-      .style.display="block";
+      const liveBadge=
+        document.getElementById(
+          "liveBadge"
+        );
 
-      document.getElementById("navigationBox")
-      .style.display="block";
+      const navigationBox=
+        document.getElementById(
+          "navigationBox"
+        );
 
-      document.getElementById("previewButton")
-      .style.display="none";
+      const navigationButton=
+        document.getElementById(
+          "navigationButton"
+        );
 
-      document.getElementById("navigationButton")
-      .style.display="none";
+      const stopButton=
+        document.getElementById(
+          "stopButton"
+        );
 
-      document.getElementById("stopButton")
-      .style.display="block";
+      if(liveBadge){
+        liveBadge.style.display="block";
+      }
+
+      if(navigationBox){
+        navigationBox.style.display="block";
+      }
+
+      if(navigationButton){
+        navigationButton.style.display="none";
+      }
+
+      if(stopButton){
+        stopButton.style.display="block";
+      }
 
       enterMobileNavigationMode();
 
@@ -3805,6 +3806,7 @@ function startLiveNavigation(){
     function(){
 
       hideStatus();
+
       alert(t.locationError);
 
     },
@@ -3818,7 +3820,6 @@ function startLiveNavigation(){
   );
 
 }
-
 
 async function handleLivePosition(
   position
