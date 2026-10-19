@@ -2916,63 +2916,117 @@ function prepareRoute(route){
 
 }
 
-
 function drawRoute(){
 
-  /*
-    إزالة المسار السابق
-  */
+  initializeNavigationMap();
 
-  if(routeLine){
-    map.removeLayer(routeLine);
-    routeLine=null;
+  if(
+    !navigationMap ||
+    !routeCoordinates.length
+  ){
+    return;
   }
 
-  if(routeCasingLine){
-    map.removeLayer(routeCasingLine);
-    routeCasingLine=null;
+  const routeGeoJSON={
+    type:"Feature",
+    properties:{},
+    geometry:{
+      type:"LineString",
+
+      coordinates:
+        routeCoordinates.map(
+          coordinate=>[
+            coordinate[1],
+            coordinate[0]
+          ]
+        )
+    }
+  };
+
+
+  function updateMapLibreRoute(){
+
+    if(
+      navigationMap.getSource(
+        "alma-route"
+      )
+    ){
+
+      navigationMap
+      .getSource("alma-route")
+      .setData(routeGeoJSON);
+
+      return;
+    }
+
+
+    navigationMap.addSource(
+      "alma-route",
+      {
+        type:"geojson",
+        data:routeGeoJSON
+      }
+    );
+
+
+    navigationMap.addLayer({
+
+      id:"alma-route-casing",
+
+      type:"line",
+
+      source:"alma-route",
+
+      layout:{
+        "line-cap":"round",
+        "line-join":"round"
+      },
+
+      paint:{
+        "line-color":"#ffffff",
+        "line-width":16,
+        "line-opacity":0.96
+      }
+
+    });
+
+
+    navigationMap.addLayer({
+
+      id:"alma-route-line",
+
+      type:"line",
+
+      source:"alma-route",
+
+      layout:{
+        "line-cap":"round",
+        "line-join":"round"
+      },
+
+      paint:{
+        "line-color":"#3478f6",
+        "line-width":10,
+        "line-opacity":1
+      }
+
+    });
+
   }
 
-  /*
-    الطبقة الخارجية:
-    تفصل مسار الملاحة بصرياً عن الطرق
-    والأسماء الموجودة على الخريطة.
-  */
 
-  routeCasingLine=
-    L.polyline(
-      routeCoordinates,
-      {
-        color:"#ffffff",
-        weight:17,
-        opacity:.96,
-        lineCap:"round",
-        lineJoin:"round"
-      }
-    ).addTo(map);
+  if(navigationMap.loaded()){
 
-  /*
-    المسار الرئيسي لـ ALMA
-  */
+    updateMapLibreRoute();
 
-  routeLine=
-    L.polyline(
-      routeCoordinates,
-      {
-        color:"#3478f6",
-        weight:12,
-        opacity:1,
-        lineCap:"round",
-        lineJoin:"round"
-      }
-    ).addTo(map);
+  }else{
 
-  /*
-    إبقاء المسار الرئيسي فوق الحافة
-  */
+    navigationMap.once(
+      "load",
+      updateMapLibreRoute
+    );
 
-  routeCasingLine.bringToFront();
-  routeLine.bringToFront();
+  }
 
 }
 async function startAlmaNavigation(){
@@ -3037,7 +3091,8 @@ async function startAlmaNavigation(){
           );
 
         prepareRoute(route);
-
+        
+    drawRoute();
         updateRouteSummary();
 
         hideStatus();
@@ -3084,7 +3139,17 @@ async function startAlmaNavigation(){
 }
 async function calculateRoute(){
 
-  stopAllNavigation(false);
+if(gpsWatchId!==null){
+
+  navigator.geolocation.clearWatch(
+    gpsWatchId
+  );
+
+  gpsWatchId=null;
+
+}
+
+previousLivePosition=null;
 
   const t=
     translations[currentLanguage];
@@ -4053,6 +4118,83 @@ if(!navigationCarMarker){
   ]);
 
 }
+  let navigationBearing=
+  liveBearing;
+
+if(
+  !Number.isFinite(
+    navigationBearing
+  )
+){
+
+  const nearestIndex=
+    nearestRouteIndex(
+      currentPoint
+    );
+
+  if(
+    Number.isInteger(nearestIndex) &&
+    nearestIndex>=0 &&
+    nearestIndex<
+      routeCoordinates.length-1
+  ){
+
+    const lookAheadIndex=
+      Math.min(
+        nearestIndex+5,
+        routeCoordinates.length-1
+      );
+
+    navigationBearing=
+      calculateBearing(
+        routeCoordinates[
+          nearestIndex
+        ],
+        routeCoordinates[
+          lookAheadIndex
+        ]
+      );
+
+  }
+
+}
+
+if(
+  !Number.isFinite(
+    navigationBearing
+  )
+){
+
+  navigationBearing=0;
+
+}
+
+navigationMap.easeTo({
+
+  center:[
+    lon,
+    lat
+  ],
+
+  zoom:17,
+
+  bearing:
+    navigationBearing,
+
+  pitch:48,
+
+  padding:{
+    top:100,
+    bottom:260,
+    left:0,
+    right:0
+  },
+
+  duration:650,
+
+  essential:true
+
+});
   updateInstruction(
     currentPoint
   );
@@ -5386,48 +5528,79 @@ function stopAllNavigation(
   }
 
   liveNavigation=false;
+
   releaseNavigationWakeLock();
-  
+
   leaveMobileNavigationMode();
 
   stopSpeech();
+
   resetSpokenInstruction();
 
-  document.getElementById("liveBadge")
-  .style.display="none";
-
-  document.getElementById("stopButton")
-  .style.display="none";
-
-  if(carMarker){
-
-    map.removeLayer(
-      carMarker
+  const liveBadge=
+    document.getElementById(
+      "liveBadge"
     );
 
-    carMarker=null;
+  const stopButton=
+    document.getElementById(
+      "stopButton"
+    );
+
+  const navigationButton=
+    document.getElementById(
+      "navigationButton"
+    );
+
+  const navigationBox=
+    document.getElementById(
+      "navigationBox"
+    );
+
+  if(liveBadge){
+    liveBadge.style.display="none";
+  }
+
+  if(stopButton){
+    stopButton.style.display="none";
+  }
+
+  if(navigationCarMarker){
+
+    navigationCarMarker.remove();
+
+    navigationCarMarker=null;
 
   }
 
-  if(currentRoute){
+  if(
+    currentRoute &&
+    navigationButton
+  ){
 
-    document.getElementById("previewButton")
-    .style.display="block";
-
-    document.getElementById("navigationButton")
-    .style.display="block";
-
-  }
-
-  if(hideNavigation){
-
-    document.getElementById("navigationBox")
-    .style.display="none";
+    navigationButton.style.display=
+      "block";
 
   }
 
-  document.getElementById("progressBar")
-  .style.width="0%";
+  if(
+    hideNavigation &&
+    navigationBox
+  ){
+
+    navigationBox.style.display=
+      "none";
+
+  }
+
+  const progressBar=
+    document.getElementById(
+      "progressBar"
+    );
+
+  if(progressBar){
+    progressBar.style.width="0%";
+  }
 
   document.getElementById(
     "remainingTimeValue"
@@ -5441,10 +5614,11 @@ function stopAllNavigation(
     "arrivalTimeValue"
   ).textContent="—";
 
+  previousLivePosition=null;
+
   hideStatus();
 
 }
-
 
 function formatDuration(minutes){
 
@@ -5511,28 +5685,6 @@ document
   }
 );
 
-
-document
-.getElementById("fromInput")
-.addEventListener(
-  "input",
-  function(){
-
-    if(
-      this.value !==
-      translations[
-        currentLanguage
-      ].currentLocation
-    ){
-
-      usingCurrentLocation=false;
-
-    }
-
-  }
-);
-
-
 document
 .getElementById("toInput")
 .addEventListener(
@@ -5540,16 +5692,33 @@ document
   function(event){
 
     if(
-      event.key==="Enter"
+      event.key!=="Enter"
+    ){
+      return;
+    }
+
+    event.preventDefault();
+
+    if(
+      destinationCoordinates &&
+      Number.isFinite(
+        Number(
+          destinationCoordinates.lat
+        )
+      ) &&
+      Number.isFinite(
+        Number(
+          destinationCoordinates.lon
+        )
+      )
     ){
 
-      calculateRoute();
+      startAlmaNavigation();
 
     }
 
   }
 );
-
 
 window.addEventListener(
   "resize",
