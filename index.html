@@ -1476,6 +1476,66 @@ iconAnchor:[16,25]
 });
   
 let currentCarBearing=0;
+  function calculateDistance(pointA,pointB){
+
+  if(
+    !pointA ||
+    !pointB
+  ){
+    return Infinity;
+  }
+
+  const lat1=
+    Number(pointA[0]);
+
+  const lon1=
+    Number(pointA[1]);
+
+  const lat2=
+    Number(pointB[0]);
+
+  const lon2=
+    Number(pointB[1]);
+
+  if(
+    !Number.isFinite(lat1) ||
+    !Number.isFinite(lon1) ||
+    !Number.isFinite(lat2) ||
+    !Number.isFinite(lon2)
+  ){
+    return Infinity;
+  }
+
+  const earthRadius=
+    6371000;
+
+  const toRadians=
+    degrees=>
+      degrees*Math.PI/180;
+
+  const dLat=
+    toRadians(lat2-lat1);
+
+  const dLon=
+    toRadians(lon2-lon1);
+
+  const a=
+    Math.sin(dLat/2)*
+    Math.sin(dLat/2)+
+    Math.cos(toRadians(lat1))*
+    Math.cos(toRadians(lat2))*
+    Math.sin(dLon/2)*
+    Math.sin(dLon/2);
+
+  const c=
+    2*Math.atan2(
+      Math.sqrt(a),
+      Math.sqrt(1-a)
+    );
+
+  return earthRadius*c;
+
+}
 function calculateBearing(from,to){
 
   const lat1=from[0]*Math.PI/180;
@@ -3719,11 +3779,11 @@ function startLiveNavigation(){
         startCoordinates.lon
       ];
 
-      const distanceFromStart=
-        map.distance(
-          realPosition,
-          routeStart
-        );
+     const distanceFromStart=
+  calculateDistance(
+    realPosition,
+    routeStart
+  );
 
       if(
         distanceFromStart>
@@ -3859,12 +3919,11 @@ if(
     position.coords.heading;
 
 }else if(previousLivePosition){
-
-  const movedDistance=
-    map.distance(
-      previousLivePosition,
-      currentPoint
-    );
+const movedDistance=
+  calculateDistance(
+    previousLivePosition,
+    currentPoint
+  );
 
   if(movedDistance>=3){
 
@@ -3883,37 +3942,117 @@ previousLivePosition=[
   lon
 ];
 
-  if(!carMarker){
+  initializeNavigationMap();
 
-    carMarker=
-      L.marker(
-        currentPoint,
-        {
-          icon:carIcon,
-          zIndexOffset:1000
-        }
-      ).addTo(map);
-
-  }else{
-
-    carMarker.setLatLng(
-      currentPoint
-    );
-
-  }
-  if(liveBearing!==null){
-
-  rotateCarMarker(
-    liveBearing
+const navigationContainer=
+  document.getElementById(
+    "navigationMap"
   );
 
+if(navigationContainer){
+  navigationContainer.style.display="block";
 }
 
-  focusNavigationPosition(
-    currentPoint,
-    true
-  );
+document.getElementById("map")
+.style.display="none";
 
+navigationMap.resize();
+
+if(!navigationCarMarker){
+
+  const carElement=
+    document.createElement("div");
+
+  carElement.className=
+    "car-icon";
+
+  carElement.innerHTML=`
+    <svg
+      viewBox="0 0 46 70"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
+
+      <path
+        d="
+          M23 2
+          C15 2 11 7 9 15
+          L6 50
+          C5 60 11 67 23 68
+          C35 67 41 60 40 50
+          L37 15
+          C35 7 31 2 23 2
+          Z
+        "
+        fill="#dbe4ea"
+        stroke="#64727c"
+        stroke-width="1.4"
+      />
+
+      <path
+        d="
+          M14 18
+          C16 12 19 10 23 10
+          C27 10 30 12 32 18
+          L30 27
+          L16 27
+          Z
+        "
+        fill="#4f83a1"
+      />
+
+      <path
+        d="
+          M14 47
+          L32 47
+          L30 57
+          C28 60 18 60 16 57
+          Z
+        "
+        fill="#4f83a1"
+      />
+
+      <ellipse
+        cx="14"
+        cy="9"
+        rx="3.5"
+        ry="2"
+        fill="#fff7bf"
+      />
+
+      <ellipse
+        cx="32"
+        cy="9"
+        rx="3.5"
+        ry="2"
+        fill="#fff7bf"
+      />
+
+    </svg>
+  `;
+
+  navigationCarMarker=
+    new maplibregl.Marker({
+      element:carElement,
+      anchor:"center"
+    })
+    .setLngLat([
+      lon,
+      lat
+    ])
+    .addTo(
+      navigationMap
+    );
+
+}else{
+
+  navigationCarMarker
+  .setLngLat([
+    lon,
+    lat
+  ]);
+
+}
   updateInstruction(
     currentPoint
   );
@@ -3925,13 +4064,13 @@ previousLivePosition=[
   if(destinationCoordinates){
 
     const distanceToDestination=
-      map.distance(
-        currentPoint,
-        [
-          destinationCoordinates.lat,
-          destinationCoordinates.lon
-        ]
-      );
+  calculateDistance(
+    currentPoint,
+    [
+      destinationCoordinates.lat,
+      destinationCoordinates.lon
+    ]
+  );
 
     if(
       distanceToDestination<35
@@ -4063,10 +4202,10 @@ function distanceFromRoute(point){
   ){
 
     const distance=
-      map.distance(
-        point,
-        routeCoordinates[i]
-      );
+  calculateDistance(
+    point,
+    routeCoordinates[i]
+  );
 
     if(distance<minimum){
       minimum=distance;
@@ -4132,11 +4271,11 @@ function updateInstruction(position){
       maneuver.location[0]
     ];
 
-    const distance=
-      map.distance(
-        position,
-        point
-      );
+   const distance=
+  calculateDistance(
+    position,
+    point
+  );
 
     if(
       distance<
@@ -4178,11 +4317,11 @@ function updateInstruction(position){
     step.maneuver.location[0]
   ];
 
-  let distanceToManeuver=
-    map.distance(
-      position,
-      maneuverPoint
-    );
+ let distanceToManeuver=
+  calculateDistance(
+    position,
+    maneuverPoint
+  );
 
   if(
     distanceToManeuver<30 &&
@@ -4207,13 +4346,11 @@ function updateInstruction(position){
         step.maneuver.location[1],
         step.maneuver.location[0]
       ];
-
-      distanceToManeuver=
-        map.distance(
-          position,
-          maneuverPoint
-        );
-
+distanceToManeuver=
+  calculateDistance(
+    position,
+    maneuverPoint
+  );
     }
 
   }
@@ -4301,19 +4438,19 @@ function maneuverDistanceBetween(
     return Infinity;
   }
 
-  return map.distance(
+  return calculateDistance(
 
-    [
-      stepA.maneuver.location[1],
-      stepA.maneuver.location[0]
-    ],
+  [
+    stepA.maneuver.location[1],
+    stepA.maneuver.location[0]
+  ],
 
-    [
-      stepB.maneuver.location[1],
-      stepB.maneuver.location[0]
-    ]
+  [
+    stepB.maneuver.location[1],
+    stepB.maneuver.location[0]
+  ]
 
-  );
+);
 
 }
 
