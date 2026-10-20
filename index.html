@@ -2872,49 +2872,51 @@ async function startAlmaNavigation(){
     drawRoute();
         updateRouteSummary();
 
-        hideStatus();
-
-        button.disabled=false;
-
-        startLiveNavigation();
-
-      }catch(error){
-
-        console.error(
-          "ALMA start navigation:",
-          error
-        );
-
-        hideStatus();
-
-        button.disabled=false;
-
-        alert(t.routeError);
-
-      }
-
-    },
-
-    ()=>{
+      error=>{
 
       hideStatus();
 
       button.disabled=false;
 
-      alert(t.locationError);
+      console.error(
+        "ALMA geolocation error:",
+        error
+      );
+
+      let message="";
+
+      switch(error.code){
+
+        case 1:
+          message=
+            "تم رفض إذن الوصول إلى الموقع. اسمح لـ ALMA باستخدام موقعك ثم حاول مرة أخرى.";
+          break;
+
+        case 2:
+          message=
+            "الإذن موجود، لكن الهاتف لم يتمكن من تحديد موقعك حاليًا. تأكد من تشغيل خدمة الموقع وحاول في مكان مفتوح.";
+          break;
+
+        case 3:
+          message=
+            "انتهت مهلة تحديد الموقع قبل أن يرسل الهاتف موقعك. سنحتاج إلى تحسين مهلة GPS في ALMA.";
+          break;
+
+        default:
+          message=
+            "حدث خطأ غير معروف أثناء تحديد الموقع. رمز الخطأ: "+
+            error.code;
+      }
+
+      alert(message);
 
     },
 
     {
       enableHighAccuracy:true,
-      timeout:15000,
+      timeout:30000,
       maximumAge:0
-    }
-
-  );
-
-}
-
+    }     
 function updateRouteSummary(){
 
   const t=
