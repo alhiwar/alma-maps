@@ -370,18 +370,14 @@ html[dir="ltr"] .my-location{
   /*
     إخفاء لوحة البحث بالكامل أثناء القيادة
   */
-
-  body.mobile-navigation .top-row,
-  body.mobile-navigation .route-row,
-  body.mobile-navigation .my-location,
-  body.mobile-navigation #routeButton,
-  body.mobile-navigation #voiceButton,
-  body.mobile-navigation #status,
-  body.mobile-navigation #routeResult,
-  body.mobile-navigation #previewButton,
-  body.mobile-navigation #navigationButton{
-    display:none !important;
-  }
+body.mobile-navigation .top-row,
+body.mobile-navigation .route-row,
+body.mobile-navigation .my-location,
+body.mobile-navigation #status,
+body.mobile-navigation #routeResult,
+body.mobile-navigation #navigationButton{
+  display:none !important;
+}
 
   /*
     بطاقة المناورة الرئيسية
@@ -1075,16 +1071,12 @@ let startMarker=null;
 let destinationMarker=null;
 let routeLine=null;
 let routeCasingLine=null;
-let carMarker=null;
 
 let currentRoute=null;
 let routeCoordinates=[];
 let routeSteps=[];
 
 let currentStepIndex=0;
-
-let previewTimer=null;
-let previewIndex=0;
 
 let gpsWatchId=null;
 let liveNavigation=false;
@@ -1195,53 +1187,56 @@ const OFF_ROUTE_DISTANCE=80;
 const RECALCULATION_DELAY=10000;
 const MAX_START_DISTANCE=20000;
 
+const almaMapStyle={
+  version:8,
 
-const map=L.map("map").setView(
-  [33.2232,43.6793],
-  6
-);
+  sources:{
+    osm:{
+      type:"raster",
+      tiles:[
+        "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
+      ],
+      tileSize:256,
+      attribution:"© OpenStreetMap contributors"
+    }
+  },
 
-L.tileLayer(
-  "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
-  {
-    maxZoom:19,
-    attribution:"&copy; OpenStreetMap contributors"
-  }
-).addTo(map);
+  layers:[
+    {
+      id:"osm",
+      type:"raster",
+      source:"osm"
+    }
+  ]
+};
+
+
+const map=
+  new maplibregl.Map({
+    container:"map",
+    style:almaMapStyle,
+    center:[
+      43.6793,
+      33.2232
+    ],
+    zoom:5
+  });
+
+
 let navigationMap=null;
-let navigationCarMarker=null;  
+let navigationCarMarker=null;
+
 
 function initializeNavigationMap(){
 
   if(navigationMap){
     return;
   }
+
   navigationMap=
     new maplibregl.Map({
       container:"navigationMap",
-
-      style:{
-        version:8,
-
-        sources:{
-          osm:{
-            type:"raster",
-            tiles:[
-              "https://tile.openstreetmap.org/{z}/{x}/{y}.png"
-            ],
-            tileSize:256,
-            attribution:"© OpenStreetMap contributors"
-          }
-        },
-
-        layers:[
-          {
-            id:"osm",
-            type:"raster",
-            source:"osm"
-          }
-        ]
-      },
+      style:almaMapStyle,
 
       center:[
         43.6793,
@@ -1252,230 +1247,205 @@ function initializeNavigationMap(){
     });
 
 }
-const carIcon=L.divIcon({
+const carSvgHtml=`
+  <div class="car-icon">
 
-  className:"",
+    <svg
+      viewBox="0 0 46 70"
+      xmlns="http://www.w3.org/2000/svg"
+      aria-hidden="true"
+    >
 
-  html:`
-    <div class="car-icon">
+      <defs>
 
-      <svg
-        viewBox="0 0 46 70"
-        xmlns="http://www.w3.org/2000/svg"
-        aria-hidden="true"
-      >
+        <linearGradient
+          id="almaCarBody"
+          x1="0"
+          y1="0"
+          x2="1"
+          y2="1"
+        >
+          <stop
+            offset="0%"
+            stop-color="#f8fafc"
+          />
+          <stop
+            offset="48%"
+            stop-color="#dbe4ea"
+          />
+          <stop
+            offset="100%"
+            stop-color="#9aa8b2"
+          />
+        </linearGradient>
 
-        <defs>
+        <linearGradient
+          id="almaGlass"
+          x1="0"
+          y1="0"
+          x2="0"
+          y2="1"
+        >
+          <stop
+            offset="0%"
+            stop-color="#8fd3f4"
+          />
+          <stop
+            offset="100%"
+            stop-color="#24475d"
+          />
+        </linearGradient>
 
-          <linearGradient
-            id="almaCarBody"
-            x1="0"
-            y1="0"
-            x2="1"
-            y2="1"
-          >
-            <stop
-              offset="0%"
-              stop-color="#f8fafc"
-            />
-            <stop
-              offset="48%"
-              stop-color="#dbe4ea"
-            />
-            <stop
-              offset="100%"
-              stop-color="#9aa8b2"
-            />
-          </linearGradient>
+      </defs>
 
-          <linearGradient
-            id="almaGlass"
-            x1="0"
-            y1="0"
-            x2="0"
-            y2="1"
-          >
-            <stop
-              offset="0%"
-              stop-color="#8fd3f4"
-            />
-            <stop
-              offset="100%"
-              stop-color="#24475d"
-            />
-          </linearGradient>
+      <rect
+        x="2"
+        y="17"
+        width="6"
+        height="15"
+        rx="2"
+        fill="#20252a"
+      />
 
-        </defs>
+      <rect
+        x="38"
+        y="17"
+        width="6"
+        height="15"
+        rx="2"
+        fill="#20252a"
+      />
 
-        <!-- العجلات -->
+      <rect
+        x="2"
+        y="45"
+        width="6"
+        height="15"
+        rx="2"
+        fill="#20252a"
+      />
 
-        <rect
-          x="2"
-          y="17"
-          width="6"
-          height="15"
-          rx="2"
-          fill="#20252a"
-        />
+      <rect
+        x="38"
+        y="45"
+        width="6"
+        height="15"
+        rx="2"
+        fill="#20252a"
+      />
 
-        <rect
-          x="38"
-          y="17"
-          width="6"
-          height="15"
-          rx="2"
-          fill="#20252a"
-        />
+      <path
+        d="
+          M23 2
+          C15 2 11 7 9 15
+          L6 50
+          C5 60 11 67 23 68
+          C35 67 41 60 40 50
+          L37 15
+          C35 7 31 2 23 2
+          Z
+        "
+        fill="url(#almaCarBody)"
+        stroke="#64727c"
+        stroke-width="1.4"
+      />
 
-        <rect
-          x="2"
-          y="45"
-          width="6"
-          height="15"
-          rx="2"
-          fill="#20252a"
-        />
+      <path
+        d="
+          M14 18
+          C16 12 19 10 23 10
+          C27 10 30 12 32 18
+          L30 27
+          L16 27
+          Z
+        "
+        fill="url(#almaGlass)"
+        stroke="#ffffff"
+        stroke-width=".8"
+      />
 
-        <rect
-          x="38"
-          y="45"
-          width="6"
-          height="15"
-          rx="2"
-          fill="#20252a"
-        />
+      <path
+        d="
+          M16 29
+          L30 29
+          L32 45
+          L14 45
+          Z
+        "
+        fill="#f8fafc"
+        stroke="#9aa8b2"
+        stroke-width=".8"
+      />
 
-        <!-- جسم السيارة -->
+      <path
+        d="
+          M14 47
+          L32 47
+          L30 57
+          C28 60 18 60 16 57
+          Z
+        "
+        fill="url(#almaGlass)"
+        stroke="#ffffff"
+        stroke-width=".8"
+      />
 
-        <path
-          d="
-            M23 2
-            C15 2 11 7 9 15
-            L6 50
-            C5 60 11 67 23 68
-            C35 67 41 60 40 50
-            L37 15
-            C35 7 31 2 23 2
-            Z
-          "
-          fill="url(#almaCarBody)"
-          stroke="#64727c"
-          stroke-width="1.4"
-        />
+      <ellipse
+        cx="6"
+        cy="29"
+        rx="4"
+        ry="2.5"
+        fill="#dbe4ea"
+        stroke="#64727c"
+        stroke-width=".8"
+      />
 
-        <!-- الزجاج الأمامي -->
+      <ellipse
+        cx="40"
+        cy="29"
+        rx="4"
+        ry="2.5"
+        fill="#dbe4ea"
+        stroke="#64727c"
+        stroke-width=".8"
+      />
 
-        <path
-          d="
-            M14 18
-            C16 12 19 10 23 10
-            C27 10 30 12 32 18
-            L30 27
-            L16 27
-            Z
-          "
-          fill="url(#almaGlass)"
-          stroke="#ffffff"
-          stroke-width=".8"
-        />
+      <ellipse
+        cx="14"
+        cy="9"
+        rx="3.5"
+        ry="2"
+        fill="#fff7bf"
+      />
 
-        <!-- السقف -->
+      <ellipse
+        cx="32"
+        cy="9"
+        rx="3.5"
+        ry="2"
+        fill="#fff7bf"
+      />
 
-        <path
-          d="
-            M16 29
-            L30 29
-            L32 45
-            L14 45
-            Z
-          "
-          fill="#f8fafc"
-          stroke="#9aa8b2"
-          stroke-width=".8"
-        />
+      <ellipse
+        cx="13"
+        cy="59"
+        rx="3.5"
+        ry="2.5"
+        fill="#e53935"
+      />
 
-        <!-- الزجاج الخلفي -->
+      <ellipse
+        cx="33"
+        cy="59"
+        rx="3.5"
+        ry="2.5"
+        fill="#e53935"
+      />
 
-        <path
-          d="
-            M14 47
-            L32 47
-            L30 57
-            C28 60 18 60 16 57
-            Z
-          "
-          fill="url(#almaGlass)"
-          stroke="#ffffff"
-          stroke-width=".8"
-        />
+    </svg>
 
-        <!-- المرايا -->
-
-        <ellipse
-          cx="6"
-          cy="29"
-          rx="4"
-          ry="2.5"
-          fill="#dbe4ea"
-          stroke="#64727c"
-          stroke-width=".8"
-        />
-
-        <ellipse
-          cx="40"
-          cy="29"
-          rx="4"
-          ry="2.5"
-          fill="#dbe4ea"
-          stroke="#64727c"
-          stroke-width=".8"
-        />
-
-        <!-- المصابيح الأمامية -->
-
-        <ellipse
-          cx="14"
-          cy="9"
-          rx="3.5"
-          ry="2"
-          fill="#fff7bf"
-        />
-
-        <ellipse
-          cx="32"
-          cy="9"
-          rx="3.5"
-          ry="2"
-          fill="#fff7bf"
-        />
-
-        <!-- المصابيح الخلفية -->
-
-        <ellipse
-          cx="13"
-          cy="59"
-          rx="3.5"
-          ry="2.5"
-          fill="#e53935"
-        />
-
-        <ellipse
-          cx="33"
-          cy="59"
-          rx="3.5"
-          ry="2.5"
-          fill="#e53935"
-        />
-
-      </svg>
-
-    </div>
-  `,
-iconSize:[32,49],
-iconAnchor:[16,25]
-});
-  
-let currentCarBearing=0;
+  </div>
+`;  
   function calculateDistance(pointA,pointB){
 
   if(
@@ -1564,93 +1534,6 @@ function calculateBearing(from,to){
 
 }  
   
-function rotateCarMarker(bearing){
-
-  if(
-    !carMarker ||
-    !Number.isFinite(bearing)
-  ){
-    return;
-  }
-
-  const markerElement=
-    carMarker.getElement();
-
-  if(!markerElement){
-    return;
-  }
-
-  const car=
-    markerElement.querySelector(
-      ".car-icon"
-    );
-
-  if(!car){
-    return;
-  }
-
-  /*
-    نحسب أقصر فرق بين الاتجاه الحالي
-    والاتجاه الجديد.
-
-    مثال:
-    من 358 إلى 2 = أربع درجات فقط،
-    وليس دورة كاملة تقريباً.
-  */
-
-  let difference=
-    (
-      (
-        bearing-
-        currentCarBearing+
-        540
-      )%360
-    )-180;
-
-  /*
-    التغيرات الصغيرة جداً غالباً ناتجة
-    عن تقارب نقاط الطريق أو اهتزاز GPS.
-    نتجاهلها حتى لا تهتز السيارة.
-  */
-
-  if(Math.abs(difference)<2){
-    return;
-  }
-
-  /*
-    إذا حدثت قفزة كبيرة جداً في تحديث واحد،
-    نخففها بدلاً من جعل السيارة تقفز بعنف.
-  */
-
-  const MAX_TURN_PER_UPDATE=35;
-
-  if(
-    difference>
-    MAX_TURN_PER_UPDATE
-  ){
-    difference=
-      MAX_TURN_PER_UPDATE;
-  }
-
-  if(
-    difference<
-    -MAX_TURN_PER_UPDATE
-  ){
-    difference=
-      -MAX_TURN_PER_UPDATE;
-  }
-
-  currentCarBearing+=difference;
-
-  car.style.transition=
-    "transform .28s ease-out";
-
-  car.style.transform=
-    "rotate("+
-    currentCarBearing+
-    "deg)";
-
-}
 
 const tripLabels={
   ar:{
@@ -1849,11 +1732,10 @@ function nearestRouteIndex(
   ){
 
     const distance=
-      map.distance(
-        position,
-        routeCoordinates[i]
-      );
-
+  calculateDistance(
+    position,
+    routeCoordinates[i]
+  );
     if(
       distance<
       bestDistance
@@ -1885,10 +1767,10 @@ function nearestRouteIndex(
   ){
 
     const distance=
-      map.distance(
-        position,
-        routeCoordinates[i]
-      );
+  calculateDistance(
+    position,
+    routeCoordinates[i]
+  );
 
     if(
       distance<
@@ -1970,89 +1852,6 @@ function updateTripMetrics(
     formatArrivalTime(
       remainingSeconds
     );
-
-}
-function focusNavigationPosition(
-  position,
-  animate=true
-){
-
-  const navigationZoom=17;
-
-  if(!animate){
-
-    map.setView(
-      position,
-      navigationZoom,
-      {
-        animate:false
-      }
-    );
-
-    setTimeout(()=>{
-
-      const point=
-        map.latLngToContainerPoint(
-          position
-        );
-
-      const targetPoint=
-        L.point(
-          point.x,
-          point.y-
-          map.getSize().y*0.18
-        );
-
-      const targetCenter=
-        map.containerPointToLatLng(
-          targetPoint
-        );
-
-      map.setView(
-        targetCenter,
-        navigationZoom,
-        {
-          animate:false
-        }
-      );
-
-    },50);
-
-    return;
-  }
-
-  const point=
-    map.latLngToContainerPoint(
-      position
-    );
-
-  const desiredPoint=
-    L.point(
-      map.getSize().x/2,
-      map.getSize().y*0.78
-    );
-
-  const offset=
-    point.subtract(
-      desiredPoint
-    );
-
-  if(
-    Math.abs(offset.x)<8 &&
-    Math.abs(offset.y)<8
-  ){
-    return;
-  }
-
-  map.panBy(
-    offset,
-    {
-      animate:true,
-      duration:0.35,
-      easeLinearity:0.25,
-      noMoveStart:true
-    }
-  );
 
 }
 
@@ -2454,25 +2253,38 @@ function toggleVoice(){
 function updateVoiceButton(){
 
   const button=
-    document.getElementById("voiceButton");
+    document.getElementById(
+      "voiceButton"
+    );
+
+  if(!button){
+    return;
+  }
 
   const t=
     translations[currentLanguage];
 
   if(voiceEnabled){
 
-    button.textContent=t.voiceOn;
-    button.classList.add("active");
+    button.textContent=
+      t.voiceOn;
+
+    button.classList.add(
+      "active"
+    );
 
   }else{
 
-    button.textContent=t.voiceOff;
-    button.classList.remove("active");
+    button.textContent=
+      t.voiceOff;
+
+    button.classList.remove(
+      "active"
+    );
 
   }
 
 }
-
 
 function setLanguage(language){
 
@@ -2481,35 +2293,75 @@ function setLanguage(language){
   const t=
     translations[language];
 
-  document.documentElement.lang=language;
-  document.documentElement.dir=directions[language];
+  document.documentElement.lang=
+    language;
 
-  document.getElementById("subtitle").textContent=t.subtitle;
+  document.documentElement.dir=
+    directions[language];
 
-  document.getElementById("fromInput").placeholder=t.from;
-  document.getElementById("toInput").placeholder=t.to;
+  const toInput=
+    document.getElementById(
+      "toInput"
+    );
 
-  document.getElementById("myLocationButton").textContent=t.myLocation;
+  const navigationButton=
+    document.getElementById(
+      "navigationButton"
+    );
 
-  document.getElementById("routeButton").textContent=t.route;
-  document.getElementById("previewButton").textContent=t.preview;
-  document.getElementById("navigationButton").textContent=t.navigate;
-  document.getElementById("stopButton").textContent=t.stop;
+  const stopButton=
+    document.getElementById(
+      "stopButton"
+    );
 
-  document.getElementById("distanceLabel").textContent=t.distance;
-  document.getElementById("durationLabel").textContent=t.duration;
+  const distanceLabel=
+    document.getElementById(
+      "distanceLabel"
+    );
 
-  document.getElementById("liveBadge").textContent=t.live;
+  const durationLabel=
+    document.getElementById(
+      "durationLabel"
+    );
 
-  updateVoiceButton();
-  updateTripLabels();
+  const liveBadge=
+    document.getElementById(
+      "liveBadge"
+    );
 
-  if(usingCurrentLocation){
-
-    document.getElementById("fromInput").value=
-      t.currentLocation;
-
+  if(toInput){
+    toInput.placeholder=
+      language==="ar"
+        ? "ابحث"
+        : t.to;
   }
+
+  if(navigationButton){
+    navigationButton.textContent=
+      language==="ar"
+        ? "ابدأ"
+        : t.navigate;
+  }
+
+  if(stopButton){
+    stopButton.textContent=t.stop;
+  }
+
+  if(distanceLabel){
+    distanceLabel.textContent=
+      t.distance;
+  }
+
+  if(durationLabel){
+    durationLabel.textContent=
+      t.duration;
+  }
+
+  if(liveBadge){
+    liveBadge.textContent=t.live;
+  }
+
+  updateTripLabels();
 
   localStorage.setItem(
     "almaLanguage",
@@ -2517,14 +2369,22 @@ function setLanguage(language){
   );
 
   stopSpeech();
+
   resetSpokenInstruction();
 
   setTimeout(()=>{
-    map.invalidateSize();
+
+    if(navigationMap){
+      navigationMap.resize();
+    }
+
+    if(map){
+   map.resize();
+    }
+
   },100);
 
 }
-
 
 function showStatus(message){
 
@@ -2782,71 +2642,6 @@ async function geocodePlace(query){
   };
 
 }
-
-
-function useMyLocation(){
-
-  const t=
-    translations[currentLanguage];
-
-  if(!navigator.geolocation){
-
-    alert(t.locationError);
-    return;
-
-  }
-
-  showStatus(t.locating);
-
-  navigator.geolocation.getCurrentPosition(
-
-    position=>{
-
-      currentLocationCoordinates={
-        lat:position.coords.latitude,
-        lon:position.coords.longitude
-      };
-
-      usingCurrentLocation=true;
-
-      document.getElementById("fromInput").value=
-        t.currentLocation;
-
-      hideStatus();
-      showStatus(t.locationReady);
-
-      setTimeout(
-        hideStatus,
-        1500
-      );
-
-      map.setView(
-        [
-          currentLocationCoordinates.lat,
-          currentLocationCoordinates.lon
-        ],
-        16
-      );
-
-    },
-
-    ()=>{
-
-      hideStatus();
-      alert(t.locationError);
-
-    },
-
-    {
-      enableHighAccuracy:true,
-      timeout:15000,
-      maximumAge:0
-    }
-
-  );
-
-}
-
 
 async function requestRoute(
   start,
@@ -3137,174 +2932,6 @@ async function startAlmaNavigation(){
   );
 
 }
-async function calculateRoute(){
-
-if(gpsWatchId!==null){
-
-  navigator.geolocation.clearWatch(
-    gpsWatchId
-  );
-
-  gpsWatchId=null;
-
-}
-
-previousLivePosition=null;
-
-  const t=
-    translations[currentLanguage];
-
-  const fromText=
-    document
-    .getElementById("fromInput")
-    .value
-    .trim();
-
-  const toText=
-    document
-    .getElementById("toInput")
-    .value
-    .trim();
-
-  if(!fromText || !toText){
-
-    alert(t.enterPlaces);
-    return;
-
-  }
-
-  const button=
-    document.getElementById("routeButton");
-
-  button.disabled=true;
-
-  document.getElementById("routeResult")
-  .style.display="none";
-
-  document.getElementById("previewButton")
-  .style.display="none";
-
-  document.getElementById("navigationButton")
-  .style.display="none";
-
-  try{
-
-    showStatus(t.searching);
-
-    let start;
-
-    if(
-      usingCurrentLocation &&
-      currentLocationCoordinates
-    ){
-
-      start={
-        lat:currentLocationCoordinates.lat,
-        lon:currentLocationCoordinates.lon,
-        name:t.currentLocation
-      };
-
-    }else{
-
-      start=
-        await geocodePlace(fromText);
-
-    }
-
-    const destination=
-      await geocodePlace(toText);
-
-    if(!start || !destination){
-
-      hideStatus();
-      alert(t.notFound);
-      return;
-
-    }
-
-    startCoordinates={
-      lat:start.lat,
-      lon:start.lon,
-      name:start.name
-    };
-
-    destinationCoordinates={
-      lat:destination.lat,
-      lon:destination.lon,
-      name:destination.name
-    };
-
-    showStatus(t.calculating);
-
-    const route=
-      await requestRoute(
-        startCoordinates,
-        destinationCoordinates
-      );
-
-    prepareRoute(route);
-    drawRoute();
-
-    if(startMarker){
-      map.removeLayer(startMarker);
-    }
-
-    if(destinationMarker){
-      map.removeLayer(destinationMarker);
-    }
-
-    startMarker=
-      L.marker([
-        startCoordinates.lat,
-        startCoordinates.lon
-      ])
-      .addTo(map)
-      .bindPopup(startCoordinates.name);
-
-    destinationMarker=
-      L.marker([
-        destinationCoordinates.lat,
-        destinationCoordinates.lon
-      ])
-      .addTo(map)
-      .bindPopup(destinationCoordinates.name);
-
-    map.fitBounds(
-      routeLine.getBounds(),
-      {
-        padding:[45,45]
-      }
-    );
-
-    updateRouteSummary();
-
-    document.getElementById("routeResult")
-    .style.display="block";
-
-    document.getElementById("previewButton")
-    .style.display="block";
-
-    document.getElementById("navigationButton")
-    .style.display="block";
-
-    hideStatus();
-
-  }catch(error){
-
-    console.error(error);
-
-    hideStatus();
-
-    alert(t.routeError);
-
-  }finally{
-
-    button.disabled=false;
-
-  }
-
-}
-
 
 function updateRouteSummary(){
 
@@ -3352,13 +2979,15 @@ function enterMobileNavigationMode(){
       "mobile-navigation"
     );
 
-    setTimeout(()=>{
-
-      map.invalidateSize();
-
-    },100);
-
   }
+
+  setTimeout(()=>{
+
+    if(navigationMap){
+      navigationMap.resize();
+    }
+
+  },100);
 
 }
 
@@ -3371,433 +3000,15 @@ function leaveMobileNavigationMode(){
 
   setTimeout(()=>{
 
-    map.invalidateSize();
+    if(navigationMap){
+      navigationMap.resize();
+    }
+
+    if(map){
+map.resize();
+    }
 
   },100);
-
-}
-
-
-/* =====================================================
-   معاينة الرحلة
-   ===================================================== */
-
-function startPreview(){
-
-  if(
-    !currentRoute ||
-    !routeCoordinates.length
-  ){
-    return;
-  }
-
-  stopAllNavigation(false);
-    /*
-    تشغيل خريطة MapLibre
-    الخاصة بوضع الملاحة
-  */
-
-  const navigationMapElement=
-    document.getElementById(
-      "navigationMap"
-    );
-
-  const leafletMapElement=
-    document.getElementById(
-      "map"
-    );
-
-  navigationMapElement.style.display=
-  "block";
-
-leafletMapElement.style.visibility=
-  "hidden";
-
-setTimeout(()=>{
-
-  initializeNavigationMap();
-
-  navigationMap.resize();
-
-  navigationMap.jumpTo({
-    center:[
-      routeCoordinates[0][1],
-      routeCoordinates[0][0]
-    ],
-    zoom:17
-  });
-
-  if(navigationCarMarker){
-    navigationCarMarker.remove();
-  }
-
-  const carElement=
-  document.createElement("div");
-
-carElement.innerHTML=
-  carIcon.options.html;
-
-carElement.style.width="32px";
-carElement.style.height="49px";
-
-const navigationCar=
-  carElement.querySelector(
-    ".car-icon"
-  );
-
-if(navigationCar){
-
-  navigationCar.style.width="32px";
-  navigationCar.style.height="49px";
-  navigationCar.style.transformOrigin=
-    "50% 50%";
-
-}
-
-navigationCarMarker=
-  new maplibregl.Marker({
-    element:carElement,
-    anchor:"center"
-  })
-    .setLngLat([
-      routeCoordinates[0][1],
-      routeCoordinates[0][0]
-    ])
-    .addTo(navigationMap);
- const drawNavigationRoute=()=>{
-
-  if(
-    navigationMap.getSource(
-      "navigation-route"
-    )
-  ){
-
-    navigationMap.getSource(
-      "navigation-route"
-    ).setData({
-      type:"Feature",
-      geometry:{
-        type:"LineString",
-        coordinates:
-          routeCoordinates.map(
-            point=>[
-              point[1],
-              point[0]
-            ]
-          )
-      }
-    });
-
-    return;
-  }
-
-  navigationMap.addSource(
-    "navigation-route",
-    {
-      type:"geojson",
-      data:{
-        type:"Feature",
-        geometry:{
-          type:"LineString",
-          coordinates:
-            routeCoordinates.map(
-              point=>[
-                point[1],
-                point[0]
-              ]
-            )
-        }
-      }
-    }
-  );
-
-  navigationMap.addLayer({
-    id:"navigation-route-casing",
-    type:"line",
-    source:"navigation-route",
-    layout:{
-      "line-cap":"round",
-      "line-join":"round"
-    },
-    paint:{
-      "line-color":"#ffffff",
-      "line-width":10
-    }
-  });
-
-  navigationMap.addLayer({
-    id:"navigation-route-line",
-    type:"line",
-    source:"navigation-route",
-    layout:{
-      "line-cap":"round",
-      "line-join":"round"
-    },
-    paint:{
-      "line-color":"#3478f6",
-      "line-width":7
-    }
-  });
-
-};
-
-if(navigationMap.loaded()){
-
-  drawNavigationRoute();
-
-}else{
-
-  navigationMap.once(
-    "load",
-    drawNavigationRoute
-  );
-
-}
-
-},100);
-
-  previewIndex=0;
-  currentStepIndex=0;
-
-  resetSpokenInstruction();
-
-  document.getElementById("navigationBox")
-  .style.display="block";
-
-  document.getElementById("previewButton")
-  .style.display="none";
-
-  document.getElementById("navigationButton")
-  .style.display="none";
-
-  document.getElementById("stopButton")
-  .style.display="block";
-
-  enterMobileNavigationMode();
-  requestNavigationWakeLock();
-
-  if(carMarker){
-
-    map.removeLayer(carMarker);
-
-    currentCarBearing=0;
-  }
-
-  carMarker=
-    L.marker(
-      routeCoordinates[0],
-      {
-        icon:carIcon,
-        zIndexOffset:1000
-      }
-    ).addTo(map);
-if(carMarker){
-
-  map.removeLayer(carMarker);
-  carMarker=null;
-  currentCarBearing=0;
-
-}
-
-updateTripMetrics(
-  routeCoordinates[0],
-  0
-);
-
-/*
-  إعطاء الإرشاد الأول فوراً
-قبل بدء حركة السيارة
-*/
-
-/*
-  تشغيل الإرشاد الأول دون ربطه بحركة السيارة
-*/
-
-speakInitialGuidance(
-  routeCoordinates[0]
-);
-
-updateInstruction(
-  routeCoordinates[0]
-);
-
-/*
-  تشغيل حركة المعاينة مباشرة
-*/
-
-if(previewTimer){
-  clearInterval(previewTimer);
-}
-
-previewTimer=
-  setInterval(
-    movePreview,
-  180
-  );
-}
-
-function movePreview(){
-
-  previewIndex+=
-    Math.max(
-      1,
-      Math.floor(
-        routeCoordinates.length/700
-      )
-    );
-
-  if(
-    previewIndex>=
-    routeCoordinates.length
-  ){
-
-    finishPreview();
-    return;
-
-  }
-
- const position=
-  routeCoordinates[previewIndex];
-
-const previousIndex=
-  Math.max(
-    0,
-    previewIndex-1
-  );
-
-const previousPosition=
-  routeCoordinates[
-    previousIndex
-  ];
-  if(navigationMap){
-
-  if(navigationCarMarker){
-
-    navigationCarMarker.setLngLat([
-      position[1],
-      position[0]
-    ]);
-
-    const navigationBearing=
-      calculateBearing(
-        previousPosition,
-        position
-    );
-
-navigationMap.easeTo({
-  center:[
-    position[1],
-    position[0]
-  ],
-  duration:180,
-  easing:t=>t
-});
-    const navigationCarElement=
-      navigationCarMarker.getElement();
-
-    const navigationCar=
-      navigationCarElement.querySelector(
-        ".car-icon"
-      );
-
-    if(navigationCar){
-navigationCar.style.transform=
-  "rotate(0deg)";
-
-  }
-
-}
-
-}    
-
-
-  const progress=
-    (
-      previewIndex/
-      (routeCoordinates.length-1)
-    )*100;
-
-  document.getElementById("progressBar")
-  .style.width=
-    progress+"%";
-
-  updateInstruction(position);
-
-  updateTripMetrics(
-    position,
-    previewIndex
-  );
-
-}
-
-
-function finishPreview(){
-
-  if(previewTimer){
-
-    clearInterval(previewTimer);
-    previewTimer=null;
-
-  }
-
-  const t=
-    translations[currentLanguage];
-
-  const last=
-    routeCoordinates[
-      routeCoordinates.length-1
-    ];
-
-  if(carMarker){
-
-    carMarker.setLatLng(last);
-    map.panTo(last);
-
-  }
-
-  document.getElementById("turnIcon")
-  .textContent="🏁";
-
-  document.getElementById("instructionText")
-  .textContent=t.arrive;
-
-  document.getElementById("instructionDistance")
-  .textContent="";
-
-  document.getElementById("progressBar")
-  .style.width="100%";
-
-  document.getElementById(
-    "remainingTimeValue"
-  ).textContent=
-    formatDuration(0);
-
-  document.getElementById(
-    "remainingDistanceValue"
-  ).textContent=
-    formatRemainingDistance(0);
-
-  document.getElementById(
-    "arrivalTimeValue"
-  ).textContent=
-    formatArrivalTime(0);
-
-  speakNavigation(
-    t.arrive,
-    routeSteps.length,
-    true
-  );
-
-  leaveMobileNavigationMode();
-
-  document.getElementById("stopButton")
-  .style.display="none";
-
-  document.getElementById("previewButton")
-  .style.display="block";
-
-  document.getElementById("navigationButton")
-  .style.display="block";
 
 }
 
@@ -3861,7 +3072,17 @@ function startLiveNavigation(){
 
       }
 
-      stopAllNavigation(false);
+  if(gpsWatchId!==null){
+
+  navigator.geolocation.clearWatch(
+    gpsWatchId
+  );
+
+  gpsWatchId=null;
+
+}
+
+previousLivePosition=null;
 
       liveNavigation=true;
 
@@ -4028,73 +3249,35 @@ if(!navigationCarMarker){
   const carElement=
     document.createElement("div");
 
-  carElement.className=
-    "car-icon";
+  carElement.innerHTML=
+    carSvgHtml;
 
-  carElement.innerHTML=`
-    <svg
-      viewBox="0 0 46 70"
-      xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-    >
+  carElement.style.width=
+    "32px";
 
-      <path
-        d="
-          M23 2
-          C15 2 11 7 9 15
-          L6 50
-          C5 60 11 67 23 68
-          C35 67 41 60 40 50
-          L37 15
-          C35 7 31 2 23 2
-          Z
-        "
-        fill="#dbe4ea"
-        stroke="#64727c"
-        stroke-width="1.4"
-      />
+  carElement.style.height=
+    "49px";
 
-      <path
-        d="
-          M14 18
-          C16 12 19 10 23 10
-          C27 10 30 12 32 18
-          L30 27
-          L16 27
-          Z
-        "
-        fill="#4f83a1"
-      />
+  const navigationCar=
+    carElement.querySelector(
+      ".car-icon"
+    );
 
-      <path
-        d="
-          M14 47
-          L32 47
-          L30 57
-          C28 60 18 60 16 57
-          Z
-        "
-        fill="#4f83a1"
-      />
+  if(navigationCar){
 
-      <ellipse
-        cx="14"
-        cy="9"
-        rx="3.5"
-        ry="2"
-        fill="#fff7bf"
-      />
+    navigationCar.style.width=
+      "32px";
 
-      <ellipse
-        cx="32"
-        cy="9"
-        rx="3.5"
-        ry="2"
-        fill="#fff7bf"
-      />
+    navigationCar.style.height=
+      "49px";
 
-    </svg>
-  `;
+    navigationCar.style.transform=
+      "rotate(0deg)";
+
+    navigationCar.style.transformOrigin=
+      "50% 50%";
+
+  }
 
   navigationCarMarker=
     new maplibregl.Marker({
@@ -4112,10 +3295,10 @@ if(!navigationCarMarker){
 }else{
 
   navigationCarMarker
-  .setLngLat([
-    lon,
-    lat
-  ]);
+    .setLngLat([
+      lon,
+      lat
+    ]);
 
 }
   let navigationBearing=
@@ -4637,13 +3820,13 @@ function getDistanceToStep(
     return Infinity;
   }
 
-  return map.distance(
-    position,
-    [
-      step.maneuver.location[1],
-      step.maneuver.location[0]
-    ]
-  );
+ return calculateDistance(
+  position,
+  [
+    step.maneuver.location[1],
+    step.maneuver.location[0]
+  ]
+); 
 
 }
 
@@ -4814,13 +3997,13 @@ function getDistanceToStep(
     return Infinity;
   }
 
-  return map.distance(
-    position,
-    [
-      step.maneuver.location[1],
-      step.maneuver.location[0]
-    ]
-  );
+  return calculateDistance(
+  position,
+  [
+    step.maneuver.location[1],
+    step.maneuver.location[0]
+  ]
+);
 
 }
 
@@ -5494,11 +4677,15 @@ function finishLiveNavigation(){
   document.getElementById("stopButton")
   .style.display="none";
 
-  document.getElementById("previewButton")
-  .style.display="block";
+  const navigationButton=
+  document.getElementById(
+    "navigationButton"
+  );
 
-  document.getElementById("navigationButton")
-  .style.display="block";
+if(navigationButton){
+  navigationButton.style.display=
+    "block";
+}
 
 }
 
@@ -5507,15 +4694,7 @@ function stopAllNavigation(
   hideNavigation=true
 ){
 
-  if(previewTimer){
-
-    clearInterval(
-      previewTimer
-    );
-
-    previewTimer=null;
-
-  }
+  
 
   if(gpsWatchId!==null){
 
@@ -5572,6 +4751,31 @@ function stopAllNavigation(
     navigationCarMarker=null;
 
   }
+  const navigationMapContainer=
+  document.getElementById(
+    "navigationMap"
+  );
+
+const normalMapContainer=
+  document.getElementById(
+    "map"
+  );
+
+if(navigationMapContainer){
+  navigationMapContainer.style.display=
+    "none";
+}
+
+if(normalMapContainer){
+  normalMapContainer.style.display=
+    "block";
+}
+
+if(map){
+  setTimeout(()=>{
+  map.resize();
+  },100);
+}
 
   if(
     currentRoute &&
@@ -5724,10 +4928,7 @@ window.addEventListener(
   "resize",
   function(){
 
-    if(
-      previewTimer ||
-      liveNavigation
-    ){
+    if(liveNavigation){
 
       enterMobileNavigationMode();
 
@@ -5739,7 +4940,6 @@ window.addEventListener(
 
   }
 );
-
 
 let savedLanguage=
   localStorage.getItem(
