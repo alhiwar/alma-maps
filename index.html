@@ -2868,11 +2868,35 @@ async function startAlmaNavigation(){
           );
 
         prepareRoute(route);
-        
-    drawRoute();
+
+        drawRoute();
+
         updateRouteSummary();
 
-      error=>{
+        hideStatus();
+
+        button.disabled=false;
+
+        startLiveNavigation();
+
+      }catch(error){
+
+        console.error(
+          "ALMA start navigation:",
+          error
+        );
+
+        hideStatus();
+
+        button.disabled=false;
+
+        alert(t.routeError);
+
+      }
+
+    },
+
+    error=>{
 
       hideStatus();
 
@@ -2906,6 +2930,7 @@ async function startAlmaNavigation(){
           message=
             "حدث خطأ غير معروف أثناء تحديد الموقع. رمز الخطأ: "+
             error.code;
+
       }
 
       alert(message);
@@ -2916,8 +2941,12 @@ async function startAlmaNavigation(){
       enableHighAccuracy:true,
       timeout:30000,
       maximumAge:0
-    }     
-function updateRouteSummary(){
+    }
+
+  );
+
+}
+  function updateRouteSummary(){
 
   const t=
     translations[currentLanguage];
