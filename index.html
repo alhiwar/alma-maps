@@ -608,18 +608,22 @@ body.mobile-navigation #navigationButton{
 
 .alma-start-button{
   position:fixed;
-
+  top:86px;
   left:50%;
-  bottom:28px;
   transform:translateX(-50%);
+  z-index:1001;
 
-  z-index:1000;
-
-  width:min(90%,420px);
-  height:58px;
+  width:min(88%,380px);
+  height:54px;
 
   border:0;
-  border-radius:29px;
+  border-radius:27px;
+
+  background:#ff1f1f;
+  color:#ffffff;
+
+  box-shadow:
+    0 4px 14px rgba(255,31,31,.38);
 
   font-family:inherit;
   font-size:20px;
@@ -627,27 +631,82 @@ body.mobile-navigation #navigationButton{
 
   cursor:pointer;
 }
-  
-.alma-start-button{
+
+.alma-start-button:hover{
+  background:#e60000;
+}
+
+.alma-start-button:active{
+  transform:translateX(-50%) scale(.98);
+}
+  .alma-location-overlay{
+  display:none;
   position:fixed;
-  left:50%;
-  bottom:28px;
-  transform:translateX(-50%);
-  z-index:1000;
+  inset:0;
+  z-index:5000;
 
-  width:min(90%,420px);
-  height:58px;
+  align-items:center;
+  justify-content:center;
+
+  padding:20px;
+  background:rgba(0,0,0,.42);
+}
+
+.alma-location-dialog{
+  width:min(92%,420px);
+  padding:24px;
+
+  background:#ffffff;
+  border-radius:22px;
+
+  box-shadow:
+    0 12px 40px rgba(0,0,0,.30);
+
+  text-align:center;
+}
+
+.alma-location-dialog h2{
+  margin:0 0 12px;
+  color:#111827;
+  font-size:22px;
+}
+
+.alma-location-dialog p{
+  margin:0 0 20px;
+  color:#4b5563;
+  font-size:16px;
+  line-height:1.8;
+}
+
+.alma-location-actions{
+  display:flex;
+  gap:10px;
+}
+
+.alma-location-actions button{
+  flex:1;
+  min-height:48px;
 
   border:0;
-  border-radius:29px;
+  border-radius:14px;
 
   font-family:inherit;
-  font-size:20px;
+  font-size:16px;
   font-weight:700;
 
   cursor:pointer;
 }
-</style>
+
+#allowLocationButton{
+  background:#146c43;
+  color:#ffffff;
+}
+
+#cancelLocationButton{
+  background:#e5e7eb;
+  color:#111827;
+}
+  </style>
 </head>
 
 <body>
@@ -778,6 +837,40 @@ body.mobile-navigation #navigationButton{
   </div>
 
 </div>
+ <div
+  id="locationPermissionOverlay"
+  class="alma-location-overlay"
+>
+  <div class="alma-location-dialog">
+
+    <h2 id="locationPermissionTitle">
+      السماح بالموقع
+    </h2>
+
+    <p id="locationPermissionText">
+      يحتاج ALMA إلى موقعك الحالي لبدء الملاحة وتحديد الطريق من مكانك إلى وجهتك.
+    </p>
+
+    <div class="alma-location-actions">
+
+      <button
+        id="allowLocationButton"
+        type="button"
+      >
+        اسمح بالموقع
+      </button>
+
+      <button
+        id="cancelLocationButton"
+        type="button"
+      >
+        ليس الآن
+      </button>
+
+    </div>
+
+  </div>
+</div> 
 
 <script src="https://unpkg.com/maplibre-gl@5.24.0/dist/maplibre-gl.js"></script>
 
@@ -1021,7 +1114,44 @@ fa:{
 }
 
 };
+const locationPermissionTranslations={
 
+  ar:{
+    title:"السماح بالموقع",
+    text:"يحتاج ALMA إلى موقعك الحالي لبدء الملاحة وتحديد الطريق من مكانك إلى وجهتك.",
+    allow:"اسمح بالموقع",
+    cancel:"ليس الآن"
+  },
+
+  ckb:{
+    title:"ڕێگەدان بە شوێن",
+    text:"ALMA پێویستی بە شوێنی ئێستات هەیە بۆ دەستپێکردنی ڕێنیشاندان و دیاریکردنی ڕێگا بۆ مەبەستەکەت.",
+    allow:"ڕێگە بدە",
+    cancel:"ئێستا نا"
+  },
+
+  en:{
+    title:"Allow location",
+    text:"ALMA needs your current location to start navigation and calculate the route from your position to your destination.",
+    allow:"Allow location",
+    cancel:"Not now"
+  },
+
+  tr:{
+    title:"Konuma izin ver",
+    text:"ALMA, navigasyonu başlatmak ve bulunduğunuz yerden hedefinize rota oluşturmak için mevcut konumunuza ihtiyaç duyar.",
+    allow:"Konuma izin ver",
+    cancel:"Şimdi değil"
+  },
+
+  fa:{
+    title:"اجازه دسترسی به موقعیت",
+    text:"ALMA برای شروع مسیریابی و تعیین مسیر از مکان فعلی شما تا مقصد، به موقعیت فعلی شما نیاز دارد.",
+    allow:"اجازه موقعیت",
+    cancel:"فعلاً نه"
+  }
+
+};
 
 const directions={
   ar:"rtl",
@@ -2912,9 +3042,10 @@ async function startAlmaNavigation(){
       switch(error.code){
 
         case 1:
-          message=
-            "تم رفض إذن الوصول إلى الموقع. اسمح لـ ALMA باستخدام موقعك ثم حاول مرة أخرى.";
-          break;
+
+  showLocationPermissionDialog();
+
+  return;
 
         case 2:
           message=
@@ -2946,6 +3077,77 @@ async function startAlmaNavigation(){
   );
 
 }
+  function showLocationPermissionDialog(){
+
+  const overlay=
+    document.getElementById(
+      "locationPermissionOverlay"
+    );
+
+  const texts=
+    locationPermissionTranslations[
+      currentLanguage
+    ] ||
+    locationPermissionTranslations.ar;
+
+  document.getElementById(
+    "locationPermissionTitle"
+  ).textContent=
+    texts.title;
+
+  document.getElementById(
+    "locationPermissionText"
+  ).textContent=
+    texts.text;
+
+  document.getElementById(
+    "allowLocationButton"
+  ).textContent=
+    texts.allow;
+
+  document.getElementById(
+    "cancelLocationButton"
+  ).textContent=
+    texts.cancel;
+
+  overlay.style.display="flex";
+
+}
+
+
+function hideLocationPermissionDialog(){
+
+  document.getElementById(
+    "locationPermissionOverlay"
+  ).style.display="none";
+
+}
+
+
+document.getElementById(
+  "allowLocationButton"
+).addEventListener(
+  "click",
+  ()=>{
+
+    hideLocationPermissionDialog();
+
+    startAlmaNavigation();
+
+  }
+);
+
+
+document.getElementById(
+  "cancelLocationButton"
+).addEventListener(
+  "click",
+  ()=>{
+
+    hideLocationPermissionDialog();
+
+  }
+);
   function updateRouteSummary(){
 
   const t=
