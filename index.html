@@ -2833,10 +2833,29 @@ async function requestRoute(
     data
   );
 
-  if(!response.ok){
+    if(!response.ok){
+
+    console.error(
+      "ALMA OSRM HTTP error:",
+      response.status,
+      data
+    );
 
     throw new Error(
-      "OSRM_HTTP_"+response.status
+      "OSRM_HTTP_"+
+      response.status+
+      " | "+
+      (
+        data && data.code
+          ? data.code
+          : "NO_CODE"
+      )+
+      " | "+
+      (
+        data && data.message
+          ? data.message
+          : "NO_MESSAGE"
+      )
     );
 
   }
@@ -3047,16 +3066,6 @@ async function startAlmaNavigation(){
           lat:position.coords.latitude,
           lon:position.coords.longitude
         };
-                alert(
-          "RAW GPS"+
-          "\nlatitude = "+
-          position.coords.latitude+
-          "\nlongitude = "+
-          position.coords.longitude+
-          "\naccuracy = "+
-          position.coords.accuracy+
-          " m"
-        );
 
         usingCurrentLocation=true;
 
