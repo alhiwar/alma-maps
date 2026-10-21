@@ -3123,20 +3123,68 @@ function hideLocationPermissionDialog(){
 
 }
 
-
 document.getElementById(
   "allowLocationButton"
 ).addEventListener(
   "click",
-  ()=>{
+  async ()=>{
 
     hideLocationPermissionDialog();
+
+    if(!navigator.geolocation){
+
+      alert(
+        translations[
+          currentLanguage
+        ].locationError
+      );
+
+      return;
+    }
+
+    try{
+
+      if(
+        navigator.permissions &&
+        navigator.permissions.query
+      ){
+
+        const permission=
+          await navigator.permissions.query({
+            name:"geolocation"
+          });
+
+        if(permission.state==="denied"){
+
+          const texts=
+            locationPermissionTranslations[
+              currentLanguage
+            ] ||
+            locationPermissionTranslations.ar;
+
+          alert(
+            texts.permissionBlocked ||
+            "تم حظر الوصول إلى الموقع في المتصفح. اسمح لـ ALMA باستخدام الموقع من إعدادات هذا الموقع، ثم حاول مرة أخرى."
+          );
+
+          return;
+        }
+
+      }
+
+    }catch(error){
+
+      console.log(
+        "ALMA permission check:",
+        error
+      );
+
+    }
 
     startAlmaNavigation();
 
   }
 );
-
 
 document.getElementById(
   "cancelLocationButton"
