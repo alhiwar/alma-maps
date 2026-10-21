@@ -2768,28 +2768,98 @@ async function requestRoute(
     destination.lat+
     "?overview=full&geometries=geojson&steps=true";
 
-  const response=
-    await fetch(routeURL);
+  console.log(
+    "ALMA route start:",
+    start
+  );
 
-  if(!response.ok){
-    throw new Error("Routing error");
+  console.log(
+    "ALMA route destination:",
+    destination
+  );
+
+  console.log(
+    "ALMA route URL:",
+    routeURL
+  );
+
+  let response;
+
+  try{
+
+    response=
+      await fetch(routeURL);
+
+  }catch(error){
+
+    console.error(
+      "ALMA OSRM fetch failed:",
+      error
+    );
+
+    throw new Error(
+      "OSRM_FETCH_FAILED"
+    );
+
   }
 
-  const data=
-    await response.json();
+  console.log(
+    "ALMA OSRM HTTP status:",
+    response.status
+  );
+
+  let data;
+
+  try{
+
+    data=
+      await response.json();
+
+  }catch(error){
+
+    console.error(
+      "ALMA OSRM invalid response:",
+      error
+    );
+
+    throw new Error(
+      "OSRM_INVALID_RESPONSE"
+    );
+
+  }
+
+  console.log(
+    "ALMA OSRM response:",
+    data
+  );
+
+  if(!response.ok){
+
+    throw new Error(
+      "OSRM_HTTP_"+response.status
+    );
+
+  }
 
   if(
     data.code!=="Ok" ||
     !data.routes ||
     !data.routes.length
   ){
-    throw new Error("No route");
+
+    throw new Error(
+      "OSRM_"+
+      (data.code || "NO_ROUTE")
+    );
+
   }
 
   return data.routes[0];
 
 }
 
+
+function prepareRoute(route){
 
 function prepareRoute(route){
 
@@ -3009,7 +3079,7 @@ async function startAlmaNavigation(){
 
         startLiveNavigation();
 
-      }catch(error){
+          }catch(error){
 
         console.error(
           "ALMA start navigation:",
@@ -3020,7 +3090,17 @@ async function startAlmaNavigation(){
 
         button.disabled=false;
 
-        alert(t.routeError);
+        alert(
+          t.routeError+
+          "\n\n"+
+          "ALMA CODE: "+
+          (
+            error &&
+            error.message
+              ? error.message
+              : "UNKNOWN"
+          )
+        );
 
       }
 
