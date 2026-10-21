@@ -3047,6 +3047,16 @@ async function startAlmaNavigation(){
           lat:position.coords.latitude,
           lon:position.coords.longitude
         };
+                alert(
+          "RAW GPS"+
+          "\nlatitude = "+
+          position.coords.latitude+
+          "\nlongitude = "+
+          position.coords.longitude+
+          "\naccuracy = "+
+          position.coords.accuracy+
+          " m"
+        );
 
         usingCurrentLocation=true;
 
