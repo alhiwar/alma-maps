@@ -3087,7 +3087,7 @@ async function startAlmaNavigation(){
 
         button.disabled=false;
 
-        alert(
+                alert(
           t.routeError+
           "\n\n"+
           "ALMA CODE: "+
@@ -3096,6 +3096,32 @@ async function startAlmaNavigation(){
             error.message
               ? error.message
               : "UNKNOWN"
+          )+
+          "\n\nSTART:"+
+          "\nlat = "+
+          (
+            startCoordinates
+              ? startCoordinates.lat
+              : "null"
+          )+
+          "\nlon = "+
+          (
+            startCoordinates
+              ? startCoordinates.lon
+              : "null"
+          )+
+          "\n\nDESTINATION:"+
+          "\nlat = "+
+          (
+            destinationCoordinates
+              ? destinationCoordinates.lat
+              : "null"
+          )+
+          "\nlon = "+
+          (
+            destinationCoordinates
+              ? destinationCoordinates.lon
+              : "null"
           )
         );
 
