@@ -1172,6 +1172,16 @@ const speechLanguages={
 
 
 let currentLanguage="ar";
+// ALMA TEST MODE
+// true  = اختبار الملاحة من الحلة
+// false = استخدام GPS الحقيقي
+const ALMA_TEST_MODE=true;
+
+const ALMA_TEST_START={
+  lat:32.4721,
+  lon:44.4217,
+  name:"الحلة - نقطة اختبار ALMA"
+};  
 
 let currentLocationCoordinates=null;
 let usingCurrentLocation=false;
@@ -3050,9 +3060,74 @@ async function startAlmaNavigation(){
 
   }
 
-  button.disabled=true;
+    button.disabled=true;
 
   hideSearchSuggestions();
+
+  if(ALMA_TEST_MODE){
+
+    startCoordinates={
+      lat:ALMA_TEST_START.lat,
+      lon:ALMA_TEST_START.lon,
+      name:ALMA_TEST_START.name
+    };
+
+    currentLocationCoordinates={
+      lat:ALMA_TEST_START.lat,
+      lon:ALMA_TEST_START.lon
+    };
+
+    usingCurrentLocation=false;
+
+    try{
+
+      showStatus(t.calculating);
+
+      const route=
+        await requestRoute(
+          startCoordinates,
+          destinationCoordinates
+        );
+
+      prepareRoute(route);
+
+      drawRoute();
+
+      updateRouteSummary();
+
+      hideStatus();
+
+      button.disabled=false;
+
+      startLiveNavigation();
+
+    }catch(error){
+
+      console.error(
+        "ALMA test navigation:",
+        error
+      );
+
+      hideStatus();
+
+      button.disabled=false;
+
+      alert(
+        t.routeError+
+        "\n\n"+
+        "ALMA TEST CODE: "+
+        (
+          error &&
+          error.message
+            ? error.message
+            : "UNKNOWN"
+        )
+      );
+
+    }
+
+    return;
+  }
 
   showStatus(t.locating);
 
