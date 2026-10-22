@@ -3476,7 +3476,6 @@ map.resize();
 /* =====================================================
    الملاحة الحية
    ===================================================== */
-
 function startLiveNavigation(){
 
   const t=
@@ -3492,105 +3491,104 @@ function startLiveNavigation(){
 
   }
 
-  if(!navigator.geolocation){
 
-    alert(t.locationError);
-    return;
+  function beginLiveNavigation(position){
 
-  }
+    const realPosition=[
+      position.coords.latitude,
+      position.coords.longitude
+    ];
 
-  showStatus(t.waitingGPS);
+    const routeStart=[
+      startCoordinates.lat,
+      startCoordinates.lon
+    ];
 
-  navigator.geolocation.getCurrentPosition(
+    const distanceFromStart=
+      calculateDistance(
+        realPosition,
+        routeStart
+      );
 
-    function(position){
+    if(
+      !ALMA_TEST_MODE &&
+      distanceFromStart>
+      MAX_START_DISTANCE
+    ){
 
-      const realPosition=[
-        position.coords.latitude,
-        position.coords.longitude
-      ];
+      hideStatus();
+      alert(t.farFromStart);
+      return;
 
-      const routeStart=[
-        startCoordinates.lat,
-        startCoordinates.lon
-      ];
+    }
 
-     const distanceFromStart=
-  calculateDistance(
-    realPosition,
-    routeStart
-  );
 
-      if(
-        distanceFromStart>
-        MAX_START_DISTANCE
-      ){
+    if(gpsWatchId!==null){
 
-        hideStatus();
-        alert(t.farFromStart);
-        return;
+      navigator.geolocation.clearWatch(
+        gpsWatchId
+      );
 
-      }
+      gpsWatchId=null;
 
-  if(gpsWatchId!==null){
+    }
 
-  navigator.geolocation.clearWatch(
-    gpsWatchId
-  );
 
-  gpsWatchId=null;
+    previousLivePosition=null;
 
-}
+    liveNavigation=true;
 
-previousLivePosition=null;
+    requestNavigationWakeLock();
 
-      liveNavigation=true;
+    currentStepIndex=0;
 
-      requestNavigationWakeLock();
+    resetSpokenInstruction();
 
-      currentStepIndex=0;
 
-      resetSpokenInstruction();
+    const liveBadge=
+      document.getElementById(
+        "liveBadge"
+      );
 
-      const liveBadge=
-        document.getElementById(
-          "liveBadge"
-        );
+    const navigationBox=
+      document.getElementById(
+        "navigationBox"
+      );
 
-      const navigationBox=
-        document.getElementById(
-          "navigationBox"
-        );
+    const navigationButton=
+      document.getElementById(
+        "navigationButton"
+      );
 
-      const navigationButton=
-        document.getElementById(
-          "navigationButton"
-        );
+    const stopButton=
+      document.getElementById(
+        "stopButton"
+      );
 
-      const stopButton=
-        document.getElementById(
-          "stopButton"
-        );
 
-      if(liveBadge){
-        liveBadge.style.display="block";
-      }
+    if(liveBadge){
+      liveBadge.style.display="block";
+    }
 
-      if(navigationBox){
-        navigationBox.style.display="block";
-      }
+    if(navigationBox){
+      navigationBox.style.display="block";
+    }
 
-      if(navigationButton){
-        navigationButton.style.display="none";
-      }
+    if(navigationButton){
+      navigationButton.style.display="none";
+    }
 
-      if(stopButton){
-        stopButton.style.display="block";
-      }
+    if(stopButton){
+      stopButton.style.display="block";
+    }
 
-      enterMobileNavigationMode();
 
-      handleLivePosition(position);
+    enterMobileNavigationMode();
+
+    handleLivePosition(position);
+
+
+    if(!ALMA_TEST_MODE){
 
       gpsWatchId=
         navigator.geolocation.watchPosition(
@@ -3606,6 +3604,57 @@ previousLivePosition=null;
           }
 
         );
+
+    }
+
+  }
+
+
+  if(ALMA_TEST_MODE){
+
+    showStatus(t.waitingGPS);
+
+    const testPosition={
+
+      coords:{
+        latitude:startCoordinates.lat,
+        longitude:startCoordinates.lon,
+        accuracy:5,
+        heading:null,
+        speed:0
+      },
+
+      timestamp:Date.now()
+
+    };
+
+    beginLiveNavigation(
+      testPosition
+    );
+
+    return;
+
+  }
+
+
+  if(!navigator.geolocation){
+
+    alert(t.locationError);
+    return;
+
+  }
+
+
+  showStatus(t.waitingGPS);
+
+
+  navigator.geolocation.getCurrentPosition(
+
+    function(position){
+
+      beginLiveNavigation(
+        position
+      );
 
     },
 
@@ -3626,7 +3675,6 @@ previousLivePosition=null;
   );
 
 }
-
 async function handleLivePosition(
   position
 ){
