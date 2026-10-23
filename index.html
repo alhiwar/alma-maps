@@ -701,6 +701,38 @@ body.mobile-navigation #navigationButton{
   flex:0 0 auto;
   font-size:19px;
 }
+  .selected-destination{
+  display:none;
+
+  position:fixed;
+  top:148px;
+  left:50%;
+  transform:translateX(-50%);
+
+  z-index:1002;
+
+  width:min(88%,560px);
+
+  padding:9px 14px;
+
+  background:rgba(255,255,255,.96);
+  border-radius:16px;
+
+  box-shadow:
+    0 2px 9px rgba(0,0,0,.16);
+
+  color:#374151;
+
+  font-family:inherit;
+  font-size:14px;
+  font-weight:600;
+
+  text-align:center;
+
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
   .alma-location-overlay{
   display:none;
   position:fixed;
@@ -800,6 +832,10 @@ body.mobile-navigation #navigationButton{
     <div
     id="searchSuggestions"
     class="search-suggestions"
+  ></div>
+    <div
+    id="selectedDestination"
+    class="selected-destination"
   ></div>
   <select id="languageSelect">
     <option value="ar">العربية</option>
@@ -2653,15 +2689,41 @@ function selectSearchSuggestion(place){
     name:place.display_name
   };
 
-  hideSearchSuggestions();
+   hideSearchSuggestions();
+
+  const destinationDisplay=
+    document.getElementById(
+      "selectedDestination"
+    );
+
+  if(destinationDisplay){
+
+    const destinationLabel=
+      currentLanguage==="ar"
+        ? "الوجهة: "
+        : currentLanguage==="ckb"
+        ? "مەبەست: "
+        : currentLanguage==="tr"
+        ? "Hedef: "
+        : currentLanguage==="fa"
+        ? "مقصد: "
+        : "Destination: ";
+
+    destinationDisplay.textContent=
+      destinationLabel+
+      place.display_name;
+
+    destinationDisplay.style.display=
+      "block";
+
+  }
 
   if(button){
     button.style.display="block";
   }
 
 }
-
-
+  
 function showSearchSuggestions(results){
 
   const box=
