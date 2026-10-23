@@ -1302,6 +1302,7 @@ let gpsWatchId=null;
 let liveNavigation=false;
 let lastRecalculation=0;
 let previousLivePosition=null;
+let almaTestDriveTimer=null;  
 let wakeLock=null;
 let navigationWantsWakeLock=false;
 
@@ -3600,7 +3601,149 @@ map.resize();
 /* =====================================================
    الملاحة الحية
    ===================================================== */
-function startLiveNavigation(){
+function startAlmaTestDrive(){
+
+  if(
+    !ALMA_TEST_MODE ||
+    !routeCoordinates ||
+    routeCoordinates.length<2
+  ){
+    return;
+  }
+
+
+  if(almaTestDriveTimer!==null){
+
+    clearInterval(
+      almaTestDriveTimer
+    );
+
+    almaTestDriveTimer=null;
+
+  }
+
+
+  let testRouteIndex=0;
+
+  const totalPoints=
+    routeCoordinates.length;
+
+  /*
+    نجعل الرحلة التجريبية تستغرق
+    تقريباً عدة دقائق مهما كان
+    عدد نقاط المسار.
+  */
+  const indexStep=
+    Math.max(
+      1,
+      Math.floor(
+        totalPoints/650
+      )
+    );
+
+
+  almaTestDriveTimer=
+    setInterval(
+      ()=>{
+
+        if(!liveNavigation){
+
+          clearInterval(
+            almaTestDriveTimer
+          );
+
+          almaTestDriveTimer=null;
+
+          return;
+
+        }
+
+
+        if(
+          testRouteIndex>=
+          totalPoints-1
+        ){
+
+          clearInterval(
+            almaTestDriveTimer
+          );
+
+          almaTestDriveTimer=null;
+
+          return;
+
+        }
+
+
+        const current=
+          routeCoordinates[
+            testRouteIndex
+          ];
+
+        const nextIndex=
+          Math.min(
+            testRouteIndex+
+            indexStep,
+            totalPoints-1
+          );
+
+        const next=
+          routeCoordinates[
+            nextIndex
+          ];
+
+
+        const bearing=
+          calculateBearing(
+            current,
+            next
+          );
+
+
+        const testPosition={
+
+          coords:{
+            latitude:next[0],
+            longitude:next[1],
+            accuracy:5,
+            heading:bearing,
+            speed:15
+          },
+
+          timestamp:Date.now()
+
+        };
+
+
+        handleLivePosition(
+          testPosition
+        );
+
+
+        testRouteIndex=
+          nextIndex;
+
+
+        if(
+          testRouteIndex>=
+          totalPoints-1
+        ){
+
+          clearInterval(
+            almaTestDriveTimer
+          );
+
+          almaTestDriveTimer=null;
+
+        }
+
+      },
+
+      700
+    );
+
+}
+  function startLiveNavigation(){
 
   const t=
     translations[currentLanguage];
@@ -3752,8 +3895,17 @@ function startLiveNavigation(){
 
     };
 
-    beginLiveNavigation(
+       beginLiveNavigation(
       testPosition
+    );
+
+    setTimeout(
+      ()=>{
+
+        startAlmaTestDrive();
+
+      },
+      1200
     );
 
     return;
@@ -5249,7 +5401,16 @@ function formatNavigationDistance(
 
 
 function finishLiveNavigation(){
+  if(almaTestDriveTimer!==null){
 
+    clearInterval(
+      almaTestDriveTimer
+    );
+
+    almaTestDriveTimer=null;
+
+  }
+  
   const t=
     translations[
       currentLanguage
@@ -5326,7 +5487,15 @@ function stopAllNavigation(
   hideNavigation=true
 ){
 
-  
+    if(almaTestDriveTimer!==null){
+
+    clearInterval(
+      almaTestDriveTimer
+    );
+
+    almaTestDriveTimer=null;
+
+  }
 
   if(gpsWatchId!==null){
 
