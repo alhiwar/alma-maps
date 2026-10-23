@@ -639,6 +639,68 @@ body.mobile-navigation #navigationButton{
 .alma-start-button:active{
   transform:translateX(-50%) scale(.98);
 }
+  /* ===== ALMA: قائمة نتائج البحث ===== */
+
+.search-suggestions{
+  display:none;
+
+  position:fixed;
+  top:82px;
+  left:50%;
+  transform:translateX(-50%);
+
+  z-index:1400;
+
+  width:min(92%,620px);
+  max-height:42vh;
+
+  overflow-y:auto;
+  overflow-x:hidden;
+
+  padding:8px;
+
+  background:#ffffff;
+  border-radius:18px;
+
+  box-shadow:
+    0 6px 24px rgba(0,0,0,.24);
+}
+
+.search-suggestion{
+  width:100%;
+
+  display:flex;
+  align-items:center;
+  gap:10px;
+
+  padding:13px 12px;
+
+  border:0;
+  border-bottom:1px solid #e5e7eb;
+
+  background:#ffffff;
+  color:#111827;
+
+  font-family:inherit;
+  font-size:15px;
+  line-height:1.5;
+
+  text-align:start;
+  cursor:pointer;
+}
+
+.search-suggestion:last-child{
+  border-bottom:0;
+}
+
+.search-suggestion:active{
+  background:#f3f4f6;
+}
+
+.search-suggestion-icon{
+  flex:0 0 auto;
+  font-size:19px;
+}
   .alma-location-overlay{
   display:none;
   position:fixed;
