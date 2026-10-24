@@ -555,6 +555,310 @@ body.mobile-navigation #navigationButton{
     white-space:nowrap;
   }
 }
+ /* =====================================================
+   ALMA - تحسين شاشة القيادة
+   عمودي + أفقي
+   ===================================================== */
+
+/* ---------- الوضع العمودي ---------- */
+
+@media
+  (max-width:600px)
+  and (orientation:portrait){
+
+  body.mobile-navigation #navigationBox{
+    top:calc(8px + env(safe-area-inset-top));
+    left:12px;
+    right:12px;
+
+    padding:11px 14px;
+
+    border-radius:20px;
+  }
+
+  body.mobile-navigation .instruction-row{
+    gap:10px;
+  }
+
+  body.mobile-navigation #turnIcon{
+    min-width:52px;
+    width:52px;
+    height:52px;
+
+    font-size:38px;
+  }
+
+  body.mobile-navigation #instructionText{
+    font-size:19px;
+    line-height:1.25;
+  }
+
+  body.mobile-navigation #instructionDistance{
+    margin-top:3px;
+    font-size:14px;
+  }
+
+  body.mobile-navigation .progress-wrap{
+    margin-top:8px;
+    height:3px;
+  }
+
+  body.mobile-navigation #liveBadge{
+    display:none !important;
+  }
+
+  body.mobile-navigation .trip-bar{
+    left:10px;
+    right:10px;
+
+    padding:7px 5px;
+
+    border-radius:20px;
+  }
+
+  body.mobile-navigation .trip-stat strong{
+    font-size:15px;
+  }
+
+  body.mobile-navigation .trip-stat span{
+    font-size:9px;
+  }
+
+  body.mobile-navigation #stopButton{
+    right:14px;
+    bottom:calc(
+      82px + env(safe-area-inset-bottom)
+    );
+
+    width:50px;
+    height:50px;
+    min-width:50px;
+  }
+
+}
+
+
+/* ---------- الوضع الأفقي ---------- */
+
+@media
+  (max-height:600px)
+  and (orientation:landscape){
+
+  body.mobile-navigation .alma-panel{
+    position:fixed;
+
+    top:0;
+    left:0;
+    right:0;
+
+    width:100%;
+    height:100%;
+
+    padding:0;
+
+    background:transparent;
+    box-shadow:none;
+
+    pointer-events:none;
+
+    z-index:1200;
+  }
+
+
+  body.mobile-navigation .top-row,
+  body.mobile-navigation .route-row,
+  body.mobile-navigation .my-location,
+  body.mobile-navigation #status,
+  body.mobile-navigation #routeResult,
+  body.mobile-navigation #navigationButton{
+    display:none !important;
+  }
+
+
+  /*
+    بطاقة الاتجاه تصبح في جانب الشاشة
+    بدلاً من تغطية عرض الخريطة
+  */
+
+  body.mobile-navigation #navigationBox{
+    display:block !important;
+
+    position:fixed;
+
+    top:calc(
+      8px + env(safe-area-inset-top)
+    );
+
+    left:12px;
+    right:auto;
+
+    width:min(42vw,360px);
+
+    margin:0;
+    padding:10px 13px;
+
+    border-radius:18px;
+
+    background:#146c43;
+    color:#ffffff;
+
+    box-shadow:
+      0 4px 16px rgba(0,0,0,.28);
+
+    pointer-events:auto;
+
+    z-index:1250;
+  }
+
+
+  body.mobile-navigation .instruction-row{
+    display:flex;
+    align-items:center;
+
+    gap:9px;
+  }
+
+
+  body.mobile-navigation #turnIcon{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    min-width:46px;
+    width:46px;
+    height:46px;
+
+    font-size:34px;
+
+    color:#ffffff;
+  }
+
+
+  body.mobile-navigation #instructionText{
+    font-size:17px;
+    font-weight:700;
+
+    line-height:1.2;
+
+    color:#ffffff;
+  }
+
+
+  body.mobile-navigation #instructionDistance{
+    margin-top:2px;
+
+    font-size:13px;
+    font-weight:600;
+
+    color:rgba(
+      255,
+      255,
+      255,
+      .90
+    );
+  }
+
+
+  body.mobile-navigation .progress-wrap{
+    height:3px;
+
+    margin-top:7px;
+  }
+
+
+  body.mobile-navigation #liveBadge{
+    display:none !important;
+  }
+
+
+  /*
+    معلومات الرحلة في بطاقة صغيرة
+    أسفل جانب الشاشة
+  */
+
+  body.mobile-navigation .trip-bar{
+    position:fixed;
+
+    left:12px;
+    right:auto;
+
+    bottom:calc(
+      8px + env(safe-area-inset-bottom)
+    );
+
+    width:min(42vw,360px);
+
+    display:flex;
+
+    padding:6px;
+
+    border-radius:18px;
+
+    z-index:1250;
+  }
+
+
+  body.mobile-navigation .trip-stat{
+    padding:3px 2px;
+  }
+
+
+  body.mobile-navigation .trip-stat strong{
+    font-size:14px;
+  }
+
+
+  body.mobile-navigation .trip-stat span{
+    margin-top:2px;
+
+    font-size:8px;
+  }
+
+
+  /*
+    زر الإيقاف بعيد عن الطريق
+  */
+
+  body.mobile-navigation #stopButton{
+    display:flex !important;
+
+    position:fixed;
+
+    right:14px;
+
+    bottom:calc(
+      14px + env(safe-area-inset-bottom)
+    );
+
+    width:48px;
+    height:48px;
+    min-width:48px;
+
+    margin:0;
+    padding:0;
+
+    align-items:center;
+    justify-content:center;
+
+    border-radius:50%;
+
+    background:#ffffff;
+    color:#b91c1c;
+
+    box-shadow:
+      0 3px 14px rgba(0,0,0,.28);
+
+    pointer-events:auto;
+
+    z-index:1250;
+  }
+
+
+  body.mobile-navigation #stopButton::before{
+    font-size:19px;
+  }
+
+} 
   .alma-search-bar{
   position:fixed;
   top:18px;
