@@ -277,6 +277,31 @@ html[dir="ltr"] .my-location{
   background:white;
   border-radius:10px;
 }
+  .next-maneuver{
+  display:none;
+
+  align-items:center;
+  gap:10px;
+
+  width:max-content;
+
+  margin-top:8px;
+  padding:6px 10px;
+
+  border-radius:12px;
+
+  background:rgba(0,0,0,.18);
+
+  color:#ffffff;
+
+  font-size:16px;
+  font-weight:700;
+}
+
+#nextManeuverIcon{
+  font-size:25px;
+  line-height:1;
+}
 
 .status{
   display:none;
@@ -370,7 +395,11 @@ body.mobile-navigation .route-row,
 body.mobile-navigation .my-location,
 body.mobile-navigation #status,
 body.mobile-navigation #routeResult,
-body.mobile-navigation #navigationButton{
+body.mobile-navigation #navigationButton,
+body.mobile-navigation .alma-search-bar,
+body.mobile-navigation .search-suggestions,
+body.mobile-navigation .selected-destination,
+body.mobile-navigation #languageSelect{
   display:none !important;
 }
 
@@ -664,16 +693,18 @@ body.mobile-navigation #navigationButton{
     z-index:1200;
   }
 
-
   body.mobile-navigation .top-row,
   body.mobile-navigation .route-row,
   body.mobile-navigation .my-location,
   body.mobile-navigation #status,
   body.mobile-navigation #routeResult,
-  body.mobile-navigation #navigationButton{
+  body.mobile-navigation #navigationButton,
+  body.mobile-navigation .alma-search-bar,
+  body.mobile-navigation .search-suggestions,
+  body.mobile-navigation .selected-destination,
+  body.mobile-navigation #languageSelect{
     display:none !important;
   }
-
 
   /*
     بطاقة الاتجاه تصبح في جانب الشاشة
@@ -1211,13 +1242,19 @@ body.mobile-navigation #navigationButton{
 
     </div>
 
-    <div class="progress-wrap">
+      <div class="progress-wrap">
       <div id="progressBar"></div>
     </div>
 
-  </div>
+    <div
+      id="nextManeuver"
+      class="next-maneuver"
+    >
+      <span id="nextManeuverThen">ثم</span>
+      <span id="nextManeuverIcon"></span>
+    </div>
 
-</div>
+  </div>  
 
 <div id="map"></div>
 <div id="navigationMap"></div>
@@ -4780,12 +4817,76 @@ distanceToManeuver=
   document.getElementById("instructionText")
   .textContent=
     instruction.text;
-
   document.getElementById("instructionDistance")
   .textContent=
     formatNavigationDistance(
       distanceToManeuver
     );
+
+
+  const nextManeuverBox=
+    document.getElementById(
+      "nextManeuver"
+    );
+
+  const nextManeuverIcon=
+    document.getElementById(
+      "nextManeuverIcon"
+    );
+
+  const nextManeuverThen=
+    document.getElementById(
+      "nextManeuverThen"
+    );
+
+
+  const nextImportant=
+    getNextImportantStep(
+      currentStepIndex
+    );
+
+
+  if(
+    nextManeuverBox &&
+    nextManeuverIcon &&
+    nextImportant
+  ){
+
+    const nextInstruction=
+      buildNavigationInstruction(
+        nextImportant.step
+      );
+
+    nextManeuverIcon.textContent=
+      nextInstruction.icon;
+
+
+    if(nextManeuverThen){
+
+      nextManeuverThen.textContent=
+        currentLanguage==="ar"
+          ? "ثم"
+          : currentLanguage==="ckb"
+          ? "پاشان"
+          : currentLanguage==="tr"
+          ? "Sonra"
+          : currentLanguage==="fa"
+          ? "سپس"
+          : "Then";
+
+    }
+
+
+    nextManeuverBox.style.display=
+      "flex";
+
+  }else if(nextManeuverBox){
+
+    nextManeuverBox.style.display=
+      "none";
+
+  }
+
 
   handleSmartVoiceGuidance(
     step,
@@ -4793,7 +4894,6 @@ distanceToManeuver=
   );
 
 }
-
 
 function isImportantManeuver(step){
 
