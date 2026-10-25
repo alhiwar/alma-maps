@@ -2973,10 +2973,11 @@ async function searchPlaceSuggestions(query){
 
   const url=
     "https://nominatim.openstreetmap.org/search"+
-    "?format=json"+
-    "&limit=6"+
+    "?format=jsonv2"+
+    "&limit=12"+
     "&countrycodes=iq"+
     "&addressdetails=1"+
+    "&namedetails=1"+
     "&accept-language="+
     encodeURIComponent(currentLanguage)+
     "&q="+
@@ -2986,13 +2987,148 @@ async function searchPlaceSuggestions(query){
     await fetch(url);
 
   if(!response.ok){
-    throw new Error("Search suggestions error");
+    throw new Error(
+      "Search suggestions error"
+    );
   }
 
-  return await response.json();
+  const results=
+    await response.json();
+
+
+  function getSearchPriority(place){
+
+    let score=
+      Number(place.importance) || 0;
+
+    const category=
+      String(
+        place.category ||
+        place.class ||
+        ""
+      ).toLowerCase();
+
+    const type=
+      String(
+        place.type || ""
+      ).toLowerCase();
+
+    const addressType=
+      String(
+        place.addresstype || ""
+      ).toLowerCase();
+
+
+    /*
+      الأماكن التي يقصدها السائق مباشرة
+    */
+
+    if(
+      category==="amenity" ||
+      category==="shop" ||
+      category==="tourism" ||
+      category==="leisure" ||
+      category==="healthcare"
+    ){
+      score+=8;
+    }
+
+
+    /*
+      المدن والبلدات والأحياء
+    */
+
+    if(
+      [
+        "city",
+        "town",
+        "village",
+        "suburb",
+        "neighbourhood",
+        "quarter",
+        "locality"
+      ].includes(type) ||
+      [
+        "city",
+        "town",
+        "village",
+        "suburb",
+        "neighbourhood",
+        "quarter",
+        "locality"
+      ].includes(addressType)
+    ){
+      score+=10;
+    }
+
+
+    /*
+      المدارس والمستشفيات والجامعات
+      والأماكن المهمة
+    */
+
+    if(
+      [
+        "hospital",
+        "clinic",
+        "school",
+        "university",
+        "college",
+        "place_of_worship"
+      ].includes(type)
+    ){
+      score+=12;
+    }
+
+
+    /*
+      الشوارع
+    */
+
+    if(
+      category==="highway"
+    ){
+      score+=6;
+    }
+
+
+    /*
+      خفض أولوية المحافظة والحدود
+      الإدارية الواسعة
+    */
+
+    if(
+      category==="boundary" ||
+      type==="administrative" ||
+      [
+        "state",
+        "province",
+        "governorate",
+        "county"
+      ].includes(addressType)
+    ){
+      score-=20;
+    }
+
+
+    return score;
+
+  }
+
+
+  results.sort(
+    (a,b)=>
+      getSearchPriority(b)-
+      getSearchPriority(a)
+  );
+
+
+  return results.slice(
+    0,
+    6
+  );
 
 }
-
 
 function hideSearchSuggestions(){
 
