@@ -3145,6 +3145,12 @@ function hideSearchSuggestions(){
 
 
 function selectSearchSuggestion(place){
+  alert(
+  "ALMA DESTINATION\n"+
+  place.display_name+
+  "\nLAT: "+place.lat+
+  "\nLON: "+place.lon
+);
 
   const input=
     document.getElementById("toInput");
