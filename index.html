@@ -3145,12 +3145,6 @@ function hideSearchSuggestions(){
 
 
 function selectSearchSuggestion(place){
-  alert(
-  "ALMA DESTINATION\n"+
-  place.display_name+
-  "\nLAT: "+place.lat+
-  "\nLON: "+place.lon
-);
 
   const input=
     document.getElementById("toInput");
@@ -3172,7 +3166,7 @@ function selectSearchSuggestion(place){
     name:place.display_name
   };
 
-   hideSearchSuggestions();
+  hideSearchSuggestions();
 
   const destinationDisplay=
     document.getElementById(
@@ -3200,6 +3194,59 @@ function selectSearchSuggestion(place){
       "block";
 
   }
+
+  if(destinationMarker){
+    destinationMarker.remove();
+    destinationMarker=null;
+  }
+
+  const markerElement=
+    document.createElement("div");
+
+  markerElement.style.width="22px";
+  markerElement.style.height="22px";
+  markerElement.style.borderRadius="50%";
+  markerElement.style.background="#e53935";
+  markerElement.style.border="3px solid #ffffff";
+  markerElement.style.boxShadow=
+    "0 2px 8px rgba(0,0,0,.35)";
+
+  const markerCenter=
+    document.createElement("div");
+
+  markerCenter.style.position="absolute";
+  markerCenter.style.left="50%";
+  markerCenter.style.top="50%";
+  markerCenter.style.transform=
+    "translate(-50%,-50%)";
+  markerCenter.style.width="7px";
+  markerCenter.style.height="7px";
+  markerCenter.style.borderRadius="50%";
+  markerCenter.style.background="#111111";
+
+  markerElement.style.position="relative";
+  markerElement.appendChild(markerCenter);
+
+  destinationMarker=
+    new maplibregl.Marker({
+      element:markerElement,
+      anchor:"center"
+    })
+    .setLngLat([
+      destinationCoordinates.lon,
+      destinationCoordinates.lat
+    ])
+    .addTo(map);
+
+  map.easeTo({
+    center:[
+      destinationCoordinates.lon,
+      destinationCoordinates.lat
+    ],
+    zoom:14,
+    duration:900,
+    essential:true
+  });
 
   if(button){
     button.style.display="block";
