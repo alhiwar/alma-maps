@@ -3201,31 +3201,37 @@ function selectSearchSuggestion(place){
   }
 
   const markerElement=
-    document.createElement("div");
+  document.createElement("div");
 
-  markerElement.style.width="22px";
-  markerElement.style.height="22px";
-  markerElement.style.borderRadius="50%";
-  markerElement.style.background="#e53935";
-  markerElement.style.border="3px solid #ffffff";
-  markerElement.style.boxShadow=
-    "0 2px 8px rgba(0,0,0,.35)";
+markerElement.style.cssText=`
+  width:18px;
+  height:18px;
+  box-sizing:border-box;
+  border-radius:50%;
+  background:#ff0000;
+  border:2px solid #ffffff;
+  box-shadow:0 2px 6px rgba(0,0,0,.35);
+  position:relative;
+`;
 
-  const markerCenter=
-    document.createElement("div");
+const markerCenter=
+  document.createElement("div");
 
-  markerCenter.style.position="absolute";
-  markerCenter.style.left="50%";
-  markerCenter.style.top="50%";
-  markerCenter.style.transform=
-    "translate(-50%,-50%)";
-  markerCenter.style.width="7px";
-  markerCenter.style.height="7px";
-  markerCenter.style.borderRadius="50%";
-  markerCenter.style.background="#111111";
+markerCenter.style.cssText=`
+  position:absolute;
+  width:6px;
+  height:6px;
+  left:50%;
+  top:50%;
+  transform:translate(-50%,-50%);
+  border-radius:50%;
+  background:#000000;
+  border:0;
+  padding:0;
+  margin:0;
+`;
 
-  markerElement.style.position="relative";
-  markerElement.appendChild(markerCenter);
+markerElement.appendChild(markerCenter);
 
   destinationMarker=
     new maplibregl.Marker({
