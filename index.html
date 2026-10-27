@@ -58,14 +58,6 @@ html[dir="ltr"] .alma-panel{
   left:18px;
 }
 
-.top-row{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  gap:10px;
-  margin-bottom:15px;
-}
-
 .brand{
   display:flex;
   align-items:center;
@@ -105,52 +97,13 @@ html[dir="ltr"] .alma-panel{
   max-width:110px;
 }
 
-.route-row{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  margin-bottom:9px;
-}
-
 .route-icon{
   width:28px;
   text-align:center;
   font-size:18px;
 }
 
-.route-row input{
-  flex:1;
-  min-width:0;
-  border:1px solid #d1d5db;
-  border-radius:11px;
-  padding:12px;
-  font-size:15px;
-  outline:none;
-}
-
-.route-row input:focus{
-  border-color:#146c43;
-}
-
-.my-location{
-  margin:2px 36px 12px 0;
-  border:0;
-  background:transparent;
-  color:#146c43;
-  font-size:13px;
-  cursor:pointer;
-  padding:0;
-}
-
-html[dir="ltr"] .my-location{
-  margin:2px 0 12px 36px;
-}
-
-.main-button,
-.preview-button,
-.navigation-button,
-.stop-button,
-.voice-button{
+.stop-button{
   width:100%;
   border:0;
   border-radius:11px;
@@ -158,43 +111,6 @@ html[dir="ltr"] .my-location{
   font-size:15px;
   font-weight:bold;
   cursor:pointer;
-}
-
-.main-button{
-  background:#146c43;
-  color:white;
-}
-
-.main-button:disabled{
-  opacity:.6;
-  cursor:wait;
-}
-
-.voice-button{
-  margin-top:10px;
-  background:#f3f4f6;
-  color:#111827;
-  border:1px solid #d1d5db;
-}
-
-.voice-button.active{
-  background:#dcfce7;
-  color:#166534;
-  border-color:#86efac;
-}
-
-.preview-button{
-  display:none;
-  margin-top:10px;
-  background:#2563eb;
-  color:white;
-}
-
-.navigation-button{
-  display:none;
-  margin-top:8px;
-  background:#111827;
-  color:white;
 }
 
 .stop-button{
@@ -390,9 +306,6 @@ html[dir="ltr"] .my-location{
   /*
     إخفاء لوحة البحث بالكامل أثناء القيادة
   */
-body.mobile-navigation .top-row,
-body.mobile-navigation .route-row,
-body.mobile-navigation .my-location,
 body.mobile-navigation #status,
 body.mobile-navigation #routeResult,
 body.mobile-navigation #navigationButton,
@@ -693,9 +606,6 @@ body.mobile-navigation #languageSelect{
     z-index:1200;
   }
 
-  body.mobile-navigation .top-row,
-  body.mobile-navigation .route-row,
-  body.mobile-navigation .my-location,
   body.mobile-navigation #status,
   body.mobile-navigation #routeResult,
   body.mobile-navigation #navigationButton,
@@ -1319,15 +1229,9 @@ const translations={
 
 ar:{
   subtitle:"دليلك الذكي في العراق",
-  from:"من أين؟",
   to:"إلى أين؟",
-  myLocation:"📍 استخدم موقعي الحالي",
-  route:"🚗 احسب الطريق",
-  preview:"▶ معاينة الرحلة",
   navigate:"🧭 ابدأ الرحلة",
   stop:"■ إيقاف",
-  voiceOn:"🔊 الإرشاد الصوتي: يعمل",
-  voiceOff:"🔇 الإرشاد الصوتي: متوقف",
   distance:"المسافة",
   duration:"الوقت التقريبي",
   searching:"جارٍ البحث عن المواقع...",
@@ -1366,15 +1270,9 @@ ar:{
 
 ckb:{
   subtitle:"ڕێبەری زیرەکی تۆ لە عێراق",
-  from:"لە کوێوە؟",
   to:"بۆ کوێ؟",
-  myLocation:"📍 شوێنی ئێستام بەکاربهێنە",
-  route:"🚗 ڕێگا دیاری بکە",
-  preview:"▶ پێشبینینی گەشت",
   navigate:"🧭 دەستپێکردنی گەشت",
   stop:"■ وەستاندن",
-  voiceOn:"🔊 ڕێنمایی دەنگی: کار دەکات",
-  voiceOff:"🔇 ڕێنمایی دەنگی: وەستاوە",
   distance:"دووری",
   duration:"کاتی خەمڵێنراو",
   searching:"گەڕان بۆ شوێنەکان...",
@@ -1413,15 +1311,9 @@ ckb:{
 
 en:{
   subtitle:"Your smart guide in Iraq",
-  from:"From where?",
   to:"Where to?",
-  myLocation:"📍 Use my current location",
-  route:"🚗 Calculate route",
-  preview:"▶ Preview trip",
   navigate:"🧭 Start navigation",
   stop:"■ Stop",
-  voiceOn:"🔊 Voice guidance: On",
-  voiceOff:"🔇 Voice guidance: Off",
   distance:"Distance",
   duration:"Estimated time",
   searching:"Searching for locations...",
@@ -1460,15 +1352,9 @@ en:{
 
 tr:{
   subtitle:"Irak'taki akıllı rehberiniz",
-  from:"Nereden?",
   to:"Nereye?",
-  myLocation:"📍 Mevcut konumumu kullan",
-  route:"🚗 Rotayı hesapla",
-  preview:"▶ Yolculuğu önizle",
   navigate:"🧭 Navigasyonu başlat",
   stop:"■ Durdur",
-  voiceOn:"🔊 Sesli yönlendirme: Açık",
-  voiceOff:"🔇 Sesli yönlendirme: Kapalı",
   distance:"Mesafe",
   duration:"Tahmini süre",
   searching:"Konumlar aranıyor...",
@@ -1507,15 +1393,9 @@ tr:{
 
 fa:{
   subtitle:"راهنمای هوشمند شما در عراق",
-  from:"از کجا؟",
   to:"به کجا؟",
-  myLocation:"📍 استفاده از موقعیت فعلی من",
-  route:"🚗 محاسبه مسیر",
-  preview:"▶ پیش‌نمایش سفر",
   navigate:"🧭 شروع مسیریابی",
   stop:"■ توقف",
-  voiceOn:"🔊 راهنمای صوتی: روشن",
-  voiceOff:"🔇 راهنمای صوتی: خاموش",
   distance:"مسافت",
   duration:"زمان تقریبی",
   searching:"در حال جستجوی مکان‌ها...",
@@ -1623,16 +1503,12 @@ const ALMA_TEST_START={
 };  
 
 let currentLocationCoordinates=null;
-let usingCurrentLocation=false;
 
 let startCoordinates=null;
 let destinationCoordinates=null;
-
-let startMarker=null;
+  
 let destinationMarker=null;
-let routeLine=null;
-let routeCasingLine=null;
-
+  
 let currentRoute=null;
 let routeCoordinates=[];
 let routeSteps=[];
@@ -2764,89 +2640,7 @@ function resetSpokenInstruction(){
   spokenStages={};
 
 }
-
-
-function toggleVoice(){
-
-  voiceEnabled=!voiceEnabled;
-
-  localStorage.setItem(
-    "almaVoice",
-    voiceEnabled ? "on" : "off"
-  );
-
-  updateVoiceButton();
-
-  if(!voiceEnabled){
-
-    stopSpeech();
-
-  }else{
-
-    const text=
-      document
-      .getElementById("instructionText")
-      .textContent
-      .trim();
-
-    if(
-      document
-      .getElementById("navigationBox")
-      .style.display==="block" &&
-      text
-    ){
-
-      resetSpokenInstruction();
-
-      speakNavigation(
-        text,
-        currentStepIndex,
-        true
-      );
-
-    }
-
-  }
-
-}
-
-
-function updateVoiceButton(){
-
-  const button=
-    document.getElementById(
-      "voiceButton"
-    );
-
-  if(!button){
-    return;
-  }
-
-  const t=
-    translations[currentLanguage];
-
-  if(voiceEnabled){
-
-    button.textContent=
-      t.voiceOn;
-
-    button.classList.add(
-      "active"
-    );
-
-  }else{
-
-    button.textContent=
-      t.voiceOff;
-
-    button.classList.remove(
-      "active"
-    );
-
-  }
-
-}
-
+  
 function setLanguage(language){
 
   currentLanguage=language;
@@ -3739,7 +3533,6 @@ async function startAlmaNavigation(){
       lon:ALMA_TEST_START.lon
     };
 
-    usingCurrentLocation=false;
 
     try{
 
@@ -3803,8 +3596,6 @@ async function startAlmaNavigation(){
           lat:position.coords.latitude,
           lon:position.coords.longitude
         };
-
-        usingCurrentLocation=true;
 
         startCoordinates={
           lat:currentLocationCoordinates.lat,
@@ -5190,183 +4981,7 @@ function getNextImportantStep(index){
   return null;
 
 }
-function getDistanceToStep(
-  position,
-  step
-){
 
-  if(
-    !position ||
-    !step ||
-    !step.maneuver ||
-    !step.maneuver.location
-  ){
-    return Infinity;
-  }
-
- return calculateDistance(
-  position,
-  [
-    step.maneuver.location[1],
-    step.maneuver.location[0]
-  ]
-); 
-
-}
-
-
-function speakInitialGuidance(
-  position
-){
-
-  if(
-    !voiceEnabled ||
-    !routeSteps.length
-  ){
-    return false;
-  }
-
-  let targetIndex=
-    currentStepIndex;
-
-  let targetStep=
-    routeSteps[targetIndex];
-
-  if(
-    !isImportantManeuver(
-      targetStep
-    )
-  ){
-
-    const next=
-      getNextImportantStep(
-        currentStepIndex-1
-      );
-
-    if(next){
-
-      targetIndex=
-        next.index;
-
-      targetStep=
-        next.step;
-
-    }
-
-  }
-
-  if(
-    !targetStep ||
-    !isImportantManeuver(
-      targetStep
-    )
-  ){
-    return false;
-  }
-
-  const meters=
-    getDistanceToStep(
-      position,
-      targetStep
-    );
-
-  const instruction=
-    buildNavigationInstruction(
-      targetStep
-    );
-
-  let spokenText;
-
-  if(meters<=55){
-
-    spokenText=
-      instruction.text+
-      "، "+
-      translations[
-        currentLanguage
-      ].now;
-
-  }else{
-
-    spokenText=
-      buildSpokenInstruction(
-        instruction.text,
-        meters
-      );
-
-  }
-
-
-  const next=
-    getNextImportantStep(
-      targetIndex
-    );
-
-  if(
-    next &&
-    maneuverDistanceBetween(
-      targetStep,
-      next.step
-    )<=CLOSE_MANEUVER_DISTANCE
-  ){
-
-    const nextInstruction=
-      buildNavigationInstruction(
-        next.step
-      );
-
-    spokenText+=
-      "، "+
-      translations[
-        currentLanguage
-      ].thenShort+
-      "، "+
-      nextInstruction.text;
-
-    spokenStages[
-      next.index
-    ]={
-      early:true,
-      near:true
-    };
-
-  }
-
-
-  spokenStages[
-    targetIndex
-  ]={
-    early:true
-  };
-
-  if(meters<=260){
-
-    spokenStages[
-      targetIndex
-    ].near=true;
-
-  }
-
-  if(meters<=55){
-
-    spokenStages[
-      targetIndex
-    ].now=true;
-
-  }
-
-  lastVoiceTime=
-    Date.now();
-
-  speakNavigation(
-    spokenText,
-    targetIndex,
-    true
-  );
-
-  return true;
-
-}
 function getDistanceToStep(
   position,
   step
@@ -6394,9 +6009,6 @@ if(
   setLanguage("ar");
 
 }
-
-
-updateVoiceButton();
 
 </script>
 
