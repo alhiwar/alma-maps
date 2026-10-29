@@ -4262,7 +4262,11 @@ if(navigationContainer){
 document.getElementById("map")
 .style.display="none";
 
-navigationMap.resize();
+requestAnimationFrame(()=>{
+  if(navigationMap){
+    navigationMap.resize();
+  }
+});
 
 if(!navigationCarMarker){
 
