@@ -2889,6 +2889,7 @@ function selectSearchSuggestion(place){
     document.getElementById("navigationButton");
 
   input.value=place.display_name;
+  console.log("ALMA SELECTED PLACE:", place.display_name, place.lat, place.lon, place.type, place.addresstype);
 
   destinationCoordinates={
     lat:Number(place.lat),
